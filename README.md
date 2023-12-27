@@ -9,4 +9,4 @@
 
 ---
 
-- Made for Android, with Java.
+Made for Android, with Java.
