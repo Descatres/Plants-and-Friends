@@ -1,5 +1,3 @@
-# Notes app - CM2
+# Plants&Friends
 
-- This is a basic notes app done in the context of the Mobile Computation class.
-
-- Some decisions might seem weird, specially regarding Local Storage as the secondary source of truth and serving only as backup if network is unavailable or firestore is not answering but all of this is requested by the professor. Could be changed later on to make the app more usable.
+## Plants compendium able to track stock and conditions of the environment where your plants are!
