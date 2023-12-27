@@ -3,7 +3,8 @@
 ## Plants compendium able to save and show plants:
 - Names;
 - Species;
-- Image of the plants.
+- Image of the plants;
+- Descriptions.
 ## And able to track:
 - stock;
 - temperature;
