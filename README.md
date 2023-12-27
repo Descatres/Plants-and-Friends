@@ -1,6 +1,10 @@
 # Plants&Friends
 
-## Plants compendium able to track:
+## Plants compendium able to save and show plants:
+- Names;
+- Species;
+- Image of the plants.
+## And able to track:
 - stock;
 - temperature;
 - humidity.
