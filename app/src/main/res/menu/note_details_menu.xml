@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_save"
+        android:title="@string/save"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_save" />
+
+    <item
+        android:id="@+id/action_back"
+        android:title="@string/back"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_back" />
+
+</menu>

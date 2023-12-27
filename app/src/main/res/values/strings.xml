@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">CM2</string>
+    <string name="app_title">CM2 App</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="already_an_user_login">Already an user?</string>
+    <string name="not_registered">Not registered?</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="log_out">Log Out</string>
+    <string name="welcome">Welcome</string>
+    <string name="name">name</string>
+    <string name="login">Login</string>
+    <string name="note_details">Note Details</string>
+    <string name="note_hint">Enter your note here</string>
+    <string name="save">Save</string>
+    <string name="back">Back</string>
+    <string name="notes_list">Notes List</string>
+    <string name="add_note">Add Note</string>
+    <string name="search_notes">Search Notes</string>
+    <string name="default_web_client_id">879052393297-ml0akv96vnmt66ajjjclavnljeosk7gi.apps.googleusercontent.com</string>
+    <string name="note_title">Note Title</string>
+    <string name="refresh">Refresh</string>
+</resources>

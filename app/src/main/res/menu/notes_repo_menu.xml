@@ -1,0 +1,34 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/refresh"
+        android:icon="@drawable/baseline_refresh_24"
+        android:title="@string/refresh"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_more"
+        android:icon="@drawable/round_menu_24"
+        android:title="@string/app_title"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/action_add_note"
+                android:icon="@drawable/ic_add_note"
+                android:title="@string/add_note"
+                app:showAsAction="ifRoom" />
+
+            <item
+                android:id="@+id/action_search_note"
+                android:icon="@drawable/ic_search_note"
+                android:title="@string/search_notes"
+                app:showAsAction="ifRoom" />
+
+            <item
+                android:id="@+id/action_logout"
+                android:icon="@drawable/baseline_lock_24"
+                app:iconTint="@color/white"
+                android:title="@string/log_out"
+                app:showAsAction="ifRoom" />
+        </menu>
+    </item>
+</menu>
