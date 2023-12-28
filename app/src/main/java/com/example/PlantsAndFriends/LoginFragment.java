@@ -1,4 +1,4 @@
-package com.example.cm2;
+package com.example.PlantsAndFriends;
 
 import android.content.Intent;
 import android.content.IntentSender;

@@ -1,4 +1,4 @@
-package com.example.cm2;
+package com.example.PlantsAndFriends;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -40,10 +40,9 @@ public class SignupFragment extends Fragment {
                 String user = signupEmail.getText().toString().trim();
                 String pass = signupPassword.getText().toString().trim();
 
-                if (user.isEmpty()){
+                if (user.isEmpty()) {
                     signupEmail.setError("Email cannot be empty");
-                }
-                else if (pass.isEmpty()){
+                } else if (pass.isEmpty()) {
                     signupPassword.setError("Password cannot be empty");
                 } else {
                     auth.createUserWithEmailAndPassword(user, pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {

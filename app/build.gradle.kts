@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.cm2"
+    namespace = "com.example.PlantsAndFriends"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.cm2"
+        applicationId = "com.example.PlantsAndFriends"
         minSdk = 30
         targetSdk = 34
         versionCode = 1

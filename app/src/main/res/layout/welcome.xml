@@ -15,7 +15,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="250dp"
         android:text="@string/welcome"
-        android:textColor="@color/darkgray"
+        android:textColor="@color/gray"
         android:textSize="26sp"
         android:textStyle="bold" />
 
@@ -25,9 +25,9 @@
         android:layout_gravity="center_horizontal"
         android:text="@string/name"
         android:id="@+id/userName"
-        android:textColor="@color/darkgray"
+        android:textColor="@color/gray"
         android:textSize="26sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <Button
         android:layout_width="wrap_content"
@@ -37,6 +37,6 @@
         android:id="@+id/logout"
         android:textSize="20sp"
         android:padding="12dp"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp" />
 
 </LinearLayout>

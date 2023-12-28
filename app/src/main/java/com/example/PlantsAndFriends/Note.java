@@ -1,4 +1,4 @@
-package com.example.cm2;
+package com.example.PlantsAndFriends;
 
 public class Note {
     private String id;

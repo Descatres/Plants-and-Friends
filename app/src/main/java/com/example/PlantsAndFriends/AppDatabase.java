@@ -1,4 +1,4 @@
-package com.example.cm2;
+package com.example.PlantsAndFriends;
 
 import androidx.room.Database;
 import androidx.room.Room;
