@@ -1,0 +1,263 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/green"
+        android:title="@string/plant_details"
+        android:titleTextColor="#FFFFFF">
+
+        <ImageView
+            android:id="@+id/toolbar_icon"
+            android:layout_width="35sp"
+            android:layout_height="35sp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/secondary_leaf_icon"
+            app:tint="#FFFFFF"
+            android:contentDescription="@string/add_plant_icon" />
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/toolbar_icon"
+            android:paddingStart="8dp"
+            android:paddingEnd="16dp"
+            android:fontFamily="@font/poppins_medium"
+            android:text="@string/new_plant"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+    </androidx.appcompat.widget.Toolbar>
+
+    <!-- Horizontal LinearLayout for Image and Text Views -->
+    <LinearLayout
+        android:id="@+id/horizontal_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:padding="30sp"
+        android:orientation="horizontal">
+
+        <!-- Plant Image -->
+        <ImageView
+            android:paddingTop="10sp"
+            android:id="@+id/add_image"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/default_plant_image"
+            android:contentDescription="@string/todo" />
+
+        <!-- Vertical LinearLayout for Text Views -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Plant Name Section -->
+            <TextView
+                android:id="@+id/name_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/plant_name"
+                android:fontFamily="@font/poppins"
+                android:textColor="@color/gray"
+                android:textSize="16sp"
+                />
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:text="@string/chosen_name"
+                android:paddingBottom="2dp" />
+
+            <!-- Plant Species Section -->
+            <TextView
+                android:id="@+id/species_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/plant_species"
+                android:fontFamily="@font/poppins"
+                android:textColor="@color/gray"
+                android:textSize="16sp"
+                />
+
+            <TextView
+                android:id="@+id/species"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:text="@string/chosen_species"
+                android:paddingBottom="2dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/temperature_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/horizontal_layout"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        android:orientation="vertical">
+
+        <!-- Title for the range slider -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"
+            android:text="@string/ideal_temperature"
+            android:textColor="@color/black"
+            android:textSize="17sp" />
+
+        <!-- Material Components Range Slider -->
+        <com.google.android.material.slider.RangeSlider
+            android:id="@+id/temperatureRangeSlider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/ideal_temperature"
+            android:valueFrom="-40"
+            android:valueTo="80"
+            app:thumbColor="@color/green"
+            app:trackColorActive="@color/green"
+            app:trackColorInactive="@color/light_gray"
+            app:values="@array/default_temperature_range" />
+
+        <!-- Display Temperature Limits -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/minTemperature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/min_temperature"
+                android:textSize="12sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/poppins"/>
+
+            <TextView
+                android:id="@+id/maxTemperature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/max_temperature"
+                android:textSize="12sp"
+                android:fontFamily="@font/poppins"
+                android:textAlignment="textEnd"
+                android:textColor="@color/black" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/temperature_layout"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        android:paddingTop="10sp"
+        android:id="@+id/humidity_layout"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"
+            android:text="@string/ideal_humidity"
+            android:textColor="@color/black"
+            android:textSize="17sp" />
+
+        <!-- Material Components Range Slider -->
+        <com.google.android.material.slider.RangeSlider
+            android:id="@+id/humidityRangeSlider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/ideal_humidity"
+            android:valueFrom="-40"
+            android:valueTo="80"
+            app:thumbColor="@color/green"
+            app:trackColorActive="@color/green"
+            app:trackColorInactive="@color/light_gray"
+            app:values="@array/default_temperature_range" />
+
+        <!-- Display Temperature Limits -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/minHumidity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/min_humidity"
+                android:textSize="12sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/poppins"/>
+
+            <TextView
+                android:id="@+id/maxHumidity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/max_humidity"
+                android:textSize="12sp"
+                android:fontFamily="@font/poppins"
+                android:textAlignment="textEnd"
+                android:textColor="@color/black" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/notes_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/humidity_layout"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        android:paddingTop="10dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"
+            android:text="@string/special_notes"
+            android:textColor="@color/black"
+            android:textSize="17sp" />
+
+        <EditText
+            android:id="@+id/notesEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/add_notes_about_the_plant"
+            android:inputType="textMultiLine"
+            android:gravity="top|start"
+            android:minLines="5"
+            android:padding="8dp"
+            android:textSize="14dp"
+            android:background="@drawable/round" />
+
+    </LinearLayout>
+
+    <!-- Add more UI elements like humidity seekbars, description edit text, etc. -->
+
+</RelativeLayout>
