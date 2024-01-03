@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -41,19 +42,19 @@ public class SignupFragment extends Fragment {
                 String pass = signupPassword.getText().toString().trim();
 
                 if (user.isEmpty()) {
-                    signupEmail.setError("Email cannot be empty");
+                    signupEmail.setError("Warning: Email cannot be empty.");
                 } else if (pass.isEmpty()) {
-                    signupPassword.setError("Password cannot be empty");
+                    signupPassword.setError("Warning: Password cannot be empty.");
                 } else {
                     auth.createUserWithEmailAndPassword(user, pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                Toast.makeText(requireContext(), "Signup Successful", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), "SignUp Successful!", Toast.LENGTH_SHORT).show();
                                 // Redirect or perform any necessary action
                                 loadLoginFragment();
                             } else {
-                                Toast.makeText(requireContext(), "Signup Failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), "SignUp Failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
@@ -61,7 +62,7 @@ public class SignupFragment extends Fragment {
             }
         });
 
-        Button loginButton = view.findViewById(R.id.login_button);
+        TextView loginButton = view.findViewById(R.id.loginRedirectText);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override

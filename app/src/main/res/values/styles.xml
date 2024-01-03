@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Custom Button -->
+    <style name="MyButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/round_button</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <!-- Custom Edit Text -->
+    <style name="MyTextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/gray</item>
+        <item name="boxBackgroundColor">@android:color/white</item>
+        <item name="hintTextColor">@color/gray</item>
+    </style>
+
+
+
+</resources>

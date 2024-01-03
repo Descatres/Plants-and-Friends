@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">Plants&amp;Friends</string>
+    <string name="app_name">Plants &amp; Friends</string>
     <string name="app_title">Plants&amp;Friends App</string>
-    <string name="sign_up">Sign Up</string>
-    <string name="already_an_user_login">Already an user?</string>
+    <string name="sign_up">New User? Create an Account</string>
+    <string name="already_an_user_login">Already an user? Go back</string>
     <string name="not_registered">Not registered?</string>
     <string name="password">Password</string>
     <string name="email">Email</string>
@@ -20,4 +20,7 @@
     <string name="default_web_client_id">879052393297-ml0akv96vnmt66ajjjclavnljeosk7gi.apps.googleusercontent.com</string>
     <string name="note_title">Note Title</string>
     <string name="refresh">Refresh</string>
+    <string name="go_back">Go Back</string>
+    <string name="create_account">Create Account</string>
+    <string name="register_here">Register Here</string>
 </resources>

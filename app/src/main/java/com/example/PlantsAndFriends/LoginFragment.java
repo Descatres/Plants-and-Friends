@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -19,7 +20,6 @@ import com.google.android.gms.auth.api.identity.BeginSignInRequest;
 import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.gms.auth.api.identity.SignInClient;
 import com.google.android.gms.auth.api.identity.SignInCredential;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -68,11 +68,14 @@ public class LoginFragment extends Fragment {
         Button loginButton = view.findViewById(R.id.login_button);
         loginButton.setOnClickListener(v -> loginUser());
 
+        TextView signUpButton = view.findViewById(R.id.sign_up_button);
+        signUpButton.setOnClickListener(v -> loadSignUpFragment());
+
+        /*
         SignInButton googleSignInBtn = view.findViewById(R.id.googleBtn);
         googleSignInBtn.setOnClickListener(v -> googleSignIn());
 
-        Button signUpButton = view.findViewById(R.id.sign_up_button);
-        signUpButton.setOnClickListener(v -> loadSignUpFragment());
+        */
 
         return view;
     }
@@ -139,12 +142,12 @@ public class LoginFragment extends Fragment {
         String password = passwordEditText.getText().toString().trim();
 
         if (email.isEmpty()) {
-            emailEditText.setError("Email cannot be empty");
+            emailEditText.setError("Warning: Email cannot be empty.");
             return;
         }
 
         if (password.isEmpty()) {
-            passwordEditText.setError("Password cannot be empty");
+            passwordEditText.setError("Warning: Password cannot be empty.");
             return;
         }
 
