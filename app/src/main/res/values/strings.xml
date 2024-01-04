@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">Plants&amp;Friends</string>
+    <string name="app_name">Plants &amp; Friends</string>
     <string name="app_title">Plants&amp;Friends App</string>
-    <string name="sign_up">Sign Up</string>
-    <string name="already_an_user_login">Already an user?</string>
+    <string name="sign_up">New User? Create an Account</string>
+    <string name="already_an_user_login">Already an user? Go back</string>
     <string name="not_registered">Not registered?</string>
     <string name="password">Password</string>
     <string name="email">Email</string>
@@ -20,4 +20,24 @@
     <string name="default_web_client_id">879052393297-ml0akv96vnmt66ajjjclavnljeosk7gi.apps.googleusercontent.com</string>
     <string name="note_title">Note Title</string>
     <string name="refresh">Refresh</string>
+    <string name="go_back">Go Back</string>
+    <string name="create_account">Create Account</string>
+    <string name="register_here">Register Here</string>
+    <string name="plant_name">Name</string>
+    <string name="plant_species">Species</string>
+    <string name="chosen_name">Input Name</string>
+    <string name="plant_details">Plant Details</string>
+    <string name="new_plant">New Plant</string>
+    <string name="chosen_species">Input Species</string>
+    <string name="add_plant_icon">Add Plant Icon</string>
+    <string name="todo">TODO</string>
+    <string name="temperature">Temperature</string>
+    <string name="min_temperature">Min: %1$.1f°C</string>
+    <string name="max_temperature">Max: %1$.1f°C</string>
+    <string name="ideal_temperature">Ideal Temperature</string>
+    <string name="ideal_humidity">Ideal Humidity</string>
+    <string name="min_humidity">Min: %1$.1f%%</string>
+    <string name="max_humidity">Max: %1$.1f%%</string>
+    <string name="add_notes_about_the_plant">Add notes about the plant…</string>
+    <string name="special_notes">Special Notes</string>
 </resources>

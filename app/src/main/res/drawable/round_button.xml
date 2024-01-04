@@ -4,8 +4,8 @@
     <item android:top="5dp" android:bottom="5dp" android:end="5dp" android:start="5dp">
         <shape
             android:shape="rectangle">
-            <corners android:radius="2dp" />
-            <solid android:color="@color/yellow" />
+            <corners android:radius="10dp" />
+            <solid android:color="@color/green" />
         </shape>
     </item>
 

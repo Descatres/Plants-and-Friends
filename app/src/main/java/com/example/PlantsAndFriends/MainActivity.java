@@ -1,10 +1,12 @@
 package com.example.PlantsAndFriends;
 
+import android.animation.AnimatorSet;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +20,12 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import android.animation.ObjectAnimator;
+import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 public class MainActivity extends AppCompatActivity {
     private AppDatabase appDatabase;
     private final Executor executor = Executors.newSingleThreadExecutor();
@@ -25,13 +33,41 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appDatabase = AppDatabase.getInstance(getApplicationContext());
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.splashscreen);
+        ImageView imageView = findViewById(R.id.splash_image);
+        TextView textView = findViewById(R.id.splash_text);
 
-        // Load the LoginFragment initially
-        if (savedInstanceState == null) {
+        float translationDistance = -400;
+
+        ObjectAnimator imageAnimator = ObjectAnimator.ofFloat(imageView, View.TRANSLATION_Y, 0, translationDistance);
+        ObjectAnimator textAnimator = ObjectAnimator.ofFloat(textView, View.TRANSLATION_Y, 0, translationDistance);
+
+        imageAnimator.setDuration(1500);
+        textAnimator.setDuration(1500);
+
+        // Create alpha animators for fading in
+        ObjectAnimator imageAlphaAnimator = ObjectAnimator.ofFloat(imageView, View.ALPHA, 1f, 0f);
+        ObjectAnimator textAlphaAnimator = ObjectAnimator.ofFloat(textView, View.ALPHA, 1f, 0f);
+
+        // Set duration for the alpha animation
+        imageAlphaAnimator.setDuration(1500);
+        textAlphaAnimator.setDuration(1500);
+
+        // translation and alpha animators
+        AnimatorSet translationSet = new AnimatorSet();
+        translationSet.playTogether(imageAnimator, textAnimator);
+
+        AnimatorSet alphaSet = new AnimatorSet();
+        alphaSet.playTogether(imageAlphaAnimator, textAlphaAnimator);
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playSequentially(translationSet, alphaSet);
+
+        animatorSet.start();
+
+        new Handler().postDelayed(() -> {
             checkUser();
-        }
+        }, 2000); // 3 seconds delay
     }
 
     @Override
@@ -67,9 +103,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void loadLoginFragment() {
+    /*private void loadLoginFragment() {
+        setContentView(R.layout.activity_main);
         getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, 0)
                 .replace(R.id.fragment_container, new LoginFragment())
+                .commit();
+    }
+*/
+    private void loadLoginFragment() {
+        setContentView(R.layout.activity_main);
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, 0)
+                .replace(R.id.fragment_container, new NoteDetailsFragment())
                 .commit();
     }
 

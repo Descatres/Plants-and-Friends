@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="default_temperature_range">
+        <item>-40.0</item>
+        <item>80.0</item>
+    </array>
+    <array name="default_humidity_range">
+        <item>0.0</item>
+        <item>100.0</item>
+    </array>
+
+
+</resources>

@@ -2,74 +2,69 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/notesline"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="20dp">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_gravity="center_horizontal"
-        android:padding="24dp"
-        android:background="@drawable/edit_text">
+    android:padding="30dp">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/primary_leaf_icon"
+            android:layout_gravity="center"
+            android:padding="20dp"
+            />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/actor"
-            android:text="@string/sign_up"
+            android:fontFamily="@font/poppins"
+            android:text="@string/register_here"
             android:textAlignment="center"
-            android:textColor="@color/yellow"
-            android:textSize="36sp"
-            android:textStyle="bold" />
+            android:textColor="@color/black"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:padding="20dp"/>
 
-        <EditText
-            android:id="@+id/signup_email"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/edit_text"
-            android:drawableStart="@drawable/baseline_person_24"
-            android:drawablePadding="8dp"
-            android:gravity="center_vertical"
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="300dp"
+            android:layout_height="55dp"
             android:hint="@string/email"
-            android:importantForAutofill="no"
-            android:inputType="textEmailAddress"
-            android:padding="8dp"
-            android:textColor="@color/black"
-            android:textSize="18sp" />
+            android:layout_marginBottom="20dp"
+            style="@style/MyTextInputLayout">
 
-        <EditText
-            android:id="@+id/signup_password"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/edit_text"
-            android:drawableStart="@drawable/baseline_lock_24"
-            android:drawablePadding="8dp"
-            android:gravity="center_vertical"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/signup_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="300dp"
+            android:layout_height="55dp"
             android:hint="@string/password"
-            android:importantForAutofill="no"
-            android:inputType="textPassword"
-            android:padding="8dp"
-            android:textColor="@color/black"
-            android:textSize="18sp" />
+            android:layout_marginBottom="20dp"
+            style="@style/MyTextInputLayout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/signup_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
 
         <Button
             android:id="@+id/register_button"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/round_button"
             android:elevation="10dp"
             android:gravity="center"
-            android:text="@string/sign_up"
+            android:text="@string/create_account"
             android:textColor="@color/white"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            android:textSize="20sp"
+             />
 
         <TextView
             android:id="@+id/loginRedirectText"
@@ -79,18 +74,12 @@
             android:layout_marginTop="20dp"
             android:padding="8dp"
             android:text="@string/already_an_user_login"
-            android:textColor="@color/yellow"
+            android:textColor="@color/gray"
+            android:textStyle="bold"
             android:textSize="14sp" />
 
-        <Button
-            android:id="@+id/login_button"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:elevation="10dp"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/ic_back"
-            android:backgroundTint="@color/gray" />
 
-    </LinearLayout>
+
+
 
 </LinearLayout>

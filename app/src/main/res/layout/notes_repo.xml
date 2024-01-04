@@ -9,7 +9,7 @@
         android:id="@+id/notesAppBar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/green"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         android:title="@string/notes_list"
         android:titleTextColor="#FFFFFF" />

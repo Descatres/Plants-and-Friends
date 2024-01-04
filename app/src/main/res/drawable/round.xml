@@ -1,21 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Shadow Layer -->
-    <item>
-        <shape
-            android:shape="rectangle">
-            <solid android:color="#33000000" /> <!-- Shadow color and opacity -->
-            <corners android:radius="20dp" />
-        </shape>
-    </item>
-
     <!-- Main Shape Layer -->
     <item android:top="5dp" android:right="5dp" android:left="5dp" android:bottom="5dp">
         <shape
             android:shape="rectangle">
-            <corners android:radius="20dp" />
-            <stroke android:color="@color/black" android:width="2dp" />
+            <corners android:radius="10dp" />
+            <stroke android:color="@color/light_gray" android:width="1dp" />
             <solid android:color="@color/white" />
         </shape>
     </item>
