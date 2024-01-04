@@ -42,7 +42,7 @@ public class LoginFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.edit_plant, container, false);
+        View view = inflater.inflate(R.layout.login_form, container, false);
 
         // Configure Google Sign In
         oneTapClient = Identity.getSignInClient(requireActivity());
@@ -61,9 +61,10 @@ public class LoginFragment extends Fragment {
 
         // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance();
-/*
+
         emailEditText = view.findViewById(R.id.login_email);
         passwordEditText = view.findViewById(R.id.login_password);
+
 
         Button loginButton = view.findViewById(R.id.login_button);
         loginButton.setOnClickListener(v -> loginUser());
@@ -71,7 +72,7 @@ public class LoginFragment extends Fragment {
         TextView signUpButton = view.findViewById(R.id.sign_up_button);
         signUpButton.setOnClickListener(v -> loadSignUpFragment());
 
-
+/*
         SignInButton googleSignInBtn = view.findViewById(R.id.googleBtn);
         googleSignInBtn.setOnClickListener(v -> googleSignIn());
 

@@ -10,7 +10,7 @@ import com.google.android.material.slider.RangeSlider;
 import java.util.Collections;
 import java.util.List;
 
-public class EditPlant extends AppCompatActivity {
+public class EditPlantFragment extends AppCompatActivity {
 
     private TextView minTemperatureTextView;
     private TextView maxTemperatureTextView;
@@ -22,7 +22,6 @@ public class EditPlant extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_plant);
 
-        // Find views
         minTemperatureTextView = findViewById(R.id.minTemperature);
         maxTemperatureTextView = findViewById(R.id.maxTemperature);
         minHumidityTextView = findViewById(R.id.minHumidity);
@@ -35,7 +34,7 @@ public class EditPlant extends AppCompatActivity {
         updateTemperatureRangeText(temperatureRangeSlider.getValues());
         updateHumidityRangeText(humidityRangeSlider.getValues());
 
-        // Set listeners for the RangeSliders
+        // Set listeners for the two RangeSliders
         temperatureRangeSlider.addOnChangeListener((slider, values, fromUser) -> {
             // Update the TextViews with the current temperature range values
             updateTemperatureRangeText(Collections.singletonList(values));
@@ -47,7 +46,7 @@ public class EditPlant extends AppCompatActivity {
         });
     }
 
-    // Method to update the TextViews with the current temperature range values
+    // update the TextViews with the current temperature and humidity values
     private void updateTemperatureRangeText(List<Float> values) {
         int minValue = values.get(0).intValue();
         int maxValue = values.get(1).intValue();
@@ -59,7 +58,6 @@ public class EditPlant extends AppCompatActivity {
         maxTemperatureTextView.setText(maxRangeText);
     }
 
-    // Method to update the TextViews with the current humidity range values
     private void updateHumidityRangeText(List<Float> values) {
         int minValue = values.get(0).intValue();
         int maxValue = values.get(1).intValue();

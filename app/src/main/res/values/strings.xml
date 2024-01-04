@@ -25,20 +25,19 @@
     <string name="register_here">Register Here</string>
     <string name="plant_name">Name</string>
     <string name="plant_species">Species</string>
-    <string name="chosen_name">Chosen Name</string>
+    <string name="chosen_name">Input Name</string>
     <string name="plant_details">Plant Details</string>
     <string name="new_plant">New Plant</string>
-    <string name="chosen_species">Chosen Species</string>
+    <string name="chosen_species">Input Species</string>
     <string name="add_plant_icon">Add Plant Icon</string>
     <string name="todo">TODO</string>
     <string name="temperature">Temperature</string>
-    <string name="min_temperature">Min: %1$d°C</string>
-    <string name="max_temperature">Max: %1$d°C</string>
-    <string name="temperature_range">Min: %1$d°C - Max: %2$d°C</string>
+    <string name="min_temperature">Min: %1$.1f°C</string>
+    <string name="max_temperature">Max: %1$.1f°C</string>
     <string name="ideal_temperature">Ideal Temperature</string>
     <string name="ideal_humidity">Ideal Humidity</string>
-    <string name="min_humidity">Min: %1$d°C</string>
-    <string name="max_humidity">Max: %1$d°C</string>
-    <string name="add_notes_about_the_plant">Add notes about the plant...</string>
+    <string name="min_humidity">Min: %1$.1f%%</string>
+    <string name="max_humidity">Max: %1$.1f%%</string>
+    <string name="add_notes_about_the_plant">Add notes about the plant…</string>
     <string name="special_notes">Special Notes</string>
 </resources>
