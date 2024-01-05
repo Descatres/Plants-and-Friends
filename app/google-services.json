@@ -1,53 +1,26 @@
 {
   "project_info": {
-    "project_number": "879052393297",
-    "firebase_url": "https://PlantsAndFriendsproject-default-rtdb.europe-west1.firebasedatabase.app",
-    "project_id": "PlantsAndFriendsproject",
-    "storage_bucket": "PlantsAndFriendsproject.appspot.com"
+    "project_number": "167088124755",
+    "project_id": "plants-and-friends",
+    "storage_bucket": "plants-and-friends.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:879052393297:android:3a93331c113d0783fb6170",
+        "mobilesdk_app_id": "1:167088124755:android:601e85f70a6a5730dca7a6",
         "android_client_info": {
           "package_name": "com.example.PlantsAndFriends"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "879052393297-38jm34b1a05mcbpjhipt97n04bt7087u.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.PlantsAndFriends",
-            "certificate_hash": "8e0b271abb4e06ab264bd96b8b5e19264d315ea8"
-          }
-        },
-        {
-          "client_id": "879052393297-ml0akv96vnmt66ajjjclavnljeosk7gi.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.PlantsAndFriends",
-            "certificate_hash": "4e54da982973158bdf73c0ef6c65010a0e7408bc"
-          }
-        },
-        {
-          "client_id": "879052393297-8kq09rl6k6q85e68kopb60m5lor0fs1g.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBvo3QegsdgRUABX-LR3_f08G8MZH6js4s"
+          "current_key": "AIzaSyA11KUYxwilvZznEWPu2kN74w7dvqv94ro"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "879052393297-8kq09rl6k6q85e68kopb60m5lor0fs1g.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

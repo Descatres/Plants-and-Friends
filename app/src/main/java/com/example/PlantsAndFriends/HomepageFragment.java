@@ -42,12 +42,12 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class NotesRepoFragment extends Fragment implements NotesGridAdapter.OnNoteClickListener {
+public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNoteClickListener {
     private List<Note> notesList = new ArrayList<>();
     private RecyclerView recyclerView;
     private NotesGridAdapter adapter;
     private Toolbar toolbar;
-    private static final String TAG = "NotesRepoFragment";
+    private static final String TAG = "HomepageFragment";
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private ListenerRegistration notesListener;
@@ -110,7 +110,7 @@ public class NotesRepoFragment extends Fragment implements NotesGridAdapter.OnNo
 
     @Override
     public void onNoteClick(Note note) {
-        openNoteDetailsFragment(note.getNumber(), note.getId());
+        openEditPlant(note.getNumber(), note.getId());
     }
 
     @Override
@@ -201,7 +201,7 @@ public class NotesRepoFragment extends Fragment implements NotesGridAdapter.OnNo
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             adapter = new NotesGridAdapter(requireContext(), notesList, appDatabase);
-                            adapter.setOnNoteClickListener(NotesRepoFragment.this);
+                            adapter.setOnNoteClickListener(HomepageFragment.this);
                             recyclerView.setAdapter(adapter);
 
                             notesList.clear(); // Clear the list before adding updated notes
@@ -374,7 +374,7 @@ public class NotesRepoFragment extends Fragment implements NotesGridAdapter.OnNo
                         }
 
                         adapter = new NotesGridAdapter(requireContext(), notesList, appDatabase);
-                        adapter.setOnNoteClickListener(NotesRepoFragment.this);
+                        adapter.setOnNoteClickListener(HomepageFragment.this);
                         recyclerView.setAdapter(adapter);
                     }
                 });
@@ -520,7 +520,7 @@ public class NotesRepoFragment extends Fragment implements NotesGridAdapter.OnNo
                             }
 
                             adapter = new NotesGridAdapter(requireContext(), notesList, appDatabase);
-                            adapter.setOnNoteClickListener(NotesRepoFragment.this);
+                            adapter.setOnNoteClickListener(HomepageFragment.this);
                             recyclerView.setAdapter(adapter);
 
                         } else {
@@ -551,16 +551,16 @@ public class NotesRepoFragment extends Fragment implements NotesGridAdapter.OnNo
         }
     }
 
-    private void openNoteDetailsFragment(String noteNumber, String noteId) {
-        NoteDetailsFragment noteDetailsFragment = new NoteDetailsFragment();
+    private void openEditPlant(String noteNumber, String noteId) {
+        PlantDetailsFragment EditPlantFragment = new PlantDetailsFragment();
         Bundle args = new Bundle();
         args.putString("noteNumber", noteNumber);
         args.putString("noteId", noteId);
-        noteDetailsFragment.setArguments(args);
+        EditPlantFragment.setArguments(args);
 
         requireActivity().getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, noteDetailsFragment, "NoteDetailsFragment")
+                .replace(R.id.fragment_container, EditPlantFragment, "PlantDetailsFragment")
                 .addToBackStack(TAG)
                 .commit();
     }
@@ -585,7 +585,7 @@ public class NotesRepoFragment extends Fragment implements NotesGridAdapter.OnNo
         List<Note> notesAux = convertToNoteList(localNotes.getValue());
 
         adapter = new NotesGridAdapter(requireContext(), notesAux, appDatabase);
-        adapter.setOnNoteClickListener(NotesRepoFragment.this);
+        adapter.setOnNoteClickListener(HomepageFragment.this);
         recyclerView.setAdapter(adapter);
     }
 

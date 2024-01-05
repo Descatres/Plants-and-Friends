@@ -176,9 +176,9 @@ public class LoginFragment extends Fragment {
     }
 
     private void openUserDashboard() {
-        NotesRepoFragment notesRepoFragment = new NotesRepoFragment();
+        HomepageFragment homepageFragment = new HomepageFragment();
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, notesRepoFragment);
+        transaction.replace(R.id.fragment_container, homepageFragment);
         transaction.commit();
     }
 

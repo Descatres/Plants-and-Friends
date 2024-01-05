@@ -32,12 +32,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class NoteDetailsFragment extends Fragment {
+public class PlantDetailsFragment extends Fragment {
     private Toolbar toolbar;
     private EditText nameEditText;
     private EditText speciesEditText;
@@ -57,6 +56,8 @@ public class NoteDetailsFragment extends Fragment {
     private AppDatabase appDatabase;
     private LiveData<List<NoteEntity>> localNotes;
     private static final int PICK_IMAGE_REQUEST = 1;
+
+    private static final String TAG = "PlantDetailsFragment";
 
     @Nullable
     @Override

@@ -22,7 +22,6 @@ import java.util.concurrent.Executors;
 
 import android.animation.ObjectAnimator;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -103,19 +102,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /*private void loadLoginFragment() {
-        setContentView(R.layout.activity_main);
-        getSupportFragmentManager().beginTransaction()
-                .setCustomAnimations(android.R.anim.fade_in, 0)
-                .replace(R.id.fragment_container, new LoginFragment())
-                .commit();
-    }
-*/
+//    private void loadLoginFragment() {
+//        setContentView(R.layout.activity_main);
+//        getSupportFragmentManager().beginTransaction()
+//                .setCustomAnimations(android.R.anim.fade_in, 0)
+//                .replace(R.id.fragment_container, new LoginFragment())
+//                .commit();
+//    }
+
     private void loadLoginFragment() {
         setContentView(R.layout.activity_main);
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(android.R.anim.fade_in, 0)
-                .replace(R.id.fragment_container, new NoteDetailsFragment())
+                .replace(R.id.fragment_container, new PlantDetailsFragment())
                 .commit();
     }
 
@@ -144,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void openUserDashboard() {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new NotesRepoFragment(), "NotesRepoFragment")
+                .replace(R.id.fragment_container, new HomepageFragment(), "HomepageFragment")
                 .commit();
     }
 
