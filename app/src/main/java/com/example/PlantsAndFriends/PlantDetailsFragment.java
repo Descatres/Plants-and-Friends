@@ -45,7 +45,7 @@ public class PlantDetailsFragment extends Fragment {
     private TextView maxTemperatureTextView;
     private TextView minHumidityTextView;
     private TextView maxHumidityTextView;
-    private EditText noteContentEditText;
+    private EditText plantContentEditText;
     private RangeSlider temperatureRangeSlider;
     private RangeSlider humidityRangeSlider;
 
@@ -54,7 +54,7 @@ public class PlantDetailsFragment extends Fragment {
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
-    private LiveData<List<PlantEntity>> localNotes;
+    private LiveData<List<PlantEntity>> localPlants;
     private static final int PICK_IMAGE_REQUEST = 1;
 
     private static final String TAG = "PlantDetailsFragment";
@@ -86,7 +86,7 @@ public class PlantDetailsFragment extends Fragment {
         maxTemperatureTextView = view.findViewById(R.id.maxTemperature);
         minHumidityTextView = view.findViewById(R.id.minHumidity);
         maxHumidityTextView = view.findViewById(R.id.maxHumidity);
-        noteContentEditText = view.findViewById(R.id.plantsEditText); // Plant Description
+        plantContentEditText = view.findViewById(R.id.plantsEditText); // Plant Description
 
         // Temperature and Humidity Ranges
         temperatureRangeSlider = view.findViewById(R.id.temperatureRangeSlider);
@@ -127,46 +127,46 @@ public class PlantDetailsFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
 
         if (getArguments() != null) {
-            String noteNumber = getArguments().getString("noteNumber");
-            String noteId = getArguments().getString("noteId");
-            Log.d("GetArguments", "GetArguments: " + noteNumber);
-            Log.d("GetArguments", "GetArguments: " + noteId);
+            String plantNumber = getArguments().getString("plantNumber");
+            String plantId = getArguments().getString("plantId");
+            Log.d("GetArguments", "GetArguments: " + plantNumber);
+            Log.d("GetArguments", "GetArguments: " + plantId);
 
             if (isNetworkConnected()) {
-                if (noteId != null && !noteId.isEmpty()) {
-                    displayNoteTitleFromFirestore(noteId);
-                    displayContentFromFirestore(noteId);
+                if (plantId != null && !plantId.isEmpty()) {
+                    displayPlantTitleFromFirestore(plantId);
+                    displayContentFromFirestore(plantId);
                 }
             } else {
-                if (noteNumber != null && !noteNumber.isEmpty()) {
-                    displayNoteTitleFromLocalStorage(noteNumber);
-                    displayContentFromLocalStorage(noteNumber);
+                if (plantNumber != null && !plantNumber.isEmpty()) {
+                    displayPlantTitleFromLocalStorage(plantNumber);
+                    displayContentFromLocalStorage(plantNumber);
                 }
             }
         }
 
         toolbar.setTitleTextColor(Color.WHITE);
-        toolbar.inflateMenu(R.menu.note_details_menu);
+        toolbar.inflateMenu(R.menu.plant_details_menu);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_save) {
                 if (getArguments() != null) {
-                    String noteNumber = getArguments().getString("noteNumber");
-                    String noteId = getArguments().getString("noteId");
+                    String plantNumber = getArguments().getString("plantNumber");
+                    String plantId = getArguments().getString("plantId");
 
                     if (isNetworkConnected()) {
-                        if (noteId != null && !noteId.isEmpty()) {
-                            saveNoteToFirestore(noteId);
+                        if (plantId != null && !plantId.isEmpty()) {
+                            savePlantToFirestore(plantId);
                         }
                     }
 
-                    if (noteNumber != null && !noteNumber.isEmpty()) {
-                        saveNoteToLocalStorage(noteNumber);
+                    if (plantNumber != null && !plantNumber.isEmpty()) {
+                        savePlantToLocalStorage(plantNumber);
                     }
 
                 }
                 return true;
             } else if (item.getItemId() == R.id.action_back) {
-                navigateToNotesRepoFragment();
+                navigateToPlantsRepoFragment();
                 return true;
             } else {
                 return false;
@@ -244,7 +244,7 @@ public class PlantDetailsFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appDatabase = AppDatabase.getInstance(requireContext());
-        localNotes = appDatabase.plantDao().getAllPlants();
+        localPlants = appDatabase.plantDao().getAllPlants();
     }
 
     private String getCurrentUser() {
@@ -256,88 +256,88 @@ public class PlantDetailsFragment extends Fragment {
         return currentUser.getUid();
     }
 
-    private void displayNoteTitleFromLocalStorage(String noteNumber) {
+    private void displayPlantTitleFromLocalStorage(String plantNumber) {
         executor.execute(() -> {
-            String noteTitle = appDatabase.plantDao().getPlantByNumber(noteNumber).getTitle();
-            mainHandler.post(() -> toolbar.setTitle(noteTitle));
+            String plantTitle = appDatabase.plantDao().getPlantByNumber(plantNumber).getTitle();
+            mainHandler.post(() -> toolbar.setTitle(plantTitle));
         });
     }
 
-    private void displayNoteTitleFromFirestore(String noteId) {
+    private void displayPlantTitleFromFirestore(String plantId) {
         String currentUserUid = getCurrentUser();
         executor.execute(() -> {
             db.collection("users")
                     .document(currentUserUid)
-                    .collection("notes")
-                    .document(noteId)
+                    .collection("plants")
+                    .document(plantId)
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            String noteTitle = documentSnapshot.getString("title");
-                            Log.d("Title", "Note title: " + noteTitle);
-                            mainHandler.post(() -> toolbar.setTitle(noteTitle));
+                            String plantTitle = documentSnapshot.getString("title");
+                            Log.d("Title", "Plant title: " + plantTitle);
+                            mainHandler.post(() -> toolbar.setTitle(plantTitle));
                         }
                     })
                     .addOnFailureListener(e -> {
-                        Log.e("NoteDetailsFragment", "Error while fetching note title: " + e.getMessage());
+                        Log.e("PlantDetailsFragment", "Error while fetching plant title: " + e.getMessage());
                     });
         });
     }
 
-    private void displayContentFromLocalStorage(String noteNumber) {
+    private void displayContentFromLocalStorage(String plantNumber) {
         executor.execute(() -> {
-            String noteContent = appDatabase.plantDao().getPlantByNumber(noteNumber).getContent();
-            mainHandler.post(() -> noteContentEditText.setText(noteContent));
+            String plantContent = appDatabase.plantDao().getPlantByNumber(plantNumber).getContent();
+            mainHandler.post(() -> plantContentEditText.setText(plantContent));
         });
     }
 
-    private void displayContentFromFirestore(String noteNumber) {
+    private void displayContentFromFirestore(String plantNumber) {
         String currentUserUid = getCurrentUser();
 
         executor.execute(() -> {
             db.collection("users")
                     .document(currentUserUid)
-                    .collection("notes")
-                    .document(noteNumber)
+                    .collection("plants")
+                    .document(plantNumber)
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            String noteContent = documentSnapshot.getString("content");
-                            mainHandler.post(() -> noteContentEditText.setText(noteContent));
+                            String plantContent = documentSnapshot.getString("content");
+                            mainHandler.post(() -> plantContentEditText.setText(plantContent));
                         }
                     })
                     .addOnFailureListener(e -> {
-                        Log.e("NoteDetailsFragment", "Error while fetching note content: " + e.getMessage());
+                        Log.e("PlantDetailsFragment", "Error while fetching plant content: " + e.getMessage());
                     });
         });
     }
 
-    private void saveNoteToLocalStorage(String noteNumber) {
+    private void savePlantToLocalStorage(String plantNumber) {
         executor.execute(() -> {
-            appDatabase.plantDao().updatePlantContent(noteNumber, noteContentEditText.getText().toString());
-            mainHandler.post(() -> Toast.makeText(requireContext(), "Note saved successfully", Toast.LENGTH_SHORT).show());
+            appDatabase.plantDao().updatePlantContent(plantNumber, plantContentEditText.getText().toString());
+            mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved successfully", Toast.LENGTH_SHORT).show());
         });
     }
 
-    private void saveNoteToFirestore(String noteId) {
+    private void savePlantToFirestore(String plantId) {
         String currentUserUid = getCurrentUser();
 
         executor.execute(() -> {
             db.collection("users")
                     .document(currentUserUid)
-                    .collection("notes")
-                    .document(noteId)
-                    .update("content", noteContentEditText.getText().toString())
+                    .collection("plants")
+                    .document(plantId)
+                    .update("content", plantContentEditText.getText().toString())
                     .addOnSuccessListener(aVoid -> {
-                        mainHandler.post(() -> Toast.makeText(requireContext(), "Note saved successfully", Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved successfully", Toast.LENGTH_SHORT).show());
                     })
                     .addOnFailureListener(e -> {
-                        mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to save the note: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to save the plant: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                     });
         });
     }
 
-    private void navigateToNotesRepoFragment() {
+    private void navigateToPlantsRepoFragment() {
         requireActivity().getSupportFragmentManager().popBackStack();
     }
 
