@@ -43,7 +43,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNoteClickListener {
-    private List<Note> notesList = new ArrayList<>();
+    private List<Note> plantsList = new ArrayList<>();
     private RecyclerView recyclerView;
     private NotesGridAdapter adapter;
     private Toolbar toolbar;
@@ -185,12 +185,12 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
         String currentUserUid = currentUser.getUid();
 
         executor.execute(() -> {
-            // delete note from firebase if it does not exist on the local storage
-            for (Note note : notesList) {
-                Log.e(TAG, "Delete note number: " + note.getNumber());
-                if (appDatabase.noteDao().getNoteByNumber(note.getNumber()) == null) {
-                    Log.d(TAG, "Deleting note from Firebase: " + note.getNumber());
-                    deleteNoteFromFirestore(note);
+            // delete plant from firebase if it does not exist on the local storage
+            for (Note plant : plantsList) {
+                Log.e(TAG, "Delete plant number: " + plant.getNumber());
+                if (appDatabase.noteDao().getNoteByNumber(plant.getNumber()) == null) {
+                    Log.d(TAG, "Deleting plant from Firebase: " + plant.getNumber());
+                    deleteNoteFromFirestore(plant);
                 }
             }
 
@@ -199,11 +199,11 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            adapter = new NotesGridAdapter(requireContext(), notesList, appDatabase);
+                            adapter = new NotesGridAdapter(requireContext(), plantsList, appDatabase);
                             adapter.setOnNoteClickListener(HomepageFragment.this);
                             recyclerView.setAdapter(adapter);
 
-                            notesList.clear(); // Clear the list before adding updated notes
+                            plantsList.clear(); // Clear the list before adding updated notes
 
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String noteId = document.getId();
@@ -212,7 +212,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                                 String number = document.getString("number");
 
                                 Note note = new Note(noteId, number, noteTitle, noteContent != null ? noteContent : "");
-                                notesList.add(note); // Add note to the list
+                                plantsList.add(note); // Add note to the list
                             }
 
                             updateFirebase();
@@ -235,7 +235,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
             noteEntities.forEach(
                     noteEntity -> {
                         boolean exists = false;
-                        for (Note note : notesList) {
+                        for (Note note : plantsList) {
                             if (note.getNumber().equals(noteEntity.getNumber())) {
                                 exists = true;
                                 // update note title and content
@@ -257,7 +257,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                         if (!exists) {
                             Log.d(TAG, "New note in Firebase: " + noteEntity.getNumber());
                             createNewNoteInDatabase(noteEntity.getNumber(), noteEntity.getTitle(), noteEntity.getContent());
-                            notesList.add(convertToNote(noteEntity));
+                            plantsList.add(convertToNote(noteEntity));
                         }
                     }
             );
@@ -334,7 +334,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
     }
 
     private void saveToLocalStorage() {
-        notesList.forEach(note -> {
+        plantsList.forEach(note -> {
             String noteId = note.getId();
             String noteNumber = note.getNumber();
             String noteTitle = note.getTitle();
@@ -361,7 +361,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                     }
 
                     if (value != null && !value.isEmpty()) {
-                        notesList.clear(); // Clear the list before adding updated notes
+                        plantsList.clear(); // Clear the list before adding updated notes
                         for (QueryDocumentSnapshot document : value) {
                             String noteId = document.getId();
                             String noteTitle = document.getString("title");
@@ -369,10 +369,10 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                             String noteContent = document.getString("content");
 
                             Note note = new Note(noteId, number, noteTitle, noteContent);
-                            notesList.add(note); // Add note to the list
+                            plantsList.add(note); // Add note to the list
                         }
 
-                        adapter = new NotesGridAdapter(requireContext(), notesList, appDatabase);
+                        adapter = new NotesGridAdapter(requireContext(), plantsList, appDatabase);
                         adapter.setOnNoteClickListener(HomepageFragment.this);
                         recyclerView.setAdapter(adapter);
                     }
@@ -500,7 +500,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            notesList.clear(); // Clear the list before adding updated notes
+                            plantsList.clear(); // Clear the list before adding updated notes
 
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String noteId = document.getId();
@@ -514,11 +514,11 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
 
                                 if (lowercaseNoteTitle.startsWith(lowercaseSearchText)) {
                                     Note note = new Note(noteId, number, noteTitle, "");
-                                    notesList.add(note);
+                                    plantsList.add(note);
                                 }
                             }
 
-                            adapter = new NotesGridAdapter(requireContext(), notesList, appDatabase);
+                            adapter = new NotesGridAdapter(requireContext(), plantsList, appDatabase);
                             adapter.setOnNoteClickListener(HomepageFragment.this);
                             recyclerView.setAdapter(adapter);
 

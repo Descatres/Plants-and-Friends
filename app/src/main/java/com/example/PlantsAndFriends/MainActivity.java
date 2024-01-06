@@ -26,8 +26,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
-    private AppDatabase appDatabase;
-    private final Executor executor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,34 +76,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        executor.execute(() -> {
-            if (appDatabase != null && isNetworkConnected()) {
-                Log.d("onDestroy", "onCreateView: " + appDatabase.noteDao().getAllNotes());
-                appDatabase.noteDao().deleteAllNotes();
-            }
-        });
     }
 
     public void onPause() {
         super.onPause();
-
-        executor.execute(() -> {
-            if (appDatabase != null && isNetworkConnected()) {
-                Log.d("onPause", "onCreateView: " + appDatabase.noteDao().getAllNotes());
-                appDatabase.noteDao().deleteAllNotes();
-            }
-        });
     }
 
     public void onStop() {
         super.onStop();
-
-        executor.execute(() -> {
-            if (appDatabase != null && isNetworkConnected()) {
-                Log.d("onStop", "onCreateView: " + appDatabase.noteDao().getAllNotes());
-                appDatabase.noteDao().deleteAllNotes();
-            }
-        });
     }
 
     private void loadLoginFragment() {
@@ -143,20 +121,5 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new HomepageFragment(), "HomepageFragment")
                 .commit();
-    }
-
-    private boolean isNetworkConnected() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        if (connectivityManager != null) {
-            Network network = connectivityManager.getActiveNetwork();
-            if (network != null) {
-                NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(network);
-                return networkCapabilities != null && (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
-            }
-        }
-
-        // If connectivity manager is null, assume there is no active network connection
-        return false;
     }
 }
