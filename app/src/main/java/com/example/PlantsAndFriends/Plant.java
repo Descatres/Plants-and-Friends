@@ -1,15 +1,15 @@
 package com.example.PlantsAndFriends;
 
-public class Note {
+public class Plant {
     private String id;
     private String number;
     private String title;
     private String content;
 
-    public Note() {
+    public Plant() {
     }
 
-    public Note(String id, String number, String title, String content) {
+    public Plant(String id, String number, String title, String content) {
         this.id = id;
         this.number = number;
         this.title = title;

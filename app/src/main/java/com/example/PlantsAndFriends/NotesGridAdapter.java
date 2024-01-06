@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.ViewHolder> {
-    private List<Note> notesList;
+    private List<Plant> notesList;
     private LayoutInflater inflater;
     private Context context;
     private OnNoteClickListener noteClickListener;
@@ -33,7 +33,7 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
     private AppDatabase appDatabase;
 
 
-    public NotesGridAdapter(Context context, List<Note> notesList, AppDatabase appDatabase) {
+    public NotesGridAdapter(Context context, List<Plant> notesList, AppDatabase appDatabase) {
         this.context = context;
         this.notesList = notesList;
         this.appDatabase = appDatabase;
@@ -42,7 +42,7 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
 
 
     public interface OnNoteClickListener {
-        void onNoteClick(Note note);
+        void onNoteClick(Plant plant);
     }
 
     public void setOnNoteClickListener(OnNoteClickListener listener) {
@@ -58,11 +58,11 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Note note = notesList.get(position);
-        holder.noteTitleTextView.setText(note.getTitle());
+        Plant plant = notesList.get(position);
+        holder.noteTitleTextView.setText(plant.getTitle());
 
         holder.itemView.setOnLongClickListener(v -> {
-            showOptionsDialog(note, position);
+            showOptionsDialog(plant, position);
             return true;
         });
 
@@ -87,28 +87,28 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
         }
     }
 
-    private void deleteNoteAndRefreshView(Note note, int position) {
+    private void deleteNoteAndRefreshView(Plant plant, int position) {
         executor.execute(() -> {
-            deleteNoteFromLocalStorage(note);
+            deleteNoteFromLocalStorage(plant);
         });
 
         // Update the list and notify the adapter
-        notesList.remove(note);
+        notesList.remove(plant);
         notifyItemRemoved(position);
     }
 
-    private void deleteNoteFromLocalStorage(Note note) {
-        appDatabase.noteDao().deleteNoteByNumber(note.getNumber());
+    private void deleteNoteFromLocalStorage(Plant plant) {
+        appDatabase.noteDao().deleteNoteByNumber(plant.getNumber());
         mainHandler.post(() -> Toast.makeText(context, "Note deleted from local storage", Toast.LENGTH_SHORT).show());
     }
 
-    private void updateNoteTitle(Note note, String newTitle) {
+    private void updateNoteTitle(Plant plant, String newTitle) {
         executor.execute(() -> {
-            appDatabase.noteDao().updateNoteTitle(note.getNumber(), newTitle);
+            appDatabase.noteDao().updateNoteTitle(plant.getNumber(), newTitle);
         });
     }
 
-    private void showRenameNoteDialog(Note note) {
+    private void showRenameNoteDialog(Plant plant) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Enter a new title for your note");
 
@@ -118,7 +118,7 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
 
         builder.setPositiveButton("Rename", (dialog, which) -> {
             String newTitle = input.getText().toString();
-            updateNoteTitle(note, newTitle);
+            updateNoteTitle(plant, newTitle);
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
@@ -129,12 +129,12 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
     }
 
-    private void showOptionsDialog(Note note, int position) {
+    private void showOptionsDialog(Plant plant, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Choose an action");
 
-        builder.setPositiveButton("Rename note", (dialog, which) -> showRenameNoteDialog(note));
-        builder.setNegativeButton("Delete note", (dialog, which) -> deleteNoteAndRefreshView(note, position));
+        builder.setPositiveButton("Rename note", (dialog, which) -> showRenameNoteDialog(plant));
+        builder.setNegativeButton("Delete note", (dialog, which) -> deleteNoteAndRefreshView(plant, position));
         builder.setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
@@ -144,7 +144,7 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(Color.BLACK);
     }
 
-    public void updateNotes(List<Note> newNotesList) {
+    public void updateNotes(List<Plant> newNotesList) {
         int oldSize = notesList.size();
         int newSize = newNotesList.size();
 

@@ -10,15 +10,14 @@
     <string name="welcome">Welcome</string>
     <string name="name">name</string>
     <string name="login">Login</string>
-    <string name="note_details">Note Details</string>
-    <string name="note_hint">Enter your note here</string>
+    <string name="plant_hint">Enter your plant here</string>
     <string name="save">Save</string>
     <string name="back">Back</string>
-    <string name="notes_list">Notes List</string>
-    <string name="add_note">Add Note</string>
-    <string name="search_notes">Search Notes</string>
+    <string name="plants_list">Plant List</string>
+    <string name="add_plant">Add Note</string>
+    <string name="search_plants">Search Plant</string>
     <string name="default_web_client_id">879052393297-ml0akv96vnmt66ajjjclavnljeosk7gi.apps.googleusercontent.com</string>
-    <string name="note_title">Note Title</string>
+    <string name="plant_title">Note Title</string>
     <string name="refresh">Refresh</string>
     <string name="go_back">Go Back</string>
     <string name="create_account">Create Account</string>
@@ -38,6 +37,6 @@
     <string name="ideal_humidity">Ideal Humidity</string>
     <string name="min_humidity">Min: %1$.1f%%</string>
     <string name="max_humidity">Max: %1$.1f%%</string>
-    <string name="add_notes_about_the_plant">Add notes about the plant…</string>
-    <string name="special_notes">Special Notes</string>
+    <string name="add_plants_about_the_plant">Add plants about the plant…</string>
+    <string name="special_plants">Special Plant</string>
 </resources>

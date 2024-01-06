@@ -43,7 +43,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNoteClickListener {
-    private List<Note> plantsList = new ArrayList<>();
+    private List<Plant> plantsList = new ArrayList<>();
     private RecyclerView recyclerView;
     private NotesGridAdapter adapter;
     private Toolbar toolbar;
@@ -108,8 +108,8 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
     }
 
     @Override
-    public void onNoteClick(Note note) {
-        openEditPlant(note.getNumber(), note.getId());
+    public void onNoteClick(Plant plant) {
+        openEditPlant(plant.getNumber(), plant.getId());
     }
 
     @Override
@@ -186,7 +186,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
 
         executor.execute(() -> {
             // delete plant from firebase if it does not exist on the local storage
-            for (Note plant : plantsList) {
+            for (Plant plant : plantsList) {
                 Log.e(TAG, "Delete plant number: " + plant.getNumber());
                 if (appDatabase.noteDao().getNoteByNumber(plant.getNumber()) == null) {
                     Log.d(TAG, "Deleting plant from Firebase: " + plant.getNumber());
@@ -211,8 +211,8 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                                 String noteContent = document.getString("content");
                                 String number = document.getString("number");
 
-                                Note note = new Note(noteId, number, noteTitle, noteContent != null ? noteContent : "");
-                                plantsList.add(note); // Add note to the list
+                                Plant plant = new Plant(noteId, number, noteTitle, noteContent != null ? noteContent : "");
+                                plantsList.add(plant); // Add note to the list
                             }
 
                             updateFirebase();
@@ -235,20 +235,20 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
             noteEntities.forEach(
                     noteEntity -> {
                         boolean exists = false;
-                        for (Note note : plantsList) {
-                            if (note.getNumber().equals(noteEntity.getNumber())) {
+                        for (Plant plant : plantsList) {
+                            if (plant.getNumber().equals(noteEntity.getNumber())) {
                                 exists = true;
                                 // update note title and content
                                 Log.d(TAG, "Note entity: " + noteEntity.getTitle() + " " + noteEntity.getContent());
-                                Log.d(TAG, "Note: " + note.getTitle() + " " + note.getContent());
-                                if (!note.getTitle().equals(noteEntity.getTitle()) || !note.getContent().equals(noteEntity.getContent() == null ? "" : noteEntity.getContent())) {
+                                Log.d(TAG, "Note: " + plant.getTitle() + " " + plant.getContent());
+                                if (!plant.getTitle().equals(noteEntity.getTitle()) || !plant.getContent().equals(noteEntity.getContent() == null ? "" : noteEntity.getContent())) {
                                     Log.d(TAG, "Updating note in Firebase: " + noteEntity.getNumber());
-                                    updateNoteTitleInFirebase(note, noteEntity.getTitle());
+                                    updateNoteTitleInFirebase(plant, noteEntity.getTitle());
                                 }
 
-                                if (!note.getContent().equals(noteEntity.getContent()) || !note.getContent().equals(noteEntity.getContent() == null ? "" : noteEntity.getContent())) {
+                                if (!plant.getContent().equals(noteEntity.getContent()) || !plant.getContent().equals(noteEntity.getContent() == null ? "" : noteEntity.getContent())) {
                                     Log.d(TAG, "Updating note content in Firebase: " + noteEntity.getNumber());
-                                    updateNoteContentInFirebase(note, noteEntity.getContent());
+                                    updateNoteContentInFirebase(plant, noteEntity.getContent());
                                 }
                                 break;
                             }
@@ -266,7 +266,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
 
     }
 
-    private void updateNoteContentInFirebase(Note note, String newContent) {
+    private void updateNoteContentInFirebase(Plant plant, String newContent) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -276,9 +276,9 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
         String currentUserUid = currentUser.getUid();
 
         // Get a reference to the note document in Firestore and update the title
-        Log.d(TAG, "updateNoteContentInFirebase: " + note.getNumber() + " " + newContent);
+        Log.d(TAG, "updateNoteContentInFirebase: " + plant.getNumber() + " " + newContent);
         db.collection("users").document(currentUserUid).collection("notes")
-                .document(note.getId())
+                .document(plant.getId())
                 .update("content", newContent)
                 .addOnSuccessListener(aVoid -> {
                     mainHandler.post(() -> Toast.makeText(requireContext(), "Note content updated in Firestore", Toast.LENGTH_SHORT).show());
@@ -289,7 +289,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                 });
     }
 
-    private void deleteNoteFromFirestore(Note note) {
+    private void deleteNoteFromFirestore(Plant plant) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -298,7 +298,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
 
         String currentUserUid = currentUser.getUid();
         db.collection("users").document(currentUserUid).collection("notes")
-                .document(note.getId())
+                .document(plant.getId())
                 .delete()
                 .addOnSuccessListener(aVoid -> {
                     Log.d("deleteNoteFromFirestore", "Note deleted from Firestore");
@@ -309,7 +309,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                 });
     }
 
-    private void updateNoteTitleInFirebase(Note note, String newTitle) {
+    private void updateNoteTitleInFirebase(Plant plant, String newTitle) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -319,9 +319,9 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
         String currentUserUid = currentUser.getUid();
 
         // Get a reference to the note document in Firestore and update the title
-        Log.d(TAG, "updateNoteTitleInFirebase: " + note.getNumber() + " " + newTitle);
+        Log.d(TAG, "updateNoteTitleInFirebase: " + plant.getNumber() + " " + newTitle);
         db.collection("users").document(currentUserUid).collection("notes")
-                .document(note.getId())
+                .document(plant.getId())
                 .update("title", newTitle)
                 .addOnSuccessListener(aVoid -> {
                     mainHandler.post(() -> Toast.makeText(requireContext(), "Note title updated in Firestore", Toast.LENGTH_SHORT).show());
@@ -334,11 +334,11 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
     }
 
     private void saveToLocalStorage() {
-        plantsList.forEach(note -> {
-            String noteId = note.getId();
-            String noteNumber = note.getNumber();
-            String noteTitle = note.getTitle();
-            String noteContent = note.getContent();
+        plantsList.forEach(plant -> {
+            String noteId = plant.getId();
+            String noteNumber = plant.getNumber();
+            String noteTitle = plant.getTitle();
+            String noteContent = plant.getContent();
 
             createNewNoteInLocalStorage(noteNumber, noteTitle, noteContent);
         });
@@ -368,8 +368,8 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                             String number = document.getString("number");
                             String noteContent = document.getString("content");
 
-                            Note note = new Note(noteId, number, noteTitle, noteContent);
-                            plantsList.add(note); // Add note to the list
+                            Plant plant = new Plant(noteId, number, noteTitle, noteContent);
+                            plantsList.add(plant); // Add note to the list
                         }
 
                         adapter = new NotesGridAdapter(requireContext(), plantsList, appDatabase);
@@ -513,8 +513,8 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                                 String lowercaseNoteTitle = noteTitle.toLowerCase();
 
                                 if (lowercaseNoteTitle.startsWith(lowercaseSearchText)) {
-                                    Note note = new Note(noteId, number, noteTitle, "");
-                                    plantsList.add(note);
+                                    Plant plant = new Plant(noteId, number, noteTitle, "");
+                                    plantsList.add(plant);
                                 }
                             }
 
@@ -531,21 +531,21 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
         } else {
             localNotes = appDatabase.noteDao().getAllNotes();
             localNotes.observe(getViewLifecycleOwner(), noteEntities -> {
-                List<Note> notes = convertToNoteList(noteEntities);
-                List<Note> filteredNotes = new ArrayList<>();
+                List<Plant> plants = convertToNoteList(noteEntities);
+                List<Plant> filteredPlants = new ArrayList<>();
 
-                for (Note note : notes) {
-                    String noteTitle = note.getTitle();
+                for (Plant plant : plants) {
+                    String noteTitle = plant.getTitle();
                     String lowercaseSearchText = searchText.toLowerCase();
                     assert noteTitle != null;
                     String lowercaseNoteTitle = noteTitle.toLowerCase();
 
                     if (lowercaseNoteTitle.startsWith(lowercaseSearchText)) {
-                        filteredNotes.add(note);
+                        filteredPlants.add(plant);
                     }
                 }
 
-                adapter.updateNotes(filteredNotes);
+                adapter.updateNotes(filteredPlants);
             });
         }
     }
@@ -577,13 +577,13 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
     private void loadNotesFromLocalStorage() {
         localNotes = appDatabase.noteDao().getAllNotes();
         localNotes.observe(getViewLifecycleOwner(), noteEntities -> {
-            List<Note> notes = convertToNoteList(noteEntities);
-            adapter.updateNotes(notes);
+            List<Plant> plants = convertToNoteList(noteEntities);
+            adapter.updateNotes(plants);
         });
 
-        List<Note> notesAux = convertToNoteList(localNotes.getValue());
+        List<Plant> plantsAux = convertToNoteList(localNotes.getValue());
 
-        adapter = new NotesGridAdapter(requireContext(), notesAux, appDatabase);
+        adapter = new NotesGridAdapter(requireContext(), plantsAux, appDatabase);
         adapter.setOnNoteClickListener(HomepageFragment.this);
         recyclerView.setAdapter(adapter);
     }
@@ -612,37 +612,37 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
         });
     }
 
-    private List<Note> convertToNoteList(@Nullable List<NoteEntity> noteEntities) {
+    private List<Plant> convertToNoteList(@Nullable List<NoteEntity> noteEntities) {
         if (noteEntities == null) {
             return new ArrayList<>();
         }
 
-        List<Note> notes = new ArrayList<>();
+        List<Plant> plants = new ArrayList<>();
 
         for (NoteEntity noteEntity : noteEntities) {
             String noteId = String.valueOf(noteEntity.getId());
 
-            Note note = new Note(
+            Plant plant = new Plant(
                     noteId,
                     noteEntity.getNumber(),
                     noteEntity.getTitle(),
                     noteEntity.getContent()
             );
-            notes.add(note);
+            plants.add(plant);
         }
-        return notes;
+        return plants;
     }
 
-    private Note convertToNote(NoteEntity noteEntity) {
+    private Plant convertToNote(NoteEntity noteEntity) {
         String noteId = String.valueOf(noteEntity.getId());
 
-        Note note = new Note(
+        Plant plant = new Plant(
                 noteId,
                 noteEntity.getNumber(),
                 noteEntity.getTitle(),
                 noteEntity.getContent()
         );
 
-        return note;
+        return plant;
     }
 }
