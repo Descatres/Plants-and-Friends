@@ -41,16 +41,16 @@ public class MainActivity extends AppCompatActivity {
         ObjectAnimator imageAnimator = ObjectAnimator.ofFloat(imageView, View.TRANSLATION_Y, 0, translationDistance);
         ObjectAnimator textAnimator = ObjectAnimator.ofFloat(textView, View.TRANSLATION_Y, 0, translationDistance);
 
-        imageAnimator.setDuration(1500);
-        textAnimator.setDuration(1500);
+        imageAnimator.setDuration(1000);
+        textAnimator.setDuration(1000);
 
         // Create alpha animators for fading in
         ObjectAnimator imageAlphaAnimator = ObjectAnimator.ofFloat(imageView, View.ALPHA, 1f, 0f);
         ObjectAnimator textAlphaAnimator = ObjectAnimator.ofFloat(textView, View.ALPHA, 1f, 0f);
 
         // Set duration for the alpha animation
-        imageAlphaAnimator.setDuration(1500);
-        textAlphaAnimator.setDuration(1500);
+        imageAlphaAnimator.setDuration(1000);
+        textAlphaAnimator.setDuration(1000);
 
         // translation and alpha animators
         AnimatorSet translationSet = new AnimatorSet();
@@ -65,8 +65,14 @@ public class MainActivity extends AppCompatActivity {
         animatorSet.start();
 
         new Handler().postDelayed(() -> {
-            checkUser();
-        }, 2000); // 3 seconds delay
+            // This method will be executed once the timer is over
+            // Start your app main activity
+            setContentView(R.layout.activity_main);
+            // Load the LoginFragment initially
+            if (savedInstanceState == null) {
+                checkUser();
+            }
+        }, 2000); // 2 seconds
     }
 
     @Override
@@ -103,20 +109,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadLoginFragment() {
-        setContentView(R.layout.activity_main);
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(android.R.anim.fade_in, 0)
                 .replace(R.id.fragment_container, new LoginFragment())
                 .commit();
     }
-
-//    private void loadLoginFragment() {
-//        setContentView(R.layout.activity_main);
-//        getSupportFragmentManager().beginTransaction()
-//                .setCustomAnimations(android.R.anim.fade_in, 0)
-//                .replace(R.id.fragment_container, new HomepageFragment())
-//                .commit();
-//    }
 
     private void checkUser() {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
