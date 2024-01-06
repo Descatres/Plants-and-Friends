@@ -69,7 +69,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         setHasOptionsMenu(true);
 
-        recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 1));
+        // Use GridLayoutManager with 3 columns
+        recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
 
         toolbar = view.findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
@@ -91,6 +92,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         return view;
     }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {

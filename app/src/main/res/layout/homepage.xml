@@ -42,9 +42,9 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:numColumns="1"
+        android:layout_weight="3"
         android:verticalSpacing="15dp"
-        android:padding="30dp" />
+        android:padding="30dp"/>
+
 
 </LinearLayout>
