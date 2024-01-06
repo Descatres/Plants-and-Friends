@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.ViewHolder> {
+public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.ViewHolder> {
     private List<Plant> notesList;
     private LayoutInflater inflater;
     private Context context;
@@ -33,7 +33,7 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
     private AppDatabase appDatabase;
 
 
-    public NotesGridAdapter(Context context, List<Plant> notesList, AppDatabase appDatabase) {
+    public PlantsGridAdapter(Context context, List<Plant> notesList, AppDatabase appDatabase) {
         this.context = context;
         this.notesList = notesList;
         this.appDatabase = appDatabase;
@@ -98,13 +98,13 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
     }
 
     private void deleteNoteFromLocalStorage(Plant plant) {
-        appDatabase.noteDao().deleteNoteByNumber(plant.getNumber());
+        appDatabase.plantDao().deletePlantByNumber(plant.getNumber());
         mainHandler.post(() -> Toast.makeText(context, "Note deleted from local storage", Toast.LENGTH_SHORT).show());
     }
 
     private void updateNoteTitle(Plant plant, String newTitle) {
         executor.execute(() -> {
-            appDatabase.noteDao().updateNoteTitle(plant.getNumber(), newTitle);
+            appDatabase.plantDao().updatePlantTitle(plant.getNumber(), newTitle);
         });
     }
 

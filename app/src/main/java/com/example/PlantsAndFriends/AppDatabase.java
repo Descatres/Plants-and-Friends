@@ -6,11 +6,11 @@ import androidx.room.RoomDatabase;
 
 import android.content.Context;
 
-@Database(entities = {NoteEntity.class}, version = 1, exportSchema = false)
+@Database(entities = {PlantEntity.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase instance;
 
-    public abstract NoteDAO noteDao();
+    public abstract PlantDAO plantDao();
 
     public static synchronized AppDatabase getInstance(Context context) {
         if (instance == null) {

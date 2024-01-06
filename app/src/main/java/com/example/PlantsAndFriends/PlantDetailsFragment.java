@@ -54,7 +54,7 @@ public class PlantDetailsFragment extends Fragment {
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
-    private LiveData<List<NoteEntity>> localNotes;
+    private LiveData<List<PlantEntity>> localNotes;
     private static final int PICK_IMAGE_REQUEST = 1;
 
     private static final String TAG = "PlantDetailsFragment";
@@ -244,7 +244,7 @@ public class PlantDetailsFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appDatabase = AppDatabase.getInstance(requireContext());
-        localNotes = appDatabase.noteDao().getAllNotes();
+        localNotes = appDatabase.plantDao().getAllPlants();
     }
 
     private String getCurrentUser() {
@@ -258,7 +258,7 @@ public class PlantDetailsFragment extends Fragment {
 
     private void displayNoteTitleFromLocalStorage(String noteNumber) {
         executor.execute(() -> {
-            String noteTitle = appDatabase.noteDao().getNoteByNumber(noteNumber).getTitle();
+            String noteTitle = appDatabase.plantDao().getPlantByNumber(noteNumber).getTitle();
             mainHandler.post(() -> toolbar.setTitle(noteTitle));
         });
     }
@@ -286,7 +286,7 @@ public class PlantDetailsFragment extends Fragment {
 
     private void displayContentFromLocalStorage(String noteNumber) {
         executor.execute(() -> {
-            String noteContent = appDatabase.noteDao().getNoteByNumber(noteNumber).getContent();
+            String noteContent = appDatabase.plantDao().getPlantByNumber(noteNumber).getContent();
             mainHandler.post(() -> noteContentEditText.setText(noteContent));
         });
     }
@@ -314,7 +314,7 @@ public class PlantDetailsFragment extends Fragment {
 
     private void saveNoteToLocalStorage(String noteNumber) {
         executor.execute(() -> {
-            appDatabase.noteDao().updateNoteContent(noteNumber, noteContentEditText.getText().toString());
+            appDatabase.plantDao().updatePlantContent(noteNumber, noteContentEditText.getText().toString());
             mainHandler.post(() -> Toast.makeText(requireContext(), "Note saved successfully", Toast.LENGTH_SHORT).show());
         });
     }

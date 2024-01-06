@@ -14,13 +14,13 @@
             <item
                 android:id="@+id/action_add_note"
                 android:icon="@drawable/ic_add_note"
-                android:title="@string/add_note"
+                android:title="@string/add_plant"
                 app:showAsAction="ifRoom" />
 
             <item
                 android:id="@+id/action_search_note"
                 android:icon="@drawable/ic_search_note"
-                android:title="@string/search_notes"
+                android:title="@string/search_plants"
                 app:showAsAction="ifRoom" />
 
             <item

@@ -42,10 +42,10 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNoteClickListener {
+public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNoteClickListener {
     private List<Plant> plantsList = new ArrayList<>();
     private RecyclerView recyclerView;
-    private NotesGridAdapter adapter;
+    private PlantsGridAdapter adapter;
     private Toolbar toolbar;
     private static final String TAG = "HomepageFragment";
     private FirebaseFirestore db;
@@ -54,7 +54,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
-    private LiveData<List<NoteEntity>> localNotes;
+    private LiveData<List<PlantEntity>> localNotes;
 
     @Nullable
     @Override
@@ -64,7 +64,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        adapter = new NotesGridAdapter(requireContext(), new ArrayList<>(), appDatabase);
+        adapter = new PlantsGridAdapter(requireContext(), new ArrayList<>(), appDatabase);
         recyclerView.setAdapter(adapter);
 
         setHasOptionsMenu(true);
@@ -96,7 +96,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appDatabase = AppDatabase.getInstance(requireContext());
-        localNotes = appDatabase.noteDao().getAllNotes();
+        localNotes = appDatabase.plantDao().getAllPlants();
     }
 
     @Override
@@ -188,7 +188,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
             // delete plant from firebase if it does not exist on the local storage
             for (Plant plant : plantsList) {
                 Log.e(TAG, "Delete plant number: " + plant.getNumber());
-                if (appDatabase.noteDao().getNoteByNumber(plant.getNumber()) == null) {
+                if (appDatabase.plantDao().getPlantByNumber(plant.getNumber()) == null) {
                     Log.d(TAG, "Deleting plant from Firebase: " + plant.getNumber());
                     deleteNoteFromFirestore(plant);
                 }
@@ -199,7 +199,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            adapter = new NotesGridAdapter(requireContext(), plantsList, appDatabase);
+                            adapter = new PlantsGridAdapter(requireContext(), plantsList, appDatabase);
                             adapter.setOnNoteClickListener(HomepageFragment.this);
                             recyclerView.setAdapter(adapter);
 
@@ -230,7 +230,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
     private void updateFirebase() {
         // Iterate through the local notes and check if there are any notes that are not in the Firebase database
         // If there are, upload them into the Firebase database
-        localNotes = appDatabase.noteDao().getAllNotes();
+        localNotes = appDatabase.plantDao().getAllPlants();
         localNotes.observe(getViewLifecycleOwner(), noteEntities -> {
             noteEntities.forEach(
                     noteEntity -> {
@@ -372,7 +372,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                             plantsList.add(plant); // Add note to the list
                         }
 
-                        adapter = new NotesGridAdapter(requireContext(), plantsList, appDatabase);
+                        adapter = new PlantsGridAdapter(requireContext(), plantsList, appDatabase);
                         adapter.setOnNoteClickListener(HomepageFragment.this);
                         recyclerView.setAdapter(adapter);
                     }
@@ -518,7 +518,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                                 }
                             }
 
-                            adapter = new NotesGridAdapter(requireContext(), plantsList, appDatabase);
+                            adapter = new PlantsGridAdapter(requireContext(), plantsList, appDatabase);
                             adapter.setOnNoteClickListener(HomepageFragment.this);
                             recyclerView.setAdapter(adapter);
 
@@ -529,7 +529,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
                         }
                     });
         } else {
-            localNotes = appDatabase.noteDao().getAllNotes();
+            localNotes = appDatabase.plantDao().getAllPlants();
             localNotes.observe(getViewLifecycleOwner(), noteEntities -> {
                 List<Plant> plants = convertToNoteList(noteEntities);
                 List<Plant> filteredPlants = new ArrayList<>();
@@ -575,7 +575,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
     }
 
     private void loadNotesFromLocalStorage() {
-        localNotes = appDatabase.noteDao().getAllNotes();
+        localNotes = appDatabase.plantDao().getAllPlants();
         localNotes.observe(getViewLifecycleOwner(), noteEntities -> {
             List<Plant> plants = convertToNoteList(noteEntities);
             adapter.updateNotes(plants);
@@ -583,24 +583,24 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
 
         List<Plant> plantsAux = convertToNoteList(localNotes.getValue());
 
-        adapter = new NotesGridAdapter(requireContext(), plantsAux, appDatabase);
+        adapter = new PlantsGridAdapter(requireContext(), plantsAux, appDatabase);
         adapter.setOnNoteClickListener(HomepageFragment.this);
         recyclerView.setAdapter(adapter);
     }
 
     private void createNewNoteInLocalStorage(String noteNumber, String noteTitle, String noteContent) {
         executor.execute(() -> {
-            if (appDatabase.noteDao().getNoteByNumber(noteNumber) != null) {
+            if (appDatabase.plantDao().getPlantByNumber(noteNumber) != null) {
                 Log.d(TAG, "createNewNoteInLocalStorage: " + "Note already exists");
                 return;
             }
 
             try {
-                NoteEntity noteEntity = new NoteEntity();
-                noteEntity.setNumber(noteNumber);
-                noteEntity.setTitle(noteTitle);
-                noteEntity.setContent(noteContent != null ? noteContent : "");
-                appDatabase.noteDao().insert(noteEntity);
+                PlantEntity plantEntity = new PlantEntity();
+                plantEntity.setNumber(noteNumber);
+                plantEntity.setTitle(noteTitle);
+                plantEntity.setContent(noteContent != null ? noteContent : "");
+                appDatabase.plantDao().insert(plantEntity);
 
                 if (!isNetworkConnected()) {
                     loadNotesFromLocalStorage();
@@ -612,35 +612,35 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
         });
     }
 
-    private List<Plant> convertToNoteList(@Nullable List<NoteEntity> noteEntities) {
+    private List<Plant> convertToNoteList(@Nullable List<PlantEntity> noteEntities) {
         if (noteEntities == null) {
             return new ArrayList<>();
         }
 
         List<Plant> plants = new ArrayList<>();
 
-        for (NoteEntity noteEntity : noteEntities) {
-            String noteId = String.valueOf(noteEntity.getId());
+        for (PlantEntity plantEntity : noteEntities) {
+            String noteId = String.valueOf(plantEntity.getId());
 
             Plant plant = new Plant(
                     noteId,
-                    noteEntity.getNumber(),
-                    noteEntity.getTitle(),
-                    noteEntity.getContent()
+                    plantEntity.getNumber(),
+                    plantEntity.getTitle(),
+                    plantEntity.getContent()
             );
             plants.add(plant);
         }
         return plants;
     }
 
-    private Plant convertToNote(NoteEntity noteEntity) {
-        String noteId = String.valueOf(noteEntity.getId());
+    private Plant convertToNote(PlantEntity plantEntity) {
+        String noteId = String.valueOf(plantEntity.getId());
 
         Plant plant = new Plant(
                 noteId,
-                noteEntity.getNumber(),
-                noteEntity.getTitle(),
-                noteEntity.getContent()
+                plantEntity.getNumber(),
+                plantEntity.getTitle(),
+                plantEntity.getContent()
         );
 
         return plant;

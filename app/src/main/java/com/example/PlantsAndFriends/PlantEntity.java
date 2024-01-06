@@ -3,15 +3,15 @@ package com.example.PlantsAndFriends;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "notes")
-public class NoteEntity {
+@Entity(tableName = "plants")
+public class PlantEntity {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String number;
     private String title;
     private String content;
 
-    public NoteEntity() {
+    public PlantEntity() {
     }
 
     // getters and setters
