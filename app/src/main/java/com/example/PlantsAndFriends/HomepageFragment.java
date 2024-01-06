@@ -634,10 +634,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     }
 
     private Plant convertToPlant(PlantEntity plantEntity) {
-        String noteId = String.valueOf(plantEntity.getId());
+        String plantId = String.valueOf(plantEntity.getId());
 
         return new Plant(
-                noteId,
+                plantId,
                 plantEntity.getNumber(),
                 plantEntity.getTitle(),
                 plantEntity.getContent()
