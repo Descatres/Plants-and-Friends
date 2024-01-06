@@ -59,7 +59,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.notes_repo, container, false);
+        View view = inflater.inflate(R.layout.homepage, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -71,8 +71,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
 
         recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 1));
 
-        toolbar = view.findViewById(R.id.notesAppBar);
-        toolbar.setTitle("Notes");
+        toolbar = view.findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.notes_repo_menu);
         toolbar.setOnMenuItemClickListener(this::onOptionsItemSelected);

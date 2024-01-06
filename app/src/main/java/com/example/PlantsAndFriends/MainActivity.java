@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 //        setContentView(R.layout.activity_main);
 //        getSupportFragmentManager().beginTransaction()
 //                .setCustomAnimations(android.R.anim.fade_in, 0)
-//                .replace(R.id.fragment_container, new PlantDetailsFragment())
+//                .replace(R.id.fragment_container, new HomepageFragment())
 //                .commit();
 //    }
 
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null) {
             //User is logged in already. You can proceed with your next screen
-            openUserDashboard();
+            openHomepage();
         } else {
             GoogleSignInOptions gso = new GoogleSignInOptions.
                     Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
             googleSignInClient.silentSignIn().addOnCompleteListener(this, task -> {
                 if (task.isSuccessful()) {
                     // User is logged in with Google. You can proceed with your next screen
-                    openUserDashboard();
+                    openHomepage();
                 } else {
                     // User is not logged in. You can show the login fragment here
                     loadLoginFragment();
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void openUserDashboard() {
+    private void openHomepage() {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new HomepageFragment(), "HomepageFragment")
                 .commit();
