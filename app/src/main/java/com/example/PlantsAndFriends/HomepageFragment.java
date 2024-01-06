@@ -110,7 +110,7 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
 
     @Override
     public void onNoteClick(Note note) {
-        openEditPlant(note.getNumber(), note.getId());
+//        openEditPlant(note.getNumber(), note.getId());
     }
 
     @Override
@@ -551,19 +551,19 @@ public class HomepageFragment extends Fragment implements NotesGridAdapter.OnNot
         }
     }
 
-    private void openEditPlant(String noteNumber, String noteId) {
-        PlantDetailsFragment EditPlantFragment = new PlantDetailsFragment();
-        Bundle args = new Bundle();
-        args.putString("noteNumber", noteNumber);
-        args.putString("noteId", noteId);
-        EditPlantFragment.setArguments(args);
-
-        requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, EditPlantFragment, "PlantDetailsFragment")
-                .addToBackStack(TAG)
-                .commit();
-    }
+//    private void openEditPlant(String noteNumber, String noteId) {
+//        PlantDetailsFragment EditPlantFragment = new PlantDetailsFragment();
+//        Bundle args = new Bundle();
+//        args.putString("noteNumber", noteNumber);
+//        args.putString("noteId", noteId);
+//        EditPlantFragment.setArguments(args);
+//
+//        requireActivity().getSupportFragmentManager()
+//                .beginTransaction()
+//                .replace(R.id.fragment_container, EditPlantFragment, "PlantDetailsFragment")
+//                .addToBackStack(TAG)
+//                .commit();
+//    }
 
     private void loadLoginFragment() {
         Log.d(TAG, "loadLoginFragment: " + requireActivity().getSupportFragmentManager().getBackStackEntryCount());

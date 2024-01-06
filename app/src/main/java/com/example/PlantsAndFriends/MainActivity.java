@@ -102,21 +102,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-//    private void loadLoginFragment() {
-//        setContentView(R.layout.activity_main);
-//        getSupportFragmentManager().beginTransaction()
-//                .setCustomAnimations(android.R.anim.fade_in, 0)
-//                .replace(R.id.fragment_container, new LoginFragment())
-//                .commit();
-//    }
-
     private void loadLoginFragment() {
         setContentView(R.layout.activity_main);
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(android.R.anim.fade_in, 0)
-                .replace(R.id.fragment_container, new PlantDetailsFragment())
+                .replace(R.id.fragment_container, new LoginFragment())
                 .commit();
     }
+
+//    private void loadLoginFragment() {
+//        setContentView(R.layout.activity_main);
+//        getSupportFragmentManager().beginTransaction()
+//                .setCustomAnimations(android.R.anim.fade_in, 0)
+//                .replace(R.id.fragment_container, new PlantDetailsFragment())
+//                .commit();
+//    }
 
     private void checkUser() {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
