@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         imageAlphaAnimator.setDuration(1000);
         textAlphaAnimator.setDuration(1000);
 
-        // translation and alpha animators
+        // translation  and alpha animators
         AnimatorSet translationSet = new AnimatorSet();
         translationSet.playTogether(imageAnimator, textAnimator);
 
@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openHomepage() {
+        setContentView(R.layout.activity_main);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new HomepageFragment(), "HomepageFragment")
                 .commit();
