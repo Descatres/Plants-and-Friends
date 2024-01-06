@@ -3,6 +3,7 @@ package com.example.PlantsAndFriends;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -72,6 +73,9 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         // Use GridLayoutManager with 3 columns
         recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
 
+        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.horizontal_spacing);
+        recyclerView.addItemDecoration(new HorizontalSpaceItemDecoration(spacingInPixels));
+
         toolbar = view.findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.plants_repo_menu);
@@ -106,6 +110,18 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         super.onDestroy();
         if (plantsListener != null) {
             plantsListener.remove(); // prevent memory leaks
+        }
+    }
+    public class HorizontalSpaceItemDecoration extends RecyclerView.ItemDecoration {
+        private final int horizontalSpace;
+
+        public HorizontalSpaceItemDecoration(int horizontalSpace) {
+            this.horizontalSpace = horizontalSpace;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            outRect.right = horizontalSpace;
         }
     }
 
