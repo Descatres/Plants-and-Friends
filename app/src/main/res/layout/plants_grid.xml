@@ -9,6 +9,6 @@
         android:id="@+id/plantTitleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Note tittle"
+        android:text="@string/plant_title"
         android:textColor="@android:color/black" />
 </FrameLayout>

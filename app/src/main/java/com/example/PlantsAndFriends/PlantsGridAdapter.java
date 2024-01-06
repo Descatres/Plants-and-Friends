@@ -87,9 +87,9 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         }
     }
 
-    private void deleteNoteAndRefreshView(Plant plant, int position) {
+    private void deletePlantAndRefreshView(Plant plant, int position) {
         executor.execute(() -> {
-            deleteNoteFromLocalStorage(plant);
+            deletePlantFromLocalStorage(plant);
         });
 
         // Update the list and notify the adapter
@@ -97,18 +97,18 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         notifyItemRemoved(position);
     }
 
-    private void deleteNoteFromLocalStorage(Plant plant) {
+    private void deletePlantFromLocalStorage(Plant plant) {
         appDatabase.plantDao().deletePlantByNumber(plant.getNumber());
-        mainHandler.post(() -> Toast.makeText(context, "Note deleted from local storage", Toast.LENGTH_SHORT).show());
+        mainHandler.post(() -> Toast.makeText(context, "Plant deleted from local storage", Toast.LENGTH_SHORT).show());
     }
 
-    private void updateNoteTitle(Plant plant, String newTitle) {
+    private void updatePlantTitle(Plant plant, String newTitle) {
         executor.execute(() -> {
             appDatabase.plantDao().updatePlantTitle(plant.getNumber(), newTitle);
         });
     }
 
-    private void showRenameNoteDialog(Plant plant) {
+    private void showRenamePlantDialog(Plant plant) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Enter a new title for your plant");
 
@@ -118,7 +118,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
 
         builder.setPositiveButton("Rename", (dialog, which) -> {
             String newTitle = input.getText().toString();
-            updateNoteTitle(plant, newTitle);
+            updatePlantTitle(plant, newTitle);
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
@@ -133,8 +133,8 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Choose an action");
 
-        builder.setPositiveButton("Rename plant", (dialog, which) -> showRenameNoteDialog(plant));
-        builder.setNegativeButton("Delete plant", (dialog, which) -> deleteNoteAndRefreshView(plant, position));
+        builder.setPositiveButton("Rename plant", (dialog, which) -> showRenamePlantDialog(plant));
+        builder.setNegativeButton("Delete plant", (dialog, which) -> deletePlantAndRefreshView(plant, position));
         builder.setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
@@ -144,14 +144,14 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(Color.BLACK);
     }
 
-    public void updatePlants(List<Plant> newNotesList) {
+    public void updatePlants(List<Plant> newPlantsList) {
         int oldSize = plantsList.size();
-        int newSize = newNotesList.size();
+        int newSize = newPlantsList.size();
 
         // Find the common prefix between old and new lists
         int commonPrefix = 0;
         while (commonPrefix < oldSize && commonPrefix < newSize &&
-                plantsList.get(commonPrefix).equals(newNotesList.get(commonPrefix))) {
+                plantsList.get(commonPrefix).equals(newPlantsList.get(commonPrefix))) {
             commonPrefix++;
         }
 
@@ -163,14 +163,14 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
 
         // Notify items that were added
         for (int i = commonPrefix; i < newSize; i++) {
-            plantsList.add(newNotesList.get(i));
+            plantsList.add(newPlantsList.get(i));
             notifyItemInserted(i);
         }
 
         // Notify items that were changed
         for (int i = commonPrefix; i < newSize; i++) {
-            if (!plantsList.get(i).equals(newNotesList.get(i))) {
-                plantsList.set(i, newNotesList.get(i));
+            if (!plantsList.get(i).equals(newPlantsList.get(i))) {
+                plantsList.set(i, newPlantsList.get(i));
                 notifyItemChanged(i);
             }
         }
