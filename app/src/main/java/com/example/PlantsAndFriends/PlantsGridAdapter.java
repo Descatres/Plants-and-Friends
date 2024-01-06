@@ -59,7 +59,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Plant plant = plantsList.get(position);
-        holder.plantTitleTextView.setText(plant.getTitle());
+        holder.plantTitleTextView.setText(plant.getName());
 
         holder.itemView.setOnLongClickListener(v -> {
             showOptionsDialog(plant, position);

@@ -25,9 +25,9 @@ public interface PlantDAO {
     @Query("DELETE FROM plants")
     void deleteAllPlants();
 
-    @Query("UPDATE plants SET title = :title WHERE number = :plantNumber")
+    @Query("UPDATE plants SET name = :title WHERE number = :plantNumber")
     void updatePlantTitle(String plantNumber, String title);
 
-    @Query("UPDATE plants SET content = :content WHERE number = :plantNumber")
+    @Query("UPDATE plants SET description = :content WHERE number = :plantNumber")
     void updatePlantContent(String plantNumber, String content);
 }

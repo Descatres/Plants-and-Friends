@@ -258,7 +258,7 @@ public class PlantDetailsFragment extends Fragment {
 
     private void displayPlantTitleFromLocalStorage(String plantNumber) {
         executor.execute(() -> {
-            String plantTitle = appDatabase.plantDao().getPlantByNumber(plantNumber).getTitle();
+            String plantTitle = appDatabase.plantDao().getPlantByNumber(plantNumber).getName();
             mainHandler.post(() -> toolbar.setTitle(plantTitle));
         });
     }
@@ -286,7 +286,7 @@ public class PlantDetailsFragment extends Fragment {
 
     private void displayContentFromLocalStorage(String plantNumber) {
         executor.execute(() -> {
-            String plantContent = appDatabase.plantDao().getPlantByNumber(plantNumber).getContent();
+            String plantContent = appDatabase.plantDao().getPlantByNumber(plantNumber).getDescription();
             mainHandler.post(() -> plantContentEditText.setText(plantContent));
         });
     }

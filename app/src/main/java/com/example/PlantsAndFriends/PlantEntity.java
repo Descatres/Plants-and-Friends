@@ -8,8 +8,11 @@ public class PlantEntity {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String number;
-    private String title;
-    private String content;
+    private String name;
+    private String species;
+    private String temperature;
+    private String humidity;
+    private String description;
 
     public PlantEntity() {
     }
@@ -37,23 +40,53 @@ public class PlantEntity {
     }
 
     // Getter for title
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
     // Setter for title
-    public void setTitle(String title) {
-        this.title = title;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // Getter for species
+    public String getSpecies() {
+        return species;
+    }
+
+    // Setter for species
+    public void setSpecies(String species) {
+        this.species = species;
+    }
+
+    // Getter for temperature
+    public String getTemperature() {
+        return temperature;
+    }
+
+    // Setter for temperature
+    public void setTemperature(String temperature) {
+        this.temperature = temperature;
+    }
+
+    // Getter for humidity
+    public String getHumidity() {
+        return humidity;
+    }
+
+    // Setter for humidity
+    public void setHumidity(String humidity) {
+        this.humidity = humidity;
     }
 
     // Getter for content
-    public String getContent() {
-        return content;
+    public String getDescription() {
+        return description;
     }
 
     // Setter for content
-    public void setContent(String content) {
-        this.content = content;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 

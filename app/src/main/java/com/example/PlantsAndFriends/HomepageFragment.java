@@ -112,6 +112,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             plantsListener.remove(); // prevent memory leaks
         }
     }
+
     public class HorizontalSpaceItemDecoration extends RecyclerView.ItemDecoration {
         private final int horizontalSpace;
 
@@ -225,11 +226,14 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String plantId = document.getId();
-                                String plantTitle = document.getString("title");
-                                String plantContent = document.getString("content");
                                 String number = document.getString("number");
+                                String plantName = document.getString("name");
+                                String plantSpecies = document.getString("species");
+                                String plantTemperature = document.getString("temperature");
+                                String plantHumidity = document.getString("humidity");
+                                String plantContent = document.getString("content");
 
-                                Plant plant = new Plant(plantId, number, plantTitle, plantContent != null ? plantContent : "");
+                                Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantTemperature, plantHumidity, plantContent != null ? plantContent : "");
                                 plantsList.add(plant); // Add plant to the list
                             }
 
@@ -257,16 +261,16 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                             if (plant.getNumber().equals(plantEntity.getNumber())) {
                                 exists = true;
                                 // update plant title and content
-                                Log.d(TAG, "Plant entity: " + plantEntity.getTitle() + " " + plantEntity.getContent());
-                                Log.d(TAG, "Plant: " + plant.getTitle() + " " + plant.getContent());
-                                if (!plant.getTitle().equals(plantEntity.getTitle()) || !plant.getContent().equals(plantEntity.getContent() == null ? "" : plantEntity.getContent())) {
+                                Log.d(TAG, "Plant entity: " + plantEntity.getName() + " " + plantEntity.getDescription());
+                                Log.d(TAG, "Plant: " + plant.getName() + " " + plant.getDescription());
+                                if (!plant.getName().equals(plantEntity.getName()) || !plant.getDescription().equals(plantEntity.getDescription() == null ? "" : plantEntity.getDescription())) {
                                     Log.d(TAG, "Updating plant in Firebase: " + plantEntity.getNumber());
-                                    updatePlantTitleInFirebase(plant, plantEntity.getTitle());
+                                    updatePlantNameInFirebase(plant, plantEntity.getName());
                                 }
 
-                                if (!plant.getContent().equals(plantEntity.getContent()) || !plant.getContent().equals(plantEntity.getContent() == null ? "" : plantEntity.getContent())) {
+                                if (!plant.getDescription().equals(plantEntity.getDescription()) || !plant.getDescription().equals(plantEntity.getDescription() == null ? "" : plantEntity.getDescription())) {
                                     Log.d(TAG, "Updating plant content in Firebase: " + plantEntity.getNumber());
-                                    updatePlantContentInFirebase(plant, plantEntity.getContent());
+                                    updatePlantContentInFirebase(plant, plantEntity.getDescription());
                                 }
                                 break;
                             }
@@ -274,7 +278,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
                         if (!exists) {
                             Log.d(TAG, "New plant in Firebase: " + plantEntity.getNumber());
-                            createNewPlantInDatabase(plantEntity.getNumber(), plantEntity.getTitle(), plantEntity.getContent());
+                            createNewPlantInDatabase(plantEntity.getNumber(), plantEntity.getName(), plantEntity.getDescription());
                             plantsList.add(convertToPlant(plantEntity));
                         }
                     }
@@ -327,7 +331,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 });
     }
 
-    private void updatePlantTitleInFirebase(Plant plant, String newTitle) {
+    private void updatePlantNameInFirebase(Plant plant, String newTitle) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -337,7 +341,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         String currentUserUid = currentUser.getUid();
 
         // Get a reference to the plant document in Firestore and update the title
-        Log.d(TAG, "updatePlantTitleInFirebase: " + plant.getNumber() + " " + newTitle);
+        Log.d(TAG, "updatePlantNameInFirebase: " + plant.getNumber() + " " + newTitle);
         db.collection("users").document(currentUserUid).collection("plants")
                 .document(plant.getId())
                 .update("title", newTitle)
@@ -345,7 +349,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                     mainHandler.post(() -> Toast.makeText(requireContext(), "Plant title updated in Firestore", Toast.LENGTH_SHORT).show());
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "updatePlantTitleInFirebase: " + e.getMessage());
+                    Log.e(TAG, "updatePlantNameInFirebase: " + e.getMessage());
                     mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update plant title in Firestore", Toast.LENGTH_SHORT).show());
                 });
 
@@ -355,10 +359,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         plantsList.forEach(plant -> {
             String plantId = plant.getId();
             String plantNumber = plant.getNumber();
-            String plantTitle = plant.getTitle();
-            String plantContent = plant.getContent();
+            String plantName = plant.getName();
+            String plantContent = plant.getDescription();
 
-            createNewPlantInLocalStorage(plantNumber, plantTitle, plantContent);
+            createNewPlantInLocalStorage(plantNumber, plantName, plantContent);
         });
     }
 
@@ -382,11 +386,14 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                         plantsList.clear(); // Clear the list before adding updated plants
                         for (QueryDocumentSnapshot document : value) {
                             String plantId = document.getId();
-                            String plantTitle = document.getString("title");
                             String number = document.getString("number");
+                            String plantName = document.getString("title");
+                            String plantSpecies = document.getString("species");
+                            String plantTemperature = document.getString("temperature");
+                            String plantHumidity = document.getString("humidity");
                             String plantContent = document.getString("content");
 
-                            Plant plant = new Plant(plantId, number, plantTitle, plantContent);
+                            Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantTemperature, plantHumidity, plantContent);
                             plantsList.add(plant); // Add plant to the list
                         }
 
@@ -398,7 +405,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
     }
 
-    private void createNewPlantInDatabase(String plantId, String plantTitle, String plantContent) {
+    private void createNewPlantInDatabase(String plantId, String plantName, String plantContent) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -409,7 +416,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         Map<String, Object> plant = new HashMap<>();
         plant.put("number", plantId);
-        plant.put("title", plantTitle);
+        plant.put("title", plantName);
         plant.put("content", plantContent != null ? plantContent : "");
 
 
@@ -447,10 +454,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
             String plantNumber = String.valueOf(System.currentTimeMillis());
-            String plantTitle = input.getText().toString();
+            String plantName = input.getText().toString();
 
-            createNewPlantInDatabase(plantNumber, plantTitle, ""); // Create and store the plant in Firebase
-            createNewPlantInLocalStorage(plantNumber, plantTitle, ""); // Create and store the plant locally
+            createNewPlantInDatabase(plantNumber, plantName, ""); // Create and store the plant in Firebase
+            createNewPlantInLocalStorage(plantNumber, plantName, ""); // Create and store the plant locally
             dialog.dismiss();
         });
 
@@ -522,16 +529,16 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String plantId = document.getId();
-                                String plantTitle = document.getString("title");
+                                String plantName = document.getString("title");
                                 String number = document.getString("number");
 
                                 // case insensitive search
                                 String lowercaseSearchText = searchText.toLowerCase();
-                                assert plantTitle != null;
-                                String lowercasePlantTitle = plantTitle.toLowerCase();
+                                assert plantName != null;
+                                String lowercasePlantName = plantName.toLowerCase();
 
-                                if (lowercasePlantTitle.startsWith(lowercaseSearchText)) {
-                                    Plant plant = new Plant(plantId, number, plantTitle, "");
+                                if (lowercasePlantName.startsWith(lowercaseSearchText)) {
+                                    Plant plant = new Plant(plantId, number, plantName, "", "", "", "");
                                     plantsList.add(plant);
                                 }
                             }
@@ -553,12 +560,12 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 List<Plant> filteredPlants = new ArrayList<>();
 
                 for (Plant plant : plants) {
-                    String plantTitle = plant.getTitle();
+                    String plantName = plant.getName();
                     String lowercaseSearchText = searchText.toLowerCase();
-                    assert plantTitle != null;
-                    String lowercasePlantTitle = plantTitle.toLowerCase();
+                    assert plantName != null;
+                    String lowercasePlantName = plantName.toLowerCase();
 
-                    if (lowercasePlantTitle.startsWith(lowercaseSearchText)) {
+                    if (lowercasePlantName.startsWith(lowercaseSearchText)) {
                         filteredPlants.add(plant);
                     }
                 }
@@ -606,7 +613,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         recyclerView.setAdapter(adapter);
     }
 
-    private void createNewPlantInLocalStorage(String plantNumber, String plantTitle, String plantContent) {
+    private void createNewPlantInLocalStorage(String plantNumber, String plantName, String plantContent) {
         executor.execute(() -> {
             if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
                 Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
@@ -616,8 +623,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             try {
                 PlantEntity plantEntity = new PlantEntity();
                 plantEntity.setNumber(plantNumber);
-                plantEntity.setTitle(plantTitle);
-                plantEntity.setContent(plantContent != null ? plantContent : "");
+                plantEntity.setName(plantName);
+                plantEntity.setDescription(plantContent != null ? plantContent : "");
                 appDatabase.plantDao().insert(plantEntity);
 
                 if (!isNetworkConnected()) {
@@ -643,8 +650,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             Plant plant = new Plant(
                     plantId,
                     plantEntity.getNumber(),
-                    plantEntity.getTitle(),
-                    plantEntity.getContent()
+                    plantEntity.getName(),
+                    plantEntity.getSpecies(),
+                    plantEntity.getTemperature(),
+                    plantEntity.getHumidity(),
+                    plantEntity.getDescription()
             );
             plants.add(plant);
         }
@@ -657,8 +667,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         return new Plant(
                 PlantId,
                 plantEntity.getNumber(),
-                plantEntity.getTitle(),
-                plantEntity.getContent()
+                plantEntity.getName(),
+                plantEntity.getSpecies(),
+                plantEntity.getTemperature(),
+                plantEntity.getHumidity(),
+                plantEntity.getDescription()
         );
     }
 }
