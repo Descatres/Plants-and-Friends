@@ -24,42 +24,42 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.ViewHolder> {
-    private List<Plant> notesList;
+    private List<Plant> plantsList;
     private LayoutInflater inflater;
     private Context context;
-    private OnNoteClickListener noteClickListener;
+    private OnPlantClickListener plantClickListener;
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
 
 
-    public PlantsGridAdapter(Context context, List<Plant> notesList, AppDatabase appDatabase) {
+    public PlantsGridAdapter(Context context, List<Plant> plantsList, AppDatabase appDatabase) {
         this.context = context;
-        this.notesList = notesList;
+        this.plantsList = plantsList;
         this.appDatabase = appDatabase;
         inflater = LayoutInflater.from(context);
     }
 
 
-    public interface OnNoteClickListener {
-        void onNoteClick(Plant plant);
+    public interface OnPlantClickListener {
+        void onPlantClick(Plant plant);
     }
 
-    public void setOnNoteClickListener(OnNoteClickListener listener) {
-        this.noteClickListener = listener;
+    public void setOnPlantClickListener(OnPlantClickListener listener) {
+        this.plantClickListener = listener;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.grid_item_note_title, parent, false);
+        View view = inflater.inflate(R.layout.grid_item_plant_title, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Plant plant = notesList.get(position);
-        holder.noteTitleTextView.setText(plant.getTitle());
+        Plant plant = plantsList.get(position);
+        holder.plantTitleTextView.setText(plant.getTitle());
 
         holder.itemView.setOnLongClickListener(v -> {
             showOptionsDialog(plant, position);
@@ -67,23 +67,23 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         });
 
         holder.itemView.setOnClickListener(v -> {
-            if (noteClickListener != null) {
-                noteClickListener.onNoteClick(notesList.get(position));
+            if (plantClickListener != null) {
+                plantClickListener.onPlantClick(plantsList.get(position));
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return notesList.size();
+        return plantsList.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView noteTitleTextView;
+        TextView plantTitleTextView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            noteTitleTextView = itemView.findViewById(R.id.noteTitleTextView);
+            plantTitleTextView = itemView.findViewById(R.id.plantTitleTextView);
         }
     }
 
@@ -93,7 +93,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         });
 
         // Update the list and notify the adapter
-        notesList.remove(plant);
+        plantsList.remove(plant);
         notifyItemRemoved(position);
     }
 
@@ -110,7 +110,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
 
     private void showRenameNoteDialog(Plant plant) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Enter a new title for your note");
+        builder.setTitle("Enter a new title for your plant");
 
         final EditText input = new EditText(context);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -133,8 +133,8 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Choose an action");
 
-        builder.setPositiveButton("Rename note", (dialog, which) -> showRenameNoteDialog(plant));
-        builder.setNegativeButton("Delete note", (dialog, which) -> deleteNoteAndRefreshView(plant, position));
+        builder.setPositiveButton("Rename plant", (dialog, which) -> showRenameNoteDialog(plant));
+        builder.setNegativeButton("Delete plant", (dialog, which) -> deleteNoteAndRefreshView(plant, position));
         builder.setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
@@ -144,33 +144,33 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(Color.BLACK);
     }
 
-    public void updateNotes(List<Plant> newNotesList) {
-        int oldSize = notesList.size();
+    public void updatePlants(List<Plant> newNotesList) {
+        int oldSize = plantsList.size();
         int newSize = newNotesList.size();
 
         // Find the common prefix between old and new lists
         int commonPrefix = 0;
         while (commonPrefix < oldSize && commonPrefix < newSize &&
-                notesList.get(commonPrefix).equals(newNotesList.get(commonPrefix))) {
+                plantsList.get(commonPrefix).equals(newNotesList.get(commonPrefix))) {
             commonPrefix++;
         }
 
         // Notify items that were removed
         for (int i = oldSize - 1; i >= commonPrefix; i--) {
-            notesList.remove(i);
+            plantsList.remove(i);
             notifyItemRemoved(i);
         }
 
         // Notify items that were added
         for (int i = commonPrefix; i < newSize; i++) {
-            notesList.add(newNotesList.get(i));
+            plantsList.add(newNotesList.get(i));
             notifyItemInserted(i);
         }
 
         // Notify items that were changed
         for (int i = commonPrefix; i < newSize; i++) {
-            if (!notesList.get(i).equals(newNotesList.get(i))) {
-                notesList.set(i, newNotesList.get(i));
+            if (!plantsList.get(i).equals(newNotesList.get(i))) {
+                plantsList.set(i, newNotesList.get(i));
                 notifyItemChanged(i);
             }
         }

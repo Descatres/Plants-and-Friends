@@ -16,7 +16,7 @@ public class Plant {
         this.content = content;
     }
 
-    // Getters and setters for Note fields
+    // Getters and setters for Plant fields
     public String getId() {
         return id;
     }

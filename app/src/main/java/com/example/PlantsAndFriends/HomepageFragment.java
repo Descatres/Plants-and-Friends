@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNoteClickListener {
+public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPlantClickListener {
     private List<Plant> plantsList = new ArrayList<>();
     private RecyclerView recyclerView;
     private PlantsGridAdapter adapter;
@@ -50,11 +50,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
     private static final String TAG = "HomepageFragment";
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private ListenerRegistration notesListener;
+    private ListenerRegistration plantsListener;
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
-    private LiveData<List<PlantEntity>> localNotes;
+    private LiveData<List<PlantEntity>> localPlants;
 
     @Nullable
     @Override
@@ -73,20 +73,20 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
 
         toolbar = view.findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
-        toolbar.inflateMenu(R.menu.notes_repo_menu);
+        toolbar.inflateMenu(R.menu.plants_repo_menu);
         toolbar.setOnMenuItemClickListener(this::onOptionsItemSelected);
 
         if (isNetworkConnected()) {
-            // load the notes from firestore at startup
-            loadNotesFromFirebase();
-            // listen for changes in the notes collection in firestore to update the notes (for example, if the title of a note is changed)
-            loadNotesAfterUpdatesFirebase();
+            // load the plants from firestore at startup
+            loadPlantsFromFirebase();
+            // listen for changes in the plants collection in firestore to update the plants (for example, if the title of a plant is changed)
+            loadPlantsAfterUpdatesFirebase();
             //saveToLocalStorage();
         } else {
             mainHandler.post(() -> {
                 Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
             });
-            loadNotesFromLocalStorage();
+            loadPlantsFromLocalStorage();
         }
 
         return view;
@@ -96,19 +96,19 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appDatabase = AppDatabase.getInstance(requireContext());
-        localNotes = appDatabase.plantDao().getAllPlants();
+        localPlants = appDatabase.plantDao().getAllPlants();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (notesListener != null) {
-            notesListener.remove(); // prevent memory leaks
+        if (plantsListener != null) {
+            plantsListener.remove(); // prevent memory leaks
         }
     }
 
     @Override
-    public void onNoteClick(Plant plant) {
+    public void onPlantClick(Plant plant) {
         openEditPlant(plant.getNumber(), plant.getId());
     }
 
@@ -116,21 +116,21 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_add_note) {
-            showCreateNoteDialog();
+        if (id == R.id.action_add_plant) {
+            showCreatePlantDialog();
             return true;
         }
 
-        if (id == R.id.action_search_note) {
+        if (id == R.id.action_search_plant) {
             showSearchDialog();
             return true;
         }
 
         if (id == R.id.refresh) {
             if (isNetworkConnected())
-                loadNotesFromFirebase();
+                loadPlantsFromFirebase();
             else
-                loadNotesFromLocalStorage();
+                loadPlantsFromLocalStorage();
             return true;
         }
 
@@ -175,7 +175,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
         return false;
     }
 
-    private void loadNotesFromFirebase() {
+    private void loadPlantsFromFirebase() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -190,29 +190,29 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
                 Log.e(TAG, "Delete plant number: " + plant.getNumber());
                 if (appDatabase.plantDao().getPlantByNumber(plant.getNumber()) == null) {
                     Log.d(TAG, "Deleting plant from Firebase: " + plant.getNumber());
-                    deleteNoteFromFirestore(plant);
+                    deletePlantFromFirestore(plant);
                 }
             }
 
-            Log.d(TAG, "loadNotesFromFirebase: " + currentUserUid);
-            db.collection("users").document(currentUserUid).collection("notes")
+            Log.d(TAG, "loadPlantsFromFirebase: " + currentUserUid);
+            db.collection("users").document(currentUserUid).collection("plants")
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             adapter = new PlantsGridAdapter(requireContext(), plantsList, appDatabase);
-                            adapter.setOnNoteClickListener(HomepageFragment.this);
+                            adapter.setOnPlantClickListener(HomepageFragment.this);
                             recyclerView.setAdapter(adapter);
 
-                            plantsList.clear(); // Clear the list before adding updated notes
+                            plantsList.clear(); // Clear the list before adding updated plants
 
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                String noteId = document.getId();
-                                String noteTitle = document.getString("title");
-                                String noteContent = document.getString("content");
+                                String plantId = document.getId();
+                                String plantTitle = document.getString("title");
+                                String plantContent = document.getString("content");
                                 String number = document.getString("number");
 
-                                Plant plant = new Plant(noteId, number, noteTitle, noteContent != null ? noteContent : "");
-                                plantsList.add(plant); // Add note to the list
+                                Plant plant = new Plant(plantId, number, plantTitle, plantContent != null ? plantContent : "");
+                                plantsList.add(plant); // Add plant to the list
                             }
 
                             updateFirebase();
@@ -220,7 +220,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
 
                         } else {
                             mainHandler.post(() -> {
-                                Toast.makeText(requireContext(), "Failed to retrieve notes from Firebase", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), "Failed to retrieve plants from Firebase", Toast.LENGTH_SHORT).show();
                             });
                         }
                     });
@@ -228,36 +228,36 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
     }
 
     private void updateFirebase() {
-        // Iterate through the local notes and check if there are any notes that are not in the Firebase database
+        // Iterate through the local plants and check if there are any plants that are not in the Firebase database
         // If there are, upload them into the Firebase database
-        localNotes = appDatabase.plantDao().getAllPlants();
-        localNotes.observe(getViewLifecycleOwner(), noteEntities -> {
-            noteEntities.forEach(
-                    noteEntity -> {
+        localPlants = appDatabase.plantDao().getAllPlants();
+        localPlants.observe(getViewLifecycleOwner(), plantEntities -> {
+            plantEntities.forEach(
+                    plantEntity -> {
                         boolean exists = false;
                         for (Plant plant : plantsList) {
-                            if (plant.getNumber().equals(noteEntity.getNumber())) {
+                            if (plant.getNumber().equals(plantEntity.getNumber())) {
                                 exists = true;
-                                // update note title and content
-                                Log.d(TAG, "Note entity: " + noteEntity.getTitle() + " " + noteEntity.getContent());
-                                Log.d(TAG, "Note: " + plant.getTitle() + " " + plant.getContent());
-                                if (!plant.getTitle().equals(noteEntity.getTitle()) || !plant.getContent().equals(noteEntity.getContent() == null ? "" : noteEntity.getContent())) {
-                                    Log.d(TAG, "Updating note in Firebase: " + noteEntity.getNumber());
-                                    updateNoteTitleInFirebase(plant, noteEntity.getTitle());
+                                // update plant title and content
+                                Log.d(TAG, "Plant entity: " + plantEntity.getTitle() + " " + plantEntity.getContent());
+                                Log.d(TAG, "Plant: " + plant.getTitle() + " " + plant.getContent());
+                                if (!plant.getTitle().equals(plantEntity.getTitle()) || !plant.getContent().equals(plantEntity.getContent() == null ? "" : plantEntity.getContent())) {
+                                    Log.d(TAG, "Updating plant in Firebase: " + plantEntity.getNumber());
+                                    updatePlantTitleInFirebase(plant, plantEntity.getTitle());
                                 }
 
-                                if (!plant.getContent().equals(noteEntity.getContent()) || !plant.getContent().equals(noteEntity.getContent() == null ? "" : noteEntity.getContent())) {
-                                    Log.d(TAG, "Updating note content in Firebase: " + noteEntity.getNumber());
-                                    updateNoteContentInFirebase(plant, noteEntity.getContent());
+                                if (!plant.getContent().equals(plantEntity.getContent()) || !plant.getContent().equals(plantEntity.getContent() == null ? "" : plantEntity.getContent())) {
+                                    Log.d(TAG, "Updating plant content in Firebase: " + plantEntity.getNumber());
+                                    updatePlantContentInFirebase(plant, plantEntity.getContent());
                                 }
                                 break;
                             }
                         }
 
                         if (!exists) {
-                            Log.d(TAG, "New note in Firebase: " + noteEntity.getNumber());
-                            createNewNoteInDatabase(noteEntity.getNumber(), noteEntity.getTitle(), noteEntity.getContent());
-                            plantsList.add(convertToNote(noteEntity));
+                            Log.d(TAG, "New plant in Firebase: " + plantEntity.getNumber());
+                            createNewPlantInDatabase(plantEntity.getNumber(), plantEntity.getTitle(), plantEntity.getContent());
+                            plantsList.add(convertToPlant(plantEntity));
                         }
                     }
             );
@@ -266,7 +266,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
 
     }
 
-    private void updateNoteContentInFirebase(Plant plant, String newContent) {
+    private void updatePlantContentInFirebase(Plant plant, String newContent) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -275,21 +275,21 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
 
         String currentUserUid = currentUser.getUid();
 
-        // Get a reference to the note document in Firestore and update the title
-        Log.d(TAG, "updateNoteContentInFirebase: " + plant.getNumber() + " " + newContent);
-        db.collection("users").document(currentUserUid).collection("notes")
+        // Get a reference to the plant document in Firestore and update the title
+        Log.d(TAG, "updatePlantContentInFirebase: " + plant.getNumber() + " " + newContent);
+        db.collection("users").document(currentUserUid).collection("plants")
                 .document(plant.getId())
                 .update("content", newContent)
                 .addOnSuccessListener(aVoid -> {
-                    mainHandler.post(() -> Toast.makeText(requireContext(), "Note content updated in Firestore", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> Toast.makeText(requireContext(), "Plant content updated in Firestore", Toast.LENGTH_SHORT).show());
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "updateNoteContentInFirebase: " + e.getMessage());
-                    mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update note content in Firestore", Toast.LENGTH_SHORT).show());
+                    Log.e(TAG, "updatePlantContentInFirebase: " + e.getMessage());
+                    mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update plant content in Firestore", Toast.LENGTH_SHORT).show());
                 });
     }
 
-    private void deleteNoteFromFirestore(Plant plant) {
+    private void deletePlantFromFirestore(Plant plant) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -297,19 +297,19 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
         }
 
         String currentUserUid = currentUser.getUid();
-        db.collection("users").document(currentUserUid).collection("notes")
+        db.collection("users").document(currentUserUid).collection("plants")
                 .document(plant.getId())
                 .delete()
                 .addOnSuccessListener(aVoid -> {
-                    Log.d("deleteNoteFromFirestore", "Note deleted from Firestore");
-                    mainHandler.post(() -> Toast.makeText(requireContext(), "Note deleted from Firebase", Toast.LENGTH_SHORT).show());
+                    Log.d("deletePlantFromFirestore", "Plant deleted from Firestore");
+                    mainHandler.post(() -> Toast.makeText(requireContext(), "Plant deleted from Firebase", Toast.LENGTH_SHORT).show());
                 })
                 .addOnFailureListener(e -> {
-                    mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to delete note from Firebase", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to delete plant from Firebase", Toast.LENGTH_SHORT).show());
                 });
     }
 
-    private void updateNoteTitleInFirebase(Plant plant, String newTitle) {
+    private void updatePlantTitleInFirebase(Plant plant, String newTitle) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -318,33 +318,33 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
 
         String currentUserUid = currentUser.getUid();
 
-        // Get a reference to the note document in Firestore and update the title
-        Log.d(TAG, "updateNoteTitleInFirebase: " + plant.getNumber() + " " + newTitle);
-        db.collection("users").document(currentUserUid).collection("notes")
+        // Get a reference to the plant document in Firestore and update the title
+        Log.d(TAG, "updatePlantTitleInFirebase: " + plant.getNumber() + " " + newTitle);
+        db.collection("users").document(currentUserUid).collection("plants")
                 .document(plant.getId())
                 .update("title", newTitle)
                 .addOnSuccessListener(aVoid -> {
-                    mainHandler.post(() -> Toast.makeText(requireContext(), "Note title updated in Firestore", Toast.LENGTH_SHORT).show());
+                    mainHandler.post(() -> Toast.makeText(requireContext(), "Plant title updated in Firestore", Toast.LENGTH_SHORT).show());
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "updateNoteTitleInFirebase: " + e.getMessage());
-                    mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update note title in Firestore", Toast.LENGTH_SHORT).show());
+                    Log.e(TAG, "updatePlantTitleInFirebase: " + e.getMessage());
+                    mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update plant title in Firestore", Toast.LENGTH_SHORT).show());
                 });
 
     }
 
     private void saveToLocalStorage() {
         plantsList.forEach(plant -> {
-            String noteId = plant.getId();
-            String noteNumber = plant.getNumber();
-            String noteTitle = plant.getTitle();
-            String noteContent = plant.getContent();
+            String plantId = plant.getId();
+            String plantNumber = plant.getNumber();
+            String plantTitle = plant.getTitle();
+            String plantContent = plant.getContent();
 
-            createNewNoteInLocalStorage(noteNumber, noteTitle, noteContent);
+            createNewPlantInLocalStorage(plantNumber, plantTitle, plantContent);
         });
     }
 
-    private void loadNotesAfterUpdatesFirebase() {
+    private void loadPlantsAfterUpdatesFirebase() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -353,7 +353,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
 
         String currentUserUid = currentUser.getUid();
 
-        notesListener = db.collection("users").document(currentUserUid).collection("notes")
+        plantsListener = db.collection("users").document(currentUserUid).collection("plants")
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
                         Log.w(TAG, "Listen failed.", error);
@@ -361,26 +361,26 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
                     }
 
                     if (value != null && !value.isEmpty()) {
-                        plantsList.clear(); // Clear the list before adding updated notes
+                        plantsList.clear(); // Clear the list before adding updated plants
                         for (QueryDocumentSnapshot document : value) {
-                            String noteId = document.getId();
-                            String noteTitle = document.getString("title");
+                            String plantId = document.getId();
+                            String plantTitle = document.getString("title");
                             String number = document.getString("number");
-                            String noteContent = document.getString("content");
+                            String plantContent = document.getString("content");
 
-                            Plant plant = new Plant(noteId, number, noteTitle, noteContent);
-                            plantsList.add(plant); // Add note to the list
+                            Plant plant = new Plant(plantId, number, plantTitle, plantContent);
+                            plantsList.add(plant); // Add plant to the list
                         }
 
                         adapter = new PlantsGridAdapter(requireContext(), plantsList, appDatabase);
-                        adapter.setOnNoteClickListener(HomepageFragment.this);
+                        adapter.setOnPlantClickListener(HomepageFragment.this);
                         recyclerView.setAdapter(adapter);
                     }
                 });
 
     }
 
-    private void createNewNoteInDatabase(String noteId, String noteTitle, String noteContent) {
+    private void createNewPlantInDatabase(String plantId, String plantTitle, String plantContent) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -389,30 +389,30 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
 
         String currentUserUid = currentUser.getUid();
 
-        Map<String, Object> note = new HashMap<>();
-        note.put("number", noteId);
-        note.put("title", noteTitle);
-        note.put("content", noteContent != null ? noteContent : "");
+        Map<String, Object> plant = new HashMap<>();
+        plant.put("number", plantId);
+        plant.put("title", plantTitle);
+        plant.put("content", plantContent != null ? plantContent : "");
 
 
-        db.collection("users").document(currentUserUid).collection("notes")
-                .add(note)
+        db.collection("users").document(currentUserUid).collection("plants")
+                .add(plant)
                 .addOnSuccessListener(documentReference -> {
                     mainHandler.post(() -> {
-                        Log.d(TAG, "Note created and saved to Firebase");
-                        Toast.makeText(requireContext(), "Note created and saved to Firebase", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Plant created and saved to Firebase");
+                        Toast.makeText(requireContext(), "Plant created and saved to Firebase", Toast.LENGTH_SHORT).show();
                     });
                 })
                 .addOnFailureListener(e -> {
                     mainHandler.post(() -> {
-                        Toast.makeText(requireContext(), "Failed to save note to Firebase", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Failed to save plant to Firebase", Toast.LENGTH_SHORT).show();
                     });
                 });
     }
 
-    private void showCreateNoteDialog() {
+    private void showCreatePlantDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Please enter a title for your note");
+        builder.setTitle("Please enter a title for your plant");
 
         final EditText input = new EditText(requireContext());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -428,11 +428,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
-            String noteNumber = String.valueOf(System.currentTimeMillis());
-            String noteTitle = input.getText().toString();
+            String plantNumber = String.valueOf(System.currentTimeMillis());
+            String plantTitle = input.getText().toString();
 
-            createNewNoteInDatabase(noteNumber, noteTitle, ""); // Create and store the note in Firebase
-            createNewNoteInLocalStorage(noteNumber, noteTitle, ""); // Create and store the note locally
+            createNewPlantInDatabase(plantNumber, plantTitle, ""); // Create and store the plant in Firebase
+            createNewPlantInLocalStorage(plantNumber, plantTitle, ""); // Create and store the plant locally
             dialog.dismiss();
         });
 
@@ -441,7 +441,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
 
     private void showSearchDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Search Note by Title");
+        builder.setTitle("Search Plant by Title");
 
         final EditText input = new EditText(requireContext());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -466,9 +466,9 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(view -> {
             input.setText("");
             if (isNetworkConnected()) {
-                loadNotesFromFirebase();
+                loadPlantsFromFirebase();
             } else {
-                loadNotesFromLocalStorage();
+                loadPlantsFromLocalStorage();
             }
         });
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(view -> dialog.cancel());
@@ -496,65 +496,65 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
                 currentUserUid = currentUser.getUid();
             }
 
-            db.collection("users").document(currentUserUid).collection("notes").orderBy("title")
+            db.collection("users").document(currentUserUid).collection("plants").orderBy("title")
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            plantsList.clear(); // Clear the list before adding updated notes
+                            plantsList.clear(); // Clear the list before adding updated plants
 
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                String noteId = document.getId();
-                                String noteTitle = document.getString("title");
+                                String plantId = document.getId();
+                                String plantTitle = document.getString("title");
                                 String number = document.getString("number");
 
                                 // case insensitive search
                                 String lowercaseSearchText = searchText.toLowerCase();
-                                assert noteTitle != null;
-                                String lowercaseNoteTitle = noteTitle.toLowerCase();
+                                assert plantTitle != null;
+                                String lowercasePlantTitle = plantTitle.toLowerCase();
 
-                                if (lowercaseNoteTitle.startsWith(lowercaseSearchText)) {
-                                    Plant plant = new Plant(noteId, number, noteTitle, "");
+                                if (lowercasePlantTitle.startsWith(lowercaseSearchText)) {
+                                    Plant plant = new Plant(plantId, number, plantTitle, "");
                                     plantsList.add(plant);
                                 }
                             }
 
                             adapter = new PlantsGridAdapter(requireContext(), plantsList, appDatabase);
-                            adapter.setOnNoteClickListener(HomepageFragment.this);
+                            adapter.setOnPlantClickListener(HomepageFragment.this);
                             recyclerView.setAdapter(adapter);
 
                         } else {
                             mainHandler.post(() -> {
-                                Toast.makeText(requireContext(), "Failed to retrieve notes from Firebase", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), "Failed to retrieve plants from Firebase", Toast.LENGTH_SHORT).show();
                             });
                         }
                     });
         } else {
-            localNotes = appDatabase.plantDao().getAllPlants();
-            localNotes.observe(getViewLifecycleOwner(), noteEntities -> {
-                List<Plant> plants = convertToNoteList(noteEntities);
+            localPlants = appDatabase.plantDao().getAllPlants();
+            localPlants.observe(getViewLifecycleOwner(), plantEntities -> {
+                List<Plant> plants = convertToPlantList(plantEntities);
                 List<Plant> filteredPlants = new ArrayList<>();
 
                 for (Plant plant : plants) {
-                    String noteTitle = plant.getTitle();
+                    String plantTitle = plant.getTitle();
                     String lowercaseSearchText = searchText.toLowerCase();
-                    assert noteTitle != null;
-                    String lowercaseNoteTitle = noteTitle.toLowerCase();
+                    assert plantTitle != null;
+                    String lowercasePlantTitle = plantTitle.toLowerCase();
 
-                    if (lowercaseNoteTitle.startsWith(lowercaseSearchText)) {
+                    if (lowercasePlantTitle.startsWith(lowercaseSearchText)) {
                         filteredPlants.add(plant);
                     }
                 }
 
-                adapter.updateNotes(filteredPlants);
+                adapter.updatePlants(filteredPlants);
             });
         }
     }
 
-    private void openEditPlant(String noteNumber, String noteId) {
+    private void openEditPlant(String plantNumber, String plantId) {
         PlantDetailsFragment EditPlantFragment = new PlantDetailsFragment();
         Bundle args = new Bundle();
-        args.putString("noteNumber", noteNumber);
-        args.putString("noteId", noteId);
+        args.putString("plantNumber", plantNumber);
+        args.putString("plantId", plantId);
         EditPlantFragment.setArguments(args);
 
         requireActivity().getSupportFragmentManager()
@@ -574,36 +574,36 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
                 .commit();
     }
 
-    private void loadNotesFromLocalStorage() {
-        localNotes = appDatabase.plantDao().getAllPlants();
-        localNotes.observe(getViewLifecycleOwner(), noteEntities -> {
-            List<Plant> plants = convertToNoteList(noteEntities);
-            adapter.updateNotes(plants);
+    private void loadPlantsFromLocalStorage() {
+        localPlants = appDatabase.plantDao().getAllPlants();
+        localPlants.observe(getViewLifecycleOwner(), plantEntities -> {
+            List<Plant> plants = convertToPlantList(plantEntities);
+            adapter.updatePlants(plants);
         });
 
-        List<Plant> plantsAux = convertToNoteList(localNotes.getValue());
+        List<Plant> plantsAux = convertToPlantList(localPlants.getValue());
 
         adapter = new PlantsGridAdapter(requireContext(), plantsAux, appDatabase);
-        adapter.setOnNoteClickListener(HomepageFragment.this);
+        adapter.setOnPlantClickListener(HomepageFragment.this);
         recyclerView.setAdapter(adapter);
     }
 
-    private void createNewNoteInLocalStorage(String noteNumber, String noteTitle, String noteContent) {
+    private void createNewPlantInLocalStorage(String plantNumber, String plantTitle, String plantContent) {
         executor.execute(() -> {
-            if (appDatabase.plantDao().getPlantByNumber(noteNumber) != null) {
-                Log.d(TAG, "createNewNoteInLocalStorage: " + "Note already exists");
+            if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
+                Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
                 return;
             }
 
             try {
                 PlantEntity plantEntity = new PlantEntity();
-                plantEntity.setNumber(noteNumber);
-                plantEntity.setTitle(noteTitle);
-                plantEntity.setContent(noteContent != null ? noteContent : "");
+                plantEntity.setNumber(plantNumber);
+                plantEntity.setTitle(plantTitle);
+                plantEntity.setContent(plantContent != null ? plantContent : "");
                 appDatabase.plantDao().insert(plantEntity);
 
                 if (!isNetworkConnected()) {
-                    loadNotesFromLocalStorage();
+                    loadPlantsFromLocalStorage();
                 }
 
             } catch (Exception e) {
@@ -612,18 +612,18 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
         });
     }
 
-    private List<Plant> convertToNoteList(@Nullable List<PlantEntity> noteEntities) {
-        if (noteEntities == null) {
+    private List<Plant> convertToPlantList(@Nullable List<PlantEntity> plantEntities) {
+        if (plantEntities == null) {
             return new ArrayList<>();
         }
 
         List<Plant> plants = new ArrayList<>();
 
-        for (PlantEntity plantEntity : noteEntities) {
-            String noteId = String.valueOf(plantEntity.getId());
+        for (PlantEntity plantEntity : plantEntities) {
+            String plantId = String.valueOf(plantEntity.getId());
 
             Plant plant = new Plant(
-                    noteId,
+                    plantId,
                     plantEntity.getNumber(),
                     plantEntity.getTitle(),
                     plantEntity.getContent()
@@ -633,16 +633,14 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnNo
         return plants;
     }
 
-    private Plant convertToNote(PlantEntity plantEntity) {
+    private Plant convertToPlant(PlantEntity plantEntity) {
         String noteId = String.valueOf(plantEntity.getId());
 
-        Plant plant = new Plant(
+        return new Plant(
                 noteId,
                 plantEntity.getNumber(),
                 plantEntity.getTitle(),
                 plantEntity.getContent()
         );
-
-        return plant;
     }
 }

@@ -16,18 +16,18 @@ public interface PlantDAO {
     @Query("SELECT * FROM plants")
     LiveData<List<PlantEntity>> getAllPlants();
 
-    @Query("SELECT * FROM plants WHERE number = :noteNumber LIMIT 1")
-    PlantEntity getPlantByNumber(String noteNumber);
+    @Query("SELECT * FROM plants WHERE number = :plantNumber LIMIT 1")
+    PlantEntity getPlantByNumber(String plantNumber);
 
-    @Query("DELETE FROM plants WHERE number = :noteNumber")
-    void deletePlantByNumber(String noteNumber);
+    @Query("DELETE FROM plants WHERE number = :plantNumber")
+    void deletePlantByNumber(String plantNumber);
 
     @Query("DELETE FROM plants")
     void deleteAllPlants();
 
-    @Query("UPDATE plants SET title = :title WHERE number = :noteNumber")
-    void updatePlantTitle(String noteNumber, String title);
+    @Query("UPDATE plants SET title = :title WHERE number = :plantNumber")
+    void updatePlantTitle(String plantNumber, String title);
 
-    @Query("UPDATE plants SET content = :content WHERE number = :noteNumber")
-    void updatePlantContent(String noteNumber, String content);
+    @Query("UPDATE plants SET content = :content WHERE number = :plantNumber")
+    void updatePlantContent(String plantNumber, String content);
 }

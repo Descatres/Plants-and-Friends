@@ -17,7 +17,7 @@ public abstract class AppDatabase extends RoomDatabase {
             instance = Room.databaseBuilder(
                     context.getApplicationContext(),
                     AppDatabase.class,
-                    "notes_database"
+                    "plants_database"
             ).fallbackToDestructiveMigration().build();
         }
         return instance;

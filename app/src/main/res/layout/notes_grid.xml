@@ -6,7 +6,7 @@
     android:padding="20dp">
 
     <TextView
-        android:id="@+id/noteTitleTextView"
+        android:id="@+id/plantTitleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Note tittle"
