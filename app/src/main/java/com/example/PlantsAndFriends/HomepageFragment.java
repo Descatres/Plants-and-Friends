@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -229,11 +230,13 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                                 String number = document.getString("number");
                                 String plantName = document.getString("name");
                                 String plantSpecies = document.getString("species");
-                                String plantTemperature = document.getString("temperature");
-                                String plantHumidity = document.getString("humidity");
-                                String plantContent = document.getString("content");
+                                float plantMinTemp = Float.parseFloat(Objects.requireNonNull(document.getString("min_temp")));
+                                float plantMaxTemp = Float.parseFloat(Objects.requireNonNull(document.getString("max_temp")));
+                                float plantMinHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("min_humidity")));
+                                float plantMaxHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("max_humidity")));
+                                String plantDescription = document.getString("content");
 
-                                Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantTemperature, plantHumidity, plantContent != null ? plantContent : "");
+                                Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantMinTemp, plantMaxTemp, plantMinHumidity, plantMaxHumidity, plantDescription != null ? plantDescription : "");
                                 plantsList.add(plant); // Add plant to the list
                             }
 
@@ -387,13 +390,15 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                         for (QueryDocumentSnapshot document : value) {
                             String plantId = document.getId();
                             String number = document.getString("number");
-                            String plantName = document.getString("title");
+                            String plantName = document.getString("name");
                             String plantSpecies = document.getString("species");
-                            String plantTemperature = document.getString("temperature");
-                            String plantHumidity = document.getString("humidity");
-                            String plantContent = document.getString("content");
+                            float plantMinTemp = Float.parseFloat(Objects.requireNonNull(document.getString("min_temp")));
+                            float plantMaxTemp = Float.parseFloat(Objects.requireNonNull(document.getString("max_temp")));
+                            float plantMinHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("min_humidity")));
+                            float plantMaxHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("max_humidity")));
+                            String plantDescription = document.getString("description");
 
-                            Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantTemperature, plantHumidity, plantContent);
+                            Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantMinTemp, plantMaxTemp, plantMinHumidity, plantMaxHumidity, plantDescription != null ? plantDescription : "");
                             plantsList.add(plant); // Add plant to the list
                         }
 
@@ -521,7 +526,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 currentUserUid = currentUser.getUid();
             }
 
-            db.collection("users").document(currentUserUid).collection("plants").orderBy("title")
+            db.collection("users").document(currentUserUid).collection("plants").orderBy("name")
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
@@ -529,8 +534,14 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String plantId = document.getId();
-                                String plantName = document.getString("title");
                                 String number = document.getString("number");
+                                String plantName = document.getString("name");
+                                String plantSpecies = document.getString("species");
+                                float plantMinTemp = Float.parseFloat(Objects.requireNonNull(document.getString("min_temp")));
+                                float plantMaxTemp = Float.parseFloat(Objects.requireNonNull(document.getString("max_temp")));
+                                float plantMinHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("min_humidity")));
+                                float plantMaxHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("max_humidity")));
+                                String plantContent = document.getString("content");
 
                                 // case insensitive search
                                 String lowercaseSearchText = searchText.toLowerCase();
@@ -538,11 +549,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                                 String lowercasePlantName = plantName.toLowerCase();
 
                                 if (lowercasePlantName.startsWith(lowercaseSearchText)) {
-                                    Plant plant = new Plant(plantId, number, plantName, "", "", "", "");
+                                    Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantMinTemp, plantMaxTemp, plantMinHumidity, plantMaxHumidity, plantContent != null ? plantContent : "");
                                     plantsList.add(plant);
                                 }
                             }
-
                             adapter = new PlantsGridAdapter(requireContext(), plantsList, appDatabase);
                             adapter.setOnPlantClickListener(HomepageFragment.this);
                             recyclerView.setAdapter(adapter);
@@ -652,8 +662,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                     plantEntity.getNumber(),
                     plantEntity.getName(),
                     plantEntity.getSpecies(),
-                    plantEntity.getTemperature(),
-                    plantEntity.getHumidity(),
+                    plantEntity.getMin_temp(),
+                    plantEntity.getMax_temp(),
+                    plantEntity.getMin_humidity(),
+                    plantEntity.getMax_humidity(),
                     plantEntity.getDescription()
             );
             plants.add(plant);
@@ -669,8 +681,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 plantEntity.getNumber(),
                 plantEntity.getName(),
                 plantEntity.getSpecies(),
-                plantEntity.getTemperature(),
-                plantEntity.getHumidity(),
+                plantEntity.getMin_temp(),
+                plantEntity.getMax_temp(),
+                plantEntity.getMin_humidity(),
+                plantEntity.getMax_humidity(),
                 plantEntity.getDescription()
         );
     }

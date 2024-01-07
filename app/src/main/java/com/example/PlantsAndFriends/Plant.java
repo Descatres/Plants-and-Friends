@@ -5,20 +5,24 @@ public class Plant {
     private String number;
     private String name;
     private String species;
-    private String temperature;
-    private String humidity;
+    private float min_temp;
+    private float max_temp;
+    private float min_humidity;
+    private float max_humidity;
     private String description;
 
     public Plant() {
     }
 
-    public Plant(String id, String number, String name, String species, String temperature, String humidity, String description) {
+    public Plant(String id, String number, String name, String species, float min_temp, float max_temp, float min_humidity, float max_humidity, String description) {
         this.id = id;
         this.number = number;
         this.name = name;
         this.species = species;
-        this.temperature = temperature;
-        this.humidity = humidity;
+        this.min_temp = min_temp;
+        this.max_temp = max_temp;
+        this.min_humidity = min_humidity;
+        this.max_humidity = max_humidity;
         this.description = description;
     }
 
@@ -39,12 +43,20 @@ public class Plant {
         return species;
     }
 
-    public String getTemperature() {
-        return temperature;
+    public float getMin_temp() {
+        return min_temp;
     }
 
-    public String getHumidity() {
-        return humidity;
+    public float getMax_temp() {
+        return max_temp;
+    }
+
+    public float getMin_humidity() {
+        return min_humidity;
+    }
+
+    public float getMax_humidity() {
+        return max_humidity;
     }
 
     public String getDescription() {
@@ -67,12 +79,20 @@ public class Plant {
         this.species = species;
     }
 
-    public void setTemperature(String temperature) {
-        this.temperature = temperature;
+    public void setMin_temp(float min_temp) {
+        this.min_temp = min_temp;
     }
 
-    public void setHumidity(String humidity) {
-        this.humidity = humidity;
+    public void setMax_temp(float max_temp) {
+        this.max_temp = max_temp;
+    }
+
+    public void setMin_humidity(float min_humidity) {
+        this.min_humidity = min_humidity;
+    }
+
+    public void setMax_humidity(float max_humidity) {
+        this.max_humidity = max_humidity;
     }
 
     public void setDescription(String description) {
