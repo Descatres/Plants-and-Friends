@@ -45,7 +45,7 @@ public class PlantDetailsFragment extends Fragment {
     private TextView maxTemperatureTextView;
     private TextView minHumidityTextView;
     private TextView maxHumidityTextView;
-    private EditText plantContentEditText;
+    private EditText plantDescriptionEditText;
     private RangeSlider temperatureRangeSlider;
     private RangeSlider humidityRangeSlider;
 
@@ -86,7 +86,7 @@ public class PlantDetailsFragment extends Fragment {
         maxTemperatureTextView = view.findViewById(R.id.maxTemperature);
         minHumidityTextView = view.findViewById(R.id.minHumidity);
         maxHumidityTextView = view.findViewById(R.id.maxHumidity);
-        plantContentEditText = view.findViewById(R.id.plantsEditText); // Plant Description
+        plantDescriptionEditText = view.findViewById(R.id.plantsEditText); // Plant Description
 
         // Temperature and Humidity Ranges
         temperatureRangeSlider = view.findViewById(R.id.temperatureRangeSlider);
@@ -131,18 +131,6 @@ public class PlantDetailsFragment extends Fragment {
             String plantId = getArguments().getString("plantId");
             Log.d("GetArguments", "GetArguments: " + plantNumber);
             Log.d("GetArguments", "GetArguments: " + plantId);
-
-            if (isNetworkConnected()) {
-                if (plantId != null && !plantId.isEmpty()) {
-                    displayPlantTitleFromFirestore(plantId);
-                    displayContentFromFirestore(plantId);
-                }
-            } else {
-                if (plantNumber != null && !plantNumber.isEmpty()) {
-                    displayPlantTitleFromLocalStorage(plantNumber);
-                    displayContentFromLocalStorage(plantNumber);
-                }
-            }
         }
 
         toolbar.setTitleTextColor(Color.WHITE);
@@ -153,11 +141,11 @@ public class PlantDetailsFragment extends Fragment {
                     String plantNumber = getArguments().getString("plantNumber");
                     String plantId = getArguments().getString("plantId");
 
-                    if (isNetworkConnected()) {
-                        if (plantId != null && !plantId.isEmpty()) {
-                            savePlantToFirestore(plantId);
-                        }
-                    }
+//                    if (isNetworkConnected()) {
+//                        if (plantId != null && !plantId.isEmpty()) {
+//                            savePlantToFirestore(plantId);
+//                        }
+//                    }
 
                     if (plantNumber != null && !plantNumber.isEmpty()) {
                         savePlantToLocalStorage(plantNumber);
@@ -166,7 +154,7 @@ public class PlantDetailsFragment extends Fragment {
                 }
                 return true;
             } else if (item.getItemId() == R.id.action_back) {
-                navigateToPlantsRepoFragment();
+                navigateToHomepage();
                 return true;
             } else {
                 return false;
@@ -212,6 +200,9 @@ public class PlantDetailsFragment extends Fragment {
             String minRangeText = getString(R.string.min_temperature, minTemperature);
             String maxRangeText = getString(R.string.max_temperature, maxTemperature);
 
+            // TODO set local min and max temperature values on localPlants
+
+
             minTemperatureTextView.setText(minRangeText);
             maxTemperatureTextView.setText(maxRangeText);
         } else {
@@ -229,6 +220,8 @@ public class PlantDetailsFragment extends Fragment {
 
             String minRangeText = getString(R.string.min_humidity, minValue);
             String maxRangeText = getString(R.string.max_humidity, maxValue);
+
+            // TODO set local min and max humidity values on localPlants
 
             minHumidityTextView.setText(minRangeText);
             maxHumidityTextView.setText(maxRangeText);
@@ -256,88 +249,88 @@ public class PlantDetailsFragment extends Fragment {
         return currentUser.getUid();
     }
 
-    private void displayPlantTitleFromLocalStorage(String plantNumber) {
-        executor.execute(() -> {
-            String plantTitle = appDatabase.plantDao().getPlantByNumber(plantNumber).getName();
-            mainHandler.post(() -> toolbar.setTitle(plantTitle));
-        });
-    }
 
-    private void displayPlantTitleFromFirestore(String plantId) {
-        String currentUserUid = getCurrentUser();
-        executor.execute(() -> {
-            db.collection("users")
-                    .document(currentUserUid)
-                    .collection("plants")
-                    .document(plantId)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            String plantTitle = documentSnapshot.getString("title");
-                            Log.d("Title", "Plant title: " + plantTitle);
-                            mainHandler.post(() -> toolbar.setTitle(plantTitle));
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("PlantDetailsFragment", "Error while fetching plant title: " + e.getMessage());
-                    });
-        });
-    }
+//    private void displayPlantTitleFromFirestore(String plantId) {
+//        String currentUserUid = getCurrentUser();
+//        executor.execute(() -> {
+//            db.collection("users")
+//                    .document(currentUserUid)
+//                    .collection("plants")
+//                    .document(plantId)
+//                    .get()
+//                    .addOnSuccessListener(documentSnapshot -> {
+//                        if (documentSnapshot.exists()) {
+//                            String plantTitle = documentSnapshot.getString("title");
+//                            Log.d("Title", "Plant title: " + plantTitle);
+//                            mainHandler.post(() -> toolbar.setTitle(plantTitle));
+//                        }
+//                    })
+//                    .addOnFailureListener(e -> {
+//                        Log.e("PlantDetailsFragment", "Error while fetching plant title: " + e.getMessage());
+//                    });
+//        });
+//    }
 
-    private void displayContentFromLocalStorage(String plantNumber) {
+    private void displayDescriptionFromLocalStorage(String plantNumber) {
         executor.execute(() -> {
             String plantContent = appDatabase.plantDao().getPlantByNumber(plantNumber).getDescription();
-            mainHandler.post(() -> plantContentEditText.setText(plantContent));
+            mainHandler.post(() -> plantDescriptionEditText.setText(plantContent));
         });
     }
 
-    private void displayContentFromFirestore(String plantNumber) {
-        String currentUserUid = getCurrentUser();
-
-        executor.execute(() -> {
-            db.collection("users")
-                    .document(currentUserUid)
-                    .collection("plants")
-                    .document(plantNumber)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            String plantContent = documentSnapshot.getString("content");
-                            mainHandler.post(() -> plantContentEditText.setText(plantContent));
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("PlantDetailsFragment", "Error while fetching plant content: " + e.getMessage());
-                    });
-        });
-    }
+//    private void displayContentFromFirestore(String plantNumber) {
+//        String currentUserUid = getCurrentUser();
+//
+//        executor.execute(() -> {
+//            db.collection("users")
+//                    .document(currentUserUid)
+//                    .collection("plants")
+//                    .document(plantNumber)
+//                    .get()
+//                    .addOnSuccessListener(documentSnapshot -> {
+//                        if (documentSnapshot.exists()) {
+//                            String plantContent = documentSnapshot.getString("content");
+//                            mainHandler.post(() -> plantContentEditText.setText(plantContent));
+//                        }
+//                    })
+//                    .addOnFailureListener(e -> {
+//                        Log.e("PlantDetailsFragment", "Error while fetching plant content: " + e.getMessage());
+//                    });
+//        });
+//    }
 
     private void savePlantToLocalStorage(String plantNumber) {
         executor.execute(() -> {
-            appDatabase.plantDao().updatePlantContent(plantNumber, plantContentEditText.getText().toString());
+            appDatabase.plantDao().updatePlantName(plantNumber, nameEditText.getText().toString());
+//            appDatabase.plantDao().updatePlantSpecies(plantNumber, speciesEditText.getText().toString());
+//            appDatabase.plantDao().updatePlantMinTemperature(plantNumber, temperatureRangeSlider.getValues().get(0));
+//            appDatabase.plantDao().updatePlantMaxTemperature(plantNumber, temperatureRangeSlider.getValues().get(1));
+//            appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
+//            appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
+            appDatabase.plantDao().updatePlantDescription(plantNumber, plantDescriptionEditText.getText().toString());
             mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved successfully", Toast.LENGTH_SHORT).show());
         });
     }
 
-    private void savePlantToFirestore(String plantId) {
-        String currentUserUid = getCurrentUser();
+//    private void savePlantToFirestore(String plantId) {
+//        String currentUserUid = getCurrentUser();
+//
+//        executor.execute(() -> {
+//            db.collection("users")
+//                    .document(currentUserUid)
+//                    .collection("plants")
+//                    .document(plantId)
+//                    .update("content", plantContentEditText.getText().toString())
+//                    .addOnSuccessListener(aVoid -> {
+//                        mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved successfully", Toast.LENGTH_SHORT).show());
+//                    })
+//                    .addOnFailureListener(e -> {
+//                        mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to save the plant: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+//                    });
+//        });
+//    }
 
-        executor.execute(() -> {
-            db.collection("users")
-                    .document(currentUserUid)
-                    .collection("plants")
-                    .document(plantId)
-                    .update("content", plantContentEditText.getText().toString())
-                    .addOnSuccessListener(aVoid -> {
-                        mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved successfully", Toast.LENGTH_SHORT).show());
-                    })
-                    .addOnFailureListener(e -> {
-                        mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to save the plant: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                    });
-        });
-    }
-
-    private void navigateToPlantsRepoFragment() {
+    private void navigateToHomepage() {
         requireActivity().getSupportFragmentManager().popBackStack();
     }
 

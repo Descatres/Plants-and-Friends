@@ -102,9 +102,9 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         mainHandler.post(() -> Toast.makeText(context, "Plant deleted from local storage", Toast.LENGTH_SHORT).show());
     }
 
-    private void updatePlantTitle(Plant plant, String newTitle) {
+    private void updatePlantName(Plant plant, String newName) {
         executor.execute(() -> {
-            appDatabase.plantDao().updatePlantTitle(plant.getNumber(), newTitle);
+            appDatabase.plantDao().updatePlantName(plant.getNumber(), newName);
         });
     }
 
@@ -118,7 +118,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
 
         builder.setPositiveButton("Rename", (dialog, which) -> {
             String newTitle = input.getText().toString();
-            updatePlantTitle(plant, newTitle);
+            updatePlantName(plant, newTitle);
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());

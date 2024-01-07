@@ -38,5 +38,5 @@
     <string name="min_humidity">Min: %1$.1f%%</string>
     <string name="max_humidity">Max: %1$.1f%%</string>
     <string name="add_notes_about_the_plant">Add notes about the plant…</string>
-    <string name="special_plants">Special Plant</string>
+    <string name="description">Description</string>
 </resources>
