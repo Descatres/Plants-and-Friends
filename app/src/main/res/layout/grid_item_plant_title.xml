@@ -1,17 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- grid_item_plant_title.xml -->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/box"
-    android:paddingVertical="25dp"
-    android:layout_marginBottom="20dp">
+    android:padding="8dp"
+    android:background="@drawable/plant_stroke">
 
-    <TextView
-        android:id="@+id/plantTitleTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/plant_title"
-        android:textColor="@android:color/black"
-        android:textSize="20sp" />
-</FrameLayout>
+<ImageView
+android:id="@+id/image_view"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:src="@drawable/default_plant_image"
+android:scaleType="centerCrop"
+android:adjustViewBounds="true"/>
+
+<TextView
+android:id="@+id/plantTitleTextView"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_below="@id/image_view"
+android:layout_gravity="center_horizontal"
+android:layout_marginTop="8dp"
+    android:text="Plant Name"
+    android:textSize="16sp"
+    android:gravity="center"/>
+
+    </RelativeLayout>

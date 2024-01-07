@@ -73,14 +73,15 @@
 
             <EditText
                 android:id="@+id/name"
-                android:fontFamily="@font/poppins_medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:padding="0sp"
+                android:fontFamily="@font/poppins_medium"
                 android:hint="@string/chosen_name"
-                android:paddingBottom="2dp" />
+                android:minHeight="48dp"
+                android:padding="0sp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
 
             <!-- Plant Species Section -->
             <TextView
@@ -94,14 +95,15 @@
 
             <EditText
                 android:id="@+id/species"
-                android:padding="0sp"
-                android:fontFamily="@font/poppins_medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="18sp"
+                android:fontFamily="@font/poppins_medium"
                 android:hint="@string/chosen_species"
-                android:paddingBottom="2dp" />
+                android:minHeight="48dp"
+                android:padding="0sp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
         </LinearLayout>
 
     </LinearLayout>

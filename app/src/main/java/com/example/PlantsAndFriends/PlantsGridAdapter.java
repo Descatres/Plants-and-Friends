@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,6 +60,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Plant plant = plantsList.get(position);
+        holder.plantImageView.setImageResource(R.drawable.default_plant_image);
         holder.plantTitleTextView.setText(plant.getName());
 
         holder.itemView.setOnLongClickListener(v -> {
@@ -80,9 +82,11 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView plantTitleTextView;
+        ImageView plantImageView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            plantImageView = itemView.findViewById(R.id.image_view);
             plantTitleTextView = itemView.findViewById(R.id.plantTitleTextView);
         }
     }

@@ -13,6 +13,7 @@ public class PlantEntity {
     private String temperature;
     private String humidity;
     private String description;
+    private String imageUrl;
 
     public PlantEntity() {
     }
@@ -89,5 +90,11 @@ public class PlantEntity {
         this.description = description;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
 
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }
