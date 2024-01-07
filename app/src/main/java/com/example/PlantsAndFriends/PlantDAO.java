@@ -30,4 +30,19 @@ public interface PlantDAO {
 
     @Query("UPDATE plants SET description = :content WHERE number = :plantNumber")
     void updatePlantDescription(String plantNumber, String content);
+
+    @Query("UPDATE plants SET species = :toString WHERE number = :plantNumber")
+    void updatePlantSpecies(String plantNumber, String toString);
+
+    @Query("UPDATE plants SET min_temp = :minTemp WHERE number = :plantNumber")
+    void updatePlantMinTemp(String plantNumber, float minTemp);
+
+    @Query("UPDATE plants SET max_temp = :maxTemp WHERE number = :plantNumber")
+    void updatePlantMaxTemp(String plantNumber, float maxTemp);
+
+    @Query("UPDATE plants SET min_humidity = :minHumidity WHERE number = :plantNumber")
+    void updatePlantMinHumidity(String plantNumber, float minHumidity);
+
+    @Query("UPDATE plants SET max_humidity = :maxHumidity WHERE number = :plantNumber")
+    void updatePlantMaxHumidity(String plantNumber, float maxHumidity);
 }

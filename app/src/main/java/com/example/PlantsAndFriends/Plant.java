@@ -1,5 +1,7 @@
 package com.example.PlantsAndFriends;
 
+import androidx.annotation.Nullable;
+
 public class Plant {
     private String id;
     private String number;
@@ -10,11 +12,12 @@ public class Plant {
     private float min_humidity;
     private float max_humidity;
     private String description;
+    private String imgUrl;
 
     public Plant() {
     }
 
-    public Plant(String id, String number, String name, String species, float min_temp, float max_temp, float min_humidity, float max_humidity, String description) {
+    public Plant(String id, String number, String name, String species, float min_temp, float max_temp, float min_humidity, float max_humidity, String description, @Nullable String imgUrl) {
         this.id = id;
         this.number = number;
         this.name = name;
@@ -24,6 +27,7 @@ public class Plant {
         this.min_humidity = min_humidity;
         this.max_humidity = max_humidity;
         this.description = description;
+        this.imgUrl = imgUrl;
     }
 
     // Getters and setters for Plant fields
@@ -97,5 +101,13 @@ public class Plant {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
     }
 }

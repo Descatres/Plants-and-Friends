@@ -124,7 +124,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
     @Override
     public void onPlantClick(Plant plant) {
-        openEditPlant(plant.getNumber(), plant.getId());
+        openEditPlant(plant.getNumber());
     }
 
     @Override
@@ -132,7 +132,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         int id = item.getItemId();
 
         if (id == R.id.action_add_plant) {
-            openEditPlant("", String.valueOf(System.currentTimeMillis()));
+            createNewPlantInLocalStorage(String.valueOf(System.currentTimeMillis()));
             return true;
         }
 
@@ -353,17 +353,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 //
 //    }
 
-    private void saveToLocalStorage() {
-        plantsList.forEach(plant -> {
-            String plantId = plant.getId();
-            String plantNumber = plant.getNumber();
-            String plantName = plant.getName();
-            String plantContent = plant.getDescription();
-
-            createNewPlantInLocalStorage(plantNumber, plantName, plantContent);
-        });
-    }
-
     private void loadPlantsAfterUpdatesFirebase() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
@@ -392,8 +381,9 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                             float plantMinHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("min_humidity")));
                             float plantMaxHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("max_humidity")));
                             String plantDescription = document.getString("description");
+                            String plantImgUrl = document.getString("imgUrl");
 
-                            Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantMinTemp, plantMaxTemp, plantMinHumidity, plantMaxHumidity, plantDescription != null ? plantDescription : "");
+                            Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantMinTemp, plantMaxTemp, plantMinHumidity, plantMaxHumidity, plantDescription != null ? plantDescription : "", plantImgUrl != null ? plantImgUrl : "");
                             plantsList.add(plant); // Add plant to the list
                         }
 
@@ -453,11 +443,13 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
-            String plantNumber = String.valueOf(System.currentTimeMillis());
+            /*String plantNumber = String.valueOf(System.currentTimeMillis());
             String plantName = input.getText().toString();
 
 //            createNewPlantInDatabase(plantNumber, plantName, ""); // Create and store the plant in Firebase
-            createNewPlantInLocalStorage(plantNumber, plantName, ""); // Create and store the plant locally
+            createNewPlantInLocalStorage(plantNumber, plantName, "", plantSpecies, plantMinTemp, plantMaxTemp, plantMinHumidity, plantMaxHumidity, plantImgUrl); // Create and store the plant locally
+            */
+
             dialog.dismiss();
         });
 
@@ -580,10 +572,9 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 //        }
     }
 
-    private void openEditPlant(String plantId, String plantNumber) {
+    private void openEditPlant(String plantNumber) {
         PlantDetailsFragment EditPlantFragment = new PlantDetailsFragment();
         Bundle args = new Bundle();
-        args.putString("plantId", plantId);
         args.putString("plantNumber", plantNumber);
         EditPlantFragment.setArguments(args);
 
@@ -607,6 +598,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     private void loadPlantsFromLocalStorage() {
         localPlants = appDatabase.plantDao().getAllPlants();
         localPlants.observe(getViewLifecycleOwner(), plantEntities -> {
+            Log.d(TAG, "loadPlantsFromLocalStorage: " + plantEntities);
             List<Plant> plants = convertToPlantList(plantEntities);
             adapter.updatePlants(plants);
         });
@@ -618,7 +610,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         recyclerView.setAdapter(adapter);
     }
 
-    private void createNewPlantInLocalStorage(String plantNumber, String plantName, String plantDescription) {
+    private void createNewPlantInLocalStorage(String plantNumber) {
         executor.execute(() -> {
             if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
                 Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
@@ -628,12 +620,16 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             try {
                 PlantEntity plantEntity = new PlantEntity();
                 plantEntity.setNumber(plantNumber);
-                plantEntity.setName(plantName);
-                plantEntity.setDescription(plantDescription != null ? plantDescription : "");
+                plantEntity.setName("");
+                plantEntity.setSpecies("");
+                plantEntity.setMin_temp(-40);
+                plantEntity.setMax_temp(80);
+                plantEntity.setMin_humidity(0);
+                plantEntity.setMax_humidity(100);
+                plantEntity.setDescription("");
                 appDatabase.plantDao().insert(plantEntity);
 
-                loadPlantsFromLocalStorage();
-
+                openEditPlant(plantNumber);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -659,7 +655,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                     plantEntity.getMax_temp(),
                     plantEntity.getMin_humidity(),
                     plantEntity.getMax_humidity(),
-                    plantEntity.getDescription()
+                    plantEntity.getDescription(),
+                    plantEntity.getImgUrl()
             );
             plants.add(plant);
         }
@@ -678,7 +675,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 plantEntity.getMax_temp(),
                 plantEntity.getMin_humidity(),
                 plantEntity.getMax_humidity(),
-                plantEntity.getDescription()
+                plantEntity.getDescription(),
+                plantEntity.getImgUrl()
         );
     }
 }

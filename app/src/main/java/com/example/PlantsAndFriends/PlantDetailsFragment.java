@@ -70,7 +70,6 @@ public class PlantDetailsFragment extends Fragment {
         speciesEditText = view.findViewById(R.id.species);
 
         // Image
-
         plantImageView = view.findViewById(R.id.add_image);
 
         plantImageView.setOnClickListener(new View.OnClickListener() {
@@ -131,6 +130,8 @@ public class PlantDetailsFragment extends Fragment {
             String plantId = getArguments().getString("plantId");
             Log.d("GetArguments", "GetArguments: " + plantNumber);
             Log.d("GetArguments", "GetArguments: " + plantId);
+
+            displayPlantFromLocalStorage(plantNumber);
         }
 
         toolbar.setTitleTextColor(Color.WHITE);
@@ -139,8 +140,6 @@ public class PlantDetailsFragment extends Fragment {
             if (item.getItemId() == R.id.action_save) {
                 if (getArguments() != null) {
                     String plantNumber = getArguments().getString("plantNumber");
-                    String plantId = getArguments().getString("plantId");
-
 //                    if (isNetworkConnected()) {
 //                        if (plantId != null && !plantId.isEmpty()) {
 //                            savePlantToFirestore(plantId);
@@ -200,9 +199,6 @@ public class PlantDetailsFragment extends Fragment {
             String minRangeText = getString(R.string.min_temperature, minTemperature);
             String maxRangeText = getString(R.string.max_temperature, maxTemperature);
 
-            // TODO set local min and max temperature values on localPlants
-
-
             minTemperatureTextView.setText(minRangeText);
             maxTemperatureTextView.setText(maxRangeText);
         } else {
@@ -220,8 +216,6 @@ public class PlantDetailsFragment extends Fragment {
 
             String minRangeText = getString(R.string.min_humidity, minValue);
             String maxRangeText = getString(R.string.max_humidity, maxValue);
-
-            // TODO set local min and max humidity values on localPlants
 
             minHumidityTextView.setText(minRangeText);
             maxHumidityTextView.setText(maxRangeText);
@@ -271,10 +265,22 @@ public class PlantDetailsFragment extends Fragment {
 //        });
 //    }
 
-    private void displayDescriptionFromLocalStorage(String plantNumber) {
+    private void displayPlantFromLocalStorage(String plantNumber) {
         executor.execute(() -> {
+            String plantName = appDatabase.plantDao().getPlantByNumber(plantNumber).getName();
             String plantContent = appDatabase.plantDao().getPlantByNumber(plantNumber).getDescription();
-            mainHandler.post(() -> plantDescriptionEditText.setText(plantContent));
+            String plantSpecies = appDatabase.plantDao().getPlantByNumber(plantNumber).getSpecies();
+            float plantMinTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_temp();
+            float plantMaxTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_temp();
+            float plantMinHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_humidity();
+            float plantMaxHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_humidity();
+            mainHandler.post(() -> {
+                nameEditText.setText(plantName);
+                speciesEditText.setText(plantSpecies);
+                plantDescriptionEditText.setText(plantContent);
+                temperatureRangeSlider.setValues(plantMinTemp, plantMaxTemp);
+                humidityRangeSlider.setValues(plantMinHumidity, plantMaxHumidity);
+            });
         });
     }
 
@@ -302,12 +308,13 @@ public class PlantDetailsFragment extends Fragment {
     private void savePlantToLocalStorage(String plantNumber) {
         executor.execute(() -> {
             appDatabase.plantDao().updatePlantName(plantNumber, nameEditText.getText().toString());
-//            appDatabase.plantDao().updatePlantSpecies(plantNumber, speciesEditText.getText().toString());
-//            appDatabase.plantDao().updatePlantMinTemperature(plantNumber, temperatureRangeSlider.getValues().get(0));
-//            appDatabase.plantDao().updatePlantMaxTemperature(plantNumber, temperatureRangeSlider.getValues().get(1));
-//            appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
-//            appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
+            appDatabase.plantDao().updatePlantSpecies(plantNumber, speciesEditText.getText().toString());
+            appDatabase.plantDao().updatePlantMinTemp(plantNumber, temperatureRangeSlider.getValues().get(0));
+            appDatabase.plantDao().updatePlantMaxTemp(plantNumber, temperatureRangeSlider.getValues().get(1));
+            appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
+            appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
             appDatabase.plantDao().updatePlantDescription(plantNumber, plantDescriptionEditText.getText().toString());
+            Log.d("PlantDetailsFragment", String.format("Plant %s saved successfully", plantNumber));
             mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved successfully", Toast.LENGTH_SHORT).show());
         });
     }
