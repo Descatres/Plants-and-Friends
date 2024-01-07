@@ -82,18 +82,13 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         toolbar.inflateMenu(R.menu.plants_repo_menu);
         toolbar.setOnMenuItemClickListener(this::onOptionsItemSelected);
 
-        if (isNetworkConnected()) {
-            // load the plants from firestore at startup
-            loadPlantsFromFirebase();
-            // listen for changes in the plants collection in firestore to update the plants (for example, if the title of a plant is changed)
-            loadPlantsAfterUpdatesFirebase();
-            //saveToLocalStorage();
-        } else {
+        if (!isNetworkConnected()) {
             mainHandler.post(() -> {
                 Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
             });
-            loadPlantsFromLocalStorage();
         }
+        // load the plants from local storage at startup
+        loadPlantsFromLocalStorage();
 
         return view;
     }
@@ -585,7 +580,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         }
     }
 
-    private void openEditPlant(String plantNumber, String plantId) {
+    private void openEditPlant(String plantId, String plantNumber) {
         PlantDetailsFragment EditPlantFragment = new PlantDetailsFragment();
         Bundle args = new Bundle();
         args.putString("plantNumber", plantNumber);
@@ -623,7 +618,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         recyclerView.setAdapter(adapter);
     }
 
-    private void createNewPlantInLocalStorage(String plantNumber, String plantName, String plantContent) {
+    private void createNewPlantInLocalStorage(String plantNumber, String plantName, String plantDescription) {
         executor.execute(() -> {
             if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
                 Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
@@ -634,12 +629,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 PlantEntity plantEntity = new PlantEntity();
                 plantEntity.setNumber(plantNumber);
                 plantEntity.setName(plantName);
-                plantEntity.setDescription(plantContent != null ? plantContent : "");
+                plantEntity.setDescription(plantDescription != null ? plantDescription : "");
                 appDatabase.plantDao().insert(plantEntity);
 
-                if (!isNetworkConnected()) {
-                    loadPlantsFromLocalStorage();
-                }
+                loadPlantsFromLocalStorage();
 
             } catch (Exception e) {
                 e.printStackTrace();
