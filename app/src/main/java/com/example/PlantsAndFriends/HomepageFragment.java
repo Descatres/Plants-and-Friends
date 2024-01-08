@@ -459,7 +459,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
     private void showSearchDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Search Plant by Title");
+        builder.setTitle("Search plant by name or species");
 
         final EditText input = new EditText(requireContext());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -493,65 +493,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     }
 
     private void performSearch(String searchText) {
-//        if (isNetworkConnected()) {
-//            FirebaseUser currentUser = mAuth.getCurrentUser();
-//
-//            String currentUserUid = null;
-//            if (currentUser == null) {
-//                GoogleSignInOptions gso = new GoogleSignInOptions.
-//                        Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).
-//                        build();
-//
-//                GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(requireContext(), gso);
-//                currentUserUid = googleSignInClient.getSignInIntent().getIdentifier();
-//                Log.d(TAG, "Google User Id: " + currentUserUid);
-//
-//                if (currentUserUid == null) {
-//                    loadLoginFragment();
-//                    return;
-//                }
-//            } else {
-//                currentUserUid = currentUser.getUid();
-//            }
-//
-//            db.collection("users").document(currentUserUid).collection("plants").orderBy("name")
-//                    .get()
-//                    .addOnCompleteListener(task -> {
-//                        if (task.isSuccessful()) {
-//                            plantsList.clear(); // Clear the list before adding updated plants
-//
-//                            for (QueryDocumentSnapshot document : task.getResult()) {
-//                                String plantId = document.getId();
-//                                String number = document.getString("number");
-//                                String plantName = document.getString("name");
-//                                String plantSpecies = document.getString("species");
-//                                float plantMinTemp = Float.parseFloat(Objects.requireNonNull(document.getString("min_temp")));
-//                                float plantMaxTemp = Float.parseFloat(Objects.requireNonNull(document.getString("max_temp")));
-//                                float plantMinHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("min_humidity")));
-//                                float plantMaxHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("max_humidity")));
-//                                String plantContent = document.getString("content");
-//
-//                                // case insensitive search
-//                                String lowercaseSearchText = searchText.toLowerCase();
-//                                assert plantName != null;
-//                                String lowercasePlantName = plantName.toLowerCase();
-//
-//                                if (lowercasePlantName.startsWith(lowercaseSearchText)) {
-//                                    Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantMinTemp, plantMaxTemp, plantMinHumidity, plantMaxHumidity, plantContent != null ? plantContent : "");
-//                                    plantsList.add(plant);
-//                                }
-//                            }
-//                            adapter = new PlantsGridAdapter(requireContext(), plantsList, appDatabase);
-//                            adapter.setOnPlantClickListener(HomepageFragment.this);
-//                            recyclerView.setAdapter(adapter);
-//
-//                        } else {
-//                            mainHandler.post(() -> {
-//                                Toast.makeText(requireContext(), "Failed to retrieve plants from Firebase", Toast.LENGTH_SHORT).show();
-//                            });
-//                        }
-//                    });
-//        } else {
         localPlants = appDatabase.plantDao().getAllPlants();
         localPlants.observe(getViewLifecycleOwner(), plantEntities -> {
             List<Plant> plants = convertToPlantList(plantEntities);
@@ -559,13 +500,19 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
             for (Plant plant : plants) {
                 String plantName = plant.getName();
+                String plantSpecies = plant.getSpecies();
                 String lowercaseSearchText = searchText.toLowerCase();
                 assert plantName != null;
                 String lowercasePlantName = plantName.toLowerCase();
+                assert plantSpecies != null;
+                String lowercasePlantSpecies = plantSpecies.toLowerCase();
 
                 if (lowercasePlantName.startsWith(lowercaseSearchText)) {
                     filteredPlants.add(plant);
+                } else if (lowercasePlantSpecies.startsWith(lowercaseSearchText)) {
+                    filteredPlants.add(plant);
                 }
+
             }
 
             adapter.updatePlants(filteredPlants);
