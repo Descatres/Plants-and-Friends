@@ -25,7 +25,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.slider.RangeSlider;
@@ -51,16 +50,13 @@ public class PlantDetailsFragment extends Fragment {
     private EditText plantDescriptionEditText;
     private RangeSlider temperatureRangeSlider;
     private RangeSlider humidityRangeSlider;
-
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
     private static final int PICK_IMAGE_REQUEST = 1;
-
     private Uri selectedImageUri;
-
     private static final String TAG = "PlantDetailsFragment";
 
     @Nullable
@@ -170,7 +166,6 @@ public class PlantDetailsFragment extends Fragment {
         return view;
     }
 
-
     // Image Picker Gallery
     private void openGallery() {
         Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -191,7 +186,6 @@ public class PlantDetailsFragment extends Fragment {
     private void loadImage(Uri imageUri) {
         Glide.with(this).load(imageUri).into(plantImageView);
     }
-
 
     // update the TextViews with the current temperature and humidity values
     private void updateTemperatureRangeText(List<Float> values) {
