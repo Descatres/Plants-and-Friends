@@ -283,7 +283,7 @@ public class PlantDetailsFragment extends Fragment {
                 mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore", Toast.LENGTH_SHORT).show());
             } else {
                 Log.d("PlantDetailsFragment", String.format("Plant %s saved successfully (1)", plantId));
-//                backupPlantToFirestore(plantId);
+                backupPlantToFirestore(plantId);
                 if (return_value.get() == 1) {
                     mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved and backed up to Firestore", Toast.LENGTH_SHORT).show());
                 } else if (return_value.get() == 2) {
