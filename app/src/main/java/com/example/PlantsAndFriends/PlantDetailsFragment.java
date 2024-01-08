@@ -33,7 +33,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -144,9 +146,7 @@ public class PlantDetailsFragment extends Fragment {
                 if (getArguments() != null) {
                     String plantNumber = getArguments().getString("plantNumber");
 //                    if (isNetworkConnected()) {
-//                        if (plantId != null && !plantId.isEmpty()) {
-//                            savePlantToFirestore(plantId);
-//                        }
+//                        savePlantToFirestore();
 //                    }
                     if (selectedImageUri != null) {
                         savePlantToLocalStorage(plantNumber, selectedImageUri);
@@ -189,7 +189,6 @@ public class PlantDetailsFragment extends Fragment {
         }
     }
 
-    // Method to load the selected image into the ImageView
     private void loadImage(Uri imageUri) {
         Glide.with(this).load(imageUri).into(plantImageView);
     }
@@ -248,28 +247,6 @@ public class PlantDetailsFragment extends Fragment {
         return currentUser.getUid();
     }
 
-
-//    private void displayPlantTitleFromFirestore(String plantId) {
-//        String currentUserUid = getCurrentUser();
-//        executor.execute(() -> {
-//            db.collection("users")
-//                    .document(currentUserUid)
-//                    .collection("plants")
-//                    .document(plantId)
-//                    .get()
-//                    .addOnSuccessListener(documentSnapshot -> {
-//                        if (documentSnapshot.exists()) {
-//                            String plantTitle = documentSnapshot.getString("title");
-//                            Log.d("Title", "Plant title: " + plantTitle);
-//                            mainHandler.post(() -> toolbar.setTitle(plantTitle));
-//                        }
-//                    })
-//                    .addOnFailureListener(e -> {
-//                        Log.e("PlantDetailsFragment", "Error while fetching plant title: " + e.getMessage());
-//                    });
-//        });
-//    }
-
     private void displayPlantFromLocalStorage(String plantNumber) {
         executor.execute(() -> {
             // check if the plant exists in the local storage by plantNumber
@@ -284,7 +261,7 @@ public class PlantDetailsFragment extends Fragment {
             float plantMaxTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_temp();
             float plantMinHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_humidity();
             float plantMaxHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_humidity();
-            Uri imageUri = loadImageUriFromLocalStorage(plantNumber);
+            Uri imageUri = getImageUriFromLocalStorage(plantNumber);
 
             mainHandler.post(() -> {
                 nameEditText.setText(plantName);
@@ -320,7 +297,7 @@ public class PlantDetailsFragment extends Fragment {
 //        });
 //    }
 
-    private Uri loadImageUriFromLocalStorage(String plantNumber) {
+    private Uri getImageUriFromLocalStorage(String plantNumber) {
         String imageUriString = appDatabase.plantDao().getPlantImageUri(plantNumber);
         if (imageUriString != null) {
             return Uri.parse(imageUriString);
@@ -340,36 +317,55 @@ public class PlantDetailsFragment extends Fragment {
             if (imageUri != null) {
                 appDatabase.plantDao().updatePlantImageUri(plantNumber, String.valueOf(imageUri));
             }
-
-
             // check if the plant name is set
             if (nameEditText.getText().toString().isEmpty()) {
                 mainHandler.post(() -> Toast.makeText(requireContext(), "Plant not saved. Plant of name required", Toast.LENGTH_SHORT).show());
                 return;
             }
 
-            Log.d("PlantDetailsFragment", String.format("Plant %s saved successfully", plantNumber));
-            mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved successfully", Toast.LENGTH_SHORT).show());
+            if (isNetworkConnected()) {
+                backupPlantToFirestore(plantNumber);
+            } else {
+                Log.d("PlantDetailsFragment", String.format("Plant %s saved successfully", plantNumber));
+                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore", Toast.LENGTH_SHORT).show());
+            }
         });
     }
 
-//    private void savePlantToFirestore(String plantId) {
-//        String currentUserUid = getCurrentUser();
-//
-//        executor.execute(() -> {
-//            db.collection("users")
-//                    .document(currentUserUid)
-//                    .collection("plants")
-//                    .document(plantId)
-//                    .update("content", plantContentEditText.getText().toString())
-//                    .addOnSuccessListener(aVoid -> {
-//                        mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved successfully", Toast.LENGTH_SHORT).show());
-//                    })
-//                    .addOnFailureListener(e -> {
-//                        mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to save the plant: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-//                    });
-//        });
-//    }
+    private void backupPlantToFirestore(String plantNumber) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Log.d(TAG, "No user logged in");
+            return;
+        }
+
+        String currentUserUid = currentUser.getUid();
+
+        Map<String, Object> plant = new HashMap<>();
+        plant.put("number", plantNumber);
+        plant.put("name", nameEditText.getText().toString());
+        plant.put("species", speciesEditText.getText().toString());
+        plant.put("min_temp", temperatureRangeSlider.getValues().get(0));
+        plant.put("max_temp", temperatureRangeSlider.getValues().get(1));
+        plant.put("min_humidity", humidityRangeSlider.getValues().get(0));
+        plant.put("max_humidity", humidityRangeSlider.getValues().get(1));
+        plant.put("description", plantDescriptionEditText.getText().toString());
+        plant.put("imgUri", getImageUriFromLocalStorage(plantNumber));
+
+        db.collection("users").document(currentUserUid).collection("plants")
+                .add(plant)
+                .addOnSuccessListener(documentReference -> {
+                    mainHandler.post(() -> {
+                        Log.d(TAG, "Plant created and saved to Firebase");
+                        Toast.makeText(requireContext(), "Plant saved and backed up to Firestore", Toast.LENGTH_SHORT).show();
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    mainHandler.post(() -> {
+                        Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore (1)", Toast.LENGTH_SHORT).show();
+                    });
+                });
+    }
 
     private void navigateToHomepage() {
         requireActivity().getSupportFragmentManager().popBackStack();

@@ -426,37 +426,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 });
     }
 
-    private void showCreatePlantDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Please enter a name for your plant");
-
-        final EditText input = new EditText(requireContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-
-        builder.setPositiveButton("Create", null);
-        builder.setNegativeButton("Cancel", null);
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
-
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
-            /*String plantNumber = String.valueOf(System.currentTimeMillis());
-            String plantName = input.getText().toString();
-
-//            createNewPlantInDatabase(plantNumber, plantName, ""); // Create and store the plant in Firebase
-            createNewPlantInLocalStorage(plantNumber, plantName, "", plantSpecies, plantMinTemp, plantMaxTemp, plantMinHumidity, plantMaxHumidity, plantImgUrl); // Create and store the plant locally
-            */
-
-            dialog.dismiss();
-        });
-
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(view -> dialog.cancel());
-    }
-
     private void showSearchDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Search plant by name or species");
