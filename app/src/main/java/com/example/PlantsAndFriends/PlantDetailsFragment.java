@@ -146,11 +146,6 @@ public class PlantDetailsFragment extends Fragment {
 //                    if (isNetworkConnected()) {
 //                        savePlantToFirestore();
 //                    }
-                    if (selectedImageUri != null) {
-                        savePlantToLocalStorage(plantNumber, selectedImageUri);
-                    } else {
-                        Log.d("PlantDetailsFragment", "No image selected");
-                    }
 
                     if (plantNumber != null && !plantNumber.isEmpty()) {
                         savePlantToLocalStorage(plantNumber, selectedImageUri);
@@ -295,7 +290,10 @@ public class PlantDetailsFragment extends Fragment {
                     mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved and backed up to Firestore", Toast.LENGTH_SHORT).show());
                 } else if (return_value.get() == 2) {
                     mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore (1)", Toast.LENGTH_SHORT).show());
+                } else if (return_value.get() == 3) {
+                    mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved and updated to Firestore", Toast.LENGTH_SHORT).show());
                 }
+
             }
         });
     }
@@ -319,6 +317,7 @@ public class PlantDetailsFragment extends Fragment {
         plant.put("max_humidity", (double) humidityRangeSlider.getValues().get(1));
         plant.put("description", plantDescriptionEditText.getText().toString());
         plant.put("imgUri", getImageUriFromLocalStorage(plantNumber));
+        Log.d(TAG, "imgUri: " + getImageUriFromLocalStorage(plantNumber));
         // check if the number of the plant already exists in firestore and save it to firebase only if it does not exist
         db.collection("users").document(currentUserUid).collection("plants").document(plantNumber).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -338,6 +337,17 @@ public class PlantDetailsFragment extends Fragment {
                 }
             } else {
                 Log.d(TAG, "Failed to check if plant exists in Firestore");
+                return_value.set(2);
+            }
+        });
+
+        // update the plant in firestore if any of the fields have changed on a plant that already exists in firestore
+        db.collection("users").document(currentUserUid).collection("plants").document(plantNumber).update(plant).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Log.d(TAG, "Plant updated successfully in Firestore");
+                return_value.set(3);
+            } else {
+                Log.d(TAG, "Plant failed to update in Firestore");
                 return_value.set(2);
             }
         });
