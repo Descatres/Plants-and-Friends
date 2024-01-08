@@ -7,17 +7,17 @@ public class Plant {
     private String number;
     private String name;
     private String species;
-    private float min_temp;
-    private float max_temp;
-    private float min_humidity;
-    private float max_humidity;
+    private double min_temp;
+    private double max_temp;
+    private double min_humidity;
+    private double max_humidity;
     private String description;
     private String imgUri;
 
     public Plant() {
     }
 
-    public Plant(String id, String number, String name, String species, float min_temp, float max_temp, float min_humidity, float max_humidity, String description, @Nullable String imgUri) {
+    public Plant(String id, String number, String name, String species, double min_temp, double max_temp, double min_humidity, double max_humidity, String description, @Nullable String imgUri) {
         this.id = id;
         this.number = number;
         this.name = name;
@@ -47,19 +47,19 @@ public class Plant {
         return species;
     }
 
-    public float getMin_temp() {
+    public double getMin_temp() {
         return min_temp;
     }
 
-    public float getMax_temp() {
+    public double getMax_temp() {
         return max_temp;
     }
 
-    public float getMin_humidity() {
+    public double getMin_humidity() {
         return min_humidity;
     }
 
-    public float getMax_humidity() {
+    public double getMax_humidity() {
         return max_humidity;
     }
 

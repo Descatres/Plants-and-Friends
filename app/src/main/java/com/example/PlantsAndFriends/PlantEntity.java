@@ -12,10 +12,10 @@ public class PlantEntity {
     private String number;
     private String name;
     private String species;
-    private float min_temp;
-    private float max_temp;
-    private float min_humidity;
-    private float max_humidity;
+    private double min_temp;
+    private double max_temp;
+    private double min_humidity;
+    private double max_humidity;
     private String description;
     private String imgUri;
 
@@ -65,7 +65,7 @@ public class PlantEntity {
     }
 
     // Getter for min temperature
-    public float getMin_temp() {
+    public double getMin_temp() {
         return min_temp;
     }
 
@@ -75,7 +75,7 @@ public class PlantEntity {
     }
 
     // Getter for max temperature
-    public float getMax_temp() {
+    public double getMax_temp() {
         return max_temp;
     }
 
@@ -85,7 +85,7 @@ public class PlantEntity {
     }
 
     // Getter for min humidity
-    public float getMin_humidity() {
+    public double getMin_humidity() {
         return min_humidity;
     }
 
@@ -95,7 +95,7 @@ public class PlantEntity {
     }
 
     // Getter for max humidity
-    public float getMax_humidity() {
+    public double getMax_humidity() {
         return max_humidity;
     }
 

@@ -238,18 +238,18 @@ public class PlantDetailsFragment extends Fragment {
             String plantName = appDatabase.plantDao().getPlantByNumber(plantNumber).getName();
             String plantContent = appDatabase.plantDao().getPlantByNumber(plantNumber).getDescription();
             String plantSpecies = appDatabase.plantDao().getPlantByNumber(plantNumber).getSpecies();
-            float plantMinTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_temp();
-            float plantMaxTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_temp();
-            float plantMinHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_humidity();
-            float plantMaxHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_humidity();
+            double plantMinTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_temp();
+            double plantMaxTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_temp();
+            double plantMinHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_humidity();
+            double plantMaxHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_humidity();
             Uri imageUri = getImageUriFromLocalStorage(plantNumber);
 
             mainHandler.post(() -> {
                 nameEditText.setText(plantName);
                 speciesEditText.setText(plantSpecies);
                 plantDescriptionEditText.setText(plantContent);
-                temperatureRangeSlider.setValues(plantMinTemp, plantMaxTemp);
-                humidityRangeSlider.setValues(plantMinHumidity, plantMaxHumidity);
+                temperatureRangeSlider.setValues((float) plantMinTemp, (float) plantMaxTemp);
+                humidityRangeSlider.setValues((float) plantMinHumidity, (float) plantMaxHumidity);
                 if (imageUri != null) {
                     loadImage(imageUri);
                 }
@@ -305,10 +305,10 @@ public class PlantDetailsFragment extends Fragment {
         plant.put("number", plantNumber);
         plant.put("name", nameEditText.getText().toString());
         plant.put("species", speciesEditText.getText().toString());
-        plant.put("min_temp", temperatureRangeSlider.getValues().get(0));
-        plant.put("max_temp", temperatureRangeSlider.getValues().get(1));
-        plant.put("min_humidity", humidityRangeSlider.getValues().get(0));
-        plant.put("max_humidity", humidityRangeSlider.getValues().get(1));
+        plant.put("min_temp", (double) temperatureRangeSlider.getValues().get(0));
+        plant.put("max_temp", (double) temperatureRangeSlider.getValues().get(1));
+        plant.put("min_humidity", (double) humidityRangeSlider.getValues().get(0));
+        plant.put("max_humidity", (double) humidityRangeSlider.getValues().get(1));
         plant.put("description", plantDescriptionEditText.getText().toString());
         plant.put("imgUri", getImageUriFromLocalStorage(plantNumber));
 
