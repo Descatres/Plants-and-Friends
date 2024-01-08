@@ -57,7 +57,6 @@ public class PlantDetailsFragment extends Fragment {
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
-    private LiveData<List<PlantEntity>> localPlants;
     private static final int PICK_IMAGE_REQUEST = 1;
 
     private Uri selectedImageUri;
@@ -212,7 +211,6 @@ public class PlantDetailsFragment extends Fragment {
         }
     }
 
-
     private void updateHumidityRangeText(List<Float> values) {
         if (values != null && values.size() >= 2) {
             float minValue = values.get(0);
@@ -230,21 +228,10 @@ public class PlantDetailsFragment extends Fragment {
         }
     }
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appDatabase = AppDatabase.getInstance(requireContext());
-        localPlants = appDatabase.plantDao().getAllPlants();
-    }
-
-    private String getCurrentUser() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            return "";
-        }
-
-        return currentUser.getUid();
     }
 
     private void displayPlantFromLocalStorage(String plantNumber) {
@@ -275,27 +262,6 @@ public class PlantDetailsFragment extends Fragment {
             });
         });
     }
-
-//    private void displayContentFromFirestore(String plantNumber) {
-//        String currentUserUid = getCurrentUser();
-//
-//        executor.execute(() -> {
-//            db.collection("users")
-//                    .document(currentUserUid)
-//                    .collection("plants")
-//                    .document(plantNumber)
-//                    .get()
-//                    .addOnSuccessListener(documentSnapshot -> {
-//                        if (documentSnapshot.exists()) {
-//                            String plantContent = documentSnapshot.getString("content");
-//                            mainHandler.post(() -> plantContentEditText.setText(plantContent));
-//                        }
-//                    })
-//                    .addOnFailureListener(e -> {
-//                        Log.e("PlantDetailsFragment", "Error while fetching plant content: " + e.getMessage());
-//                    });
-//        });
-//    }
 
     private Uri getImageUriFromLocalStorage(String plantNumber) {
         String imageUriString = appDatabase.plantDao().getPlantImageUri(plantNumber);
