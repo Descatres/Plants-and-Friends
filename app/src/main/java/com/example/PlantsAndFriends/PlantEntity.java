@@ -17,7 +17,7 @@ public class PlantEntity {
     private float min_humidity;
     private float max_humidity;
     private String description;
-    private String imgUrl;
+    private String imgUri;
 
     public PlantEntity() {
     }
@@ -115,13 +115,13 @@ public class PlantEntity {
     }
 
     // Getter for image url
-    public String getImgUrl() {
-        return imgUrl;
+    public String getImgUri() {
+        return imgUri;
     }
 
     // Setter for image url
-    public void setImgUrl(String imgUrl) {
-        this.imgUrl = imgUrl;
+    public void setImgUri(String imgUri) {
+        this.imgUri = imgUri;
     }
 
 }

@@ -667,7 +667,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                     plantEntity.getMin_humidity(),
                     plantEntity.getMax_humidity(),
                     plantEntity.getDescription(),
-                    plantEntity.getImgUrl()
+                    plantEntity.getImgUri()
             );
             plants.add(plant);
         }
@@ -687,7 +687,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 plantEntity.getMin_humidity(),
                 plantEntity.getMax_humidity(),
                 plantEntity.getDescription(),
-                plantEntity.getImgUrl()
+                plantEntity.getImgUri()
         );
     }
 }

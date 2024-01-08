@@ -6,7 +6,7 @@ import androidx.room.RoomDatabase;
 
 import android.content.Context;
 
-@Database(entities = {PlantEntity.class}, version = 3, exportSchema = false)
+@Database(entities = {PlantEntity.class}, version = 5, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase instance;
 

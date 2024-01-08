@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,6 +57,8 @@ public class PlantDetailsFragment extends Fragment {
     private AppDatabase appDatabase;
     private LiveData<List<PlantEntity>> localPlants;
     private static final int PICK_IMAGE_REQUEST = 1;
+
+    private Uri selectedImageUri;
 
     private static final String TAG = "PlantDetailsFragment";
 
@@ -145,9 +148,14 @@ public class PlantDetailsFragment extends Fragment {
 //                            savePlantToFirestore(plantId);
 //                        }
 //                    }
+                    if (selectedImageUri != null) {
+                        savePlantToLocalStorage(plantNumber, selectedImageUri);
+                    } else {
+                        Log.d("PlantDetailsFragment", "No image selected");
+                    }
 
                     if (plantNumber != null && !plantNumber.isEmpty()) {
-                        savePlantToLocalStorage(plantNumber);
+                        savePlantToLocalStorage(plantNumber, selectedImageUri);
                     }
 
                 }
@@ -166,21 +174,18 @@ public class PlantDetailsFragment extends Fragment {
 
     // Image Picker Gallery
     private void openGallery() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
-        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_REQUEST) {
-            if (data != null) {
-                // Handle the selected image URI
-                Uri selectedImageUri = data.getData();
-                loadImage(selectedImageUri);
-            }
+        if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_REQUEST && data != null) {
+            // Handle the selected image URI
+            selectedImageUri = data.getData();
+            loadImage(selectedImageUri);
         }
     }
 
@@ -279,12 +284,17 @@ public class PlantDetailsFragment extends Fragment {
             float plantMaxTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_temp();
             float plantMinHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_humidity();
             float plantMaxHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_humidity();
+            Uri imageUri = loadImageUriFromLocalStorage(plantNumber);
+
             mainHandler.post(() -> {
                 nameEditText.setText(plantName);
                 speciesEditText.setText(plantSpecies);
                 plantDescriptionEditText.setText(plantContent);
                 temperatureRangeSlider.setValues(plantMinTemp, plantMaxTemp);
                 humidityRangeSlider.setValues(plantMinHumidity, plantMaxHumidity);
+                if (imageUri != null) {
+                    loadImage(imageUri);
+                }
             });
         });
     }
@@ -310,7 +320,15 @@ public class PlantDetailsFragment extends Fragment {
 //        });
 //    }
 
-    private void savePlantToLocalStorage(String plantNumber) {
+    private Uri loadImageUriFromLocalStorage(String plantNumber) {
+        String imageUriString = appDatabase.plantDao().getPlantImageUri(plantNumber);
+        if (imageUriString != null) {
+            return Uri.parse(imageUriString);
+        }
+        return null;
+    }
+
+    private void savePlantToLocalStorage(String plantNumber, Uri imageUri) {
         executor.execute(() -> {
             appDatabase.plantDao().updatePlantName(plantNumber, nameEditText.getText().toString());
             appDatabase.plantDao().updatePlantSpecies(plantNumber, speciesEditText.getText().toString());
@@ -319,6 +337,10 @@ public class PlantDetailsFragment extends Fragment {
             appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
             appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
             appDatabase.plantDao().updatePlantDescription(plantNumber, plantDescriptionEditText.getText().toString());
+            if (imageUri != null) {
+                appDatabase.plantDao().updatePlantImageUri(plantNumber, String.valueOf(imageUri));
+            }
+
 
             // check if the plant name is set
             if (nameEditText.getText().toString().isEmpty()) {

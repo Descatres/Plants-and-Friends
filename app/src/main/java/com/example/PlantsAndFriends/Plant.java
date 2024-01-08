@@ -12,12 +12,12 @@ public class Plant {
     private float min_humidity;
     private float max_humidity;
     private String description;
-    private String imgUrl;
+    private String imgUri;
 
     public Plant() {
     }
 
-    public Plant(String id, String number, String name, String species, float min_temp, float max_temp, float min_humidity, float max_humidity, String description, @Nullable String imgUrl) {
+    public Plant(String id, String number, String name, String species, float min_temp, float max_temp, float min_humidity, float max_humidity, String description, @Nullable String imgUri) {
         this.id = id;
         this.number = number;
         this.name = name;
@@ -27,7 +27,7 @@ public class Plant {
         this.min_humidity = min_humidity;
         this.max_humidity = max_humidity;
         this.description = description;
-        this.imgUrl = imgUrl;
+        this.imgUri = imgUri;
     }
 
     // Getters and setters for Plant fields
@@ -67,6 +67,10 @@ public class Plant {
         return description;
     }
 
+    public String getImgUri() {
+        return imgUri;
+    }
+
     public void setId(String number) {
         this.number = number;
     }
@@ -103,11 +107,7 @@ public class Plant {
         this.description = description;
     }
 
-    public String getImgUrl() {
-        return imgUrl;
-    }
-
-    public void setImgUrl(String imgUrl) {
-        this.imgUrl = imgUrl;
+    public void setImgUri(String imgUri) {
+        this.imgUri = imgUri;
     }
 }

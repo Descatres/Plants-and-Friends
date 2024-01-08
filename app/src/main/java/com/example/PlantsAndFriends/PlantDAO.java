@@ -45,4 +45,10 @@ public interface PlantDAO {
 
     @Query("UPDATE plants SET max_humidity = :maxHumidity WHERE number = :plantNumber")
     void updatePlantMaxHumidity(String plantNumber, float maxHumidity);
+
+    @Query("UPDATE plants SET imgUri = :imgUrl WHERE number = :plantNumber")
+    void updatePlantImageUri(String plantNumber, String imgUrl);
+
+    @Query("SELECT imgUri FROM plants WHERE number = :plantNumber")
+    String getPlantImageUri(String plantNumber);
 }
