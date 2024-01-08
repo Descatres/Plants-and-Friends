@@ -87,6 +87,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
             });
         }
+
         // load the plants from local storage at startup
         loadPlantsFromLocalStorage();
 
@@ -600,8 +601,18 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         localPlants.observe(getViewLifecycleOwner(), plantEntities -> {
             Log.d(TAG, "loadPlantsFromLocalStorage: " + plantEntities);
             List<Plant> plants = convertToPlantList(plantEntities);
+            // TODO - create the plant only if saved on PlantDetailsFragment to avoid rerendering the list
+            // if any plant as all the fields empty, delete it from the local storage
+            plants.forEach(plant -> {
+                if (plant.getName().equals("")) {
+                    executor.execute(() -> {
+                        appDatabase.plantDao().deletePlantByNumber(plant.getNumber());
+                    });
+                }
+            });
             adapter.updatePlants(plants);
         });
+
 
         List<Plant> plantsAux = convertToPlantList(localPlants.getValue());
 

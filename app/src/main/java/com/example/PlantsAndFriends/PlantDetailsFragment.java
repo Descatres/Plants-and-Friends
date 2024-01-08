@@ -267,6 +267,11 @@ public class PlantDetailsFragment extends Fragment {
 
     private void displayPlantFromLocalStorage(String plantNumber) {
         executor.execute(() -> {
+            // check if the plant exists in the local storage by plantNumber
+            if (appDatabase.plantDao().getPlantByNumber(plantNumber) == null) {
+                Log.d("PlantDetailsFragment", "Plant does not exist in local storage");
+                return;
+            }
             String plantName = appDatabase.plantDao().getPlantByNumber(plantNumber).getName();
             String plantContent = appDatabase.plantDao().getPlantByNumber(plantNumber).getDescription();
             String plantSpecies = appDatabase.plantDao().getPlantByNumber(plantNumber).getSpecies();
@@ -314,6 +319,13 @@ public class PlantDetailsFragment extends Fragment {
             appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
             appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
             appDatabase.plantDao().updatePlantDescription(plantNumber, plantDescriptionEditText.getText().toString());
+
+            // check if the plant name is set
+            if (nameEditText.getText().toString().isEmpty()) {
+                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant not saved. Plant of name required", Toast.LENGTH_SHORT).show());
+                return;
+            }
+
             Log.d("PlantDetailsFragment", String.format("Plant %s saved successfully", plantNumber));
             mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved successfully", Toast.LENGTH_SHORT).show());
         });
