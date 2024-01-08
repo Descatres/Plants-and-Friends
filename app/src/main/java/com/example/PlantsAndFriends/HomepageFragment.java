@@ -32,9 +32,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,9 +92,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             mainHandler.post(() -> {
                 Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
             });
-        } else {
-            updateFirebase();
         }
+//        if (isNetworkConnected()) {
+//            updateFirebase();
+//        }
 
 
         return view;
@@ -147,6 +151,9 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         if (id == R.id.refresh) {
             loadPlantsFromLocalStorage();
+            if (isNetworkConnected()) {
+//                updateFirebase();
+            }
             return true;
         }
 
@@ -248,172 +255,82 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 //        });
 //    }
 
+
     private void updateFirebase() {
-        // TODO - Redo this function because it's not working xd
+        // TODO - this still needs work xd
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
             return;
         }
         String currentUserUid = currentUser.getUid();
-        // get all the plants from firestore and save to plantsListFirestore
-        plantsListener = db.collection("users").document(currentUserUid).collection("plants")
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) {
-                        Log.w(TAG, "Listen failed.", error);
-                        return;
-                    }
 
-                    if (value != null && !value.isEmpty()) {
-                        plantsListFirestore.clear(); // Clear the list before adding updated plants
-                        for (QueryDocumentSnapshot document : value) {
-                            String plantId = document.getId();
-                            String number = document.getString("number");
-                            String plantName = document.getString("name");
-                            String plantSpecies = document.getString("species");
-                            double plantMinTemp = Objects.requireNonNull(document.getDouble("min_temp")); // this is line 273
-                            double plantMaxTemp = Objects.requireNonNull(document.getDouble("max_temp"));
-                            double plantMinHumidity = Objects.requireNonNull(document.getDouble("min_humidity"));
-                            double plantMaxHumidity = Objects.requireNonNull(document.getDouble("max_humidity"));
-                            String plantDescription = document.getString("description");
-                            String plantImgUri = document.getString("imgUri");
-
-                            Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantMinTemp, plantMaxTemp, plantMinHumidity, plantMaxHumidity, plantDescription, plantImgUri);
-                            plantsListFirestore.add(plant); // Add plant to the list
-                        }
-                    }
-                });
-
-        // Iterate through the local plants and check if there are any plants that are not in Firestore
-        // or if there are any plants that have different fields.
-        // If there are, upload them into Firestore
         localPlants = appDatabase.plantDao().getAllPlants();
         localPlants.observe(getViewLifecycleOwner(), plantEntities -> {
-            plantEntities.forEach(
-                    plantEntity -> {
-                        String plantNumber = plantEntity.getNumber();
-                        String plantName = plantEntity.getName();
-                        String plantSpecies = plantEntity.getSpecies();
-                        double plantMinTemp = plantEntity.getMin_temp();
-                        double plantMaxTemp = plantEntity.getMax_temp();
-                        double plantMinHumidity = plantEntity.getMin_humidity();
-                        double plantMaxHumidity = plantEntity.getMax_humidity();
-                        String plantDescription = plantEntity.getDescription();
-                        String plantImgUri = plantEntity.getImgUri();
+            List<Plant> plants = convertToPlantList(plantEntities);
 
-                        // check if all the fields are not different from the ones in Firestore
-                        // If any of them are, update the plant in Firestore
-                        for (Plant plant : plantsListFirestore) {
-                            if (plant.getNumber().equals(plantNumber)) {
-                                if (!plant.getName().equals(plantName)) {
-                                    db.collection("users").document(currentUserUid).collection("plants")
-                                            .document(plant.getId())
-                                            .update("name", plantName)
-                                            .addOnSuccessListener(aVoid -> {
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant name updated in Firestore", Toast.LENGTH_SHORT).show());
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Log.e(TAG, "updatePlantNameInFirebase: " + e.getMessage());
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update plant name in Firestore", Toast.LENGTH_SHORT).show());
-                                            });
-                                }
+            for (Plant localPlant : plants) {
+                // Check if the plant exists in Firestore by its number
+                Query query = db.collection("users").document(currentUserUid).collection("plants")
+                        .whereEqualTo("number", localPlant.getNumber());
 
-                                if (!plant.getSpecies().equals(plantSpecies)) {
-                                    db.collection("users").document(currentUserUid).collection("plants")
-                                            .document(plant.getId())
-                                            .update("species", plantSpecies)
-                                            .addOnSuccessListener(aVoid -> {
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant species updated in Firestore", Toast.LENGTH_SHORT).show());
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Log.e(TAG, "updatePlantSpeciesInFirebase: " + e.getMessage());
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update plant species in Firestore", Toast.LENGTH_SHORT).show());
-                                            });
-                                }
+                query.get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                            // Plant exists in Firestore, check for differences and update if needed
+                            DocumentSnapshot documentSnapshot = querySnapshot.getDocuments().get(0);
+                            Plant firestorePlant = documentSnapshot.toObject(Plant.class);
 
-                                if (plant.getMin_temp() != plantMinTemp) {
-                                    db.collection("users").document(currentUserUid).collection("plants")
-                                            .document(plant.getId())
-                                            .update("min_temp", plantMinTemp)
-                                            .addOnSuccessListener(aVoid -> {
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant min temp updated in Firestore", Toast.LENGTH_SHORT).show());
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Log.e(TAG, "updatePlantMinTempInFirebase: " + e.getMessage());
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update plant min temp in Firestore", Toast.LENGTH_SHORT).show());
-                                            });
-                                }
+                            if (firestorePlant != null && !localPlant.equals(firestorePlant)) {
+                                // Fields are different, update the plant in Firestore
+                                Map<String, Object> plantMap = new HashMap<>();
+                                plantMap.put("name", localPlant.getName());
+                                plantMap.put("species", localPlant.getSpecies());
+                                plantMap.put("min_temp", localPlant.getMin_temp());
+                                plantMap.put("max_temp", localPlant.getMax_temp());
+                                plantMap.put("min_humidity", localPlant.getMin_humidity());
+                                plantMap.put("max_humidity", localPlant.getMax_humidity());
+                                plantMap.put("description", localPlant.getDescription());
+                                plantMap.put("imgUri", localPlant.getImgUri());
 
-                                if (plant.getMax_temp() != plantMaxTemp) {
-                                    db.collection("users").document(currentUserUid).collection("plants")
-                                            .document(plant.getId())
-                                            .update("max_temp", plantMaxTemp)
-                                            .addOnSuccessListener(aVoid -> {
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant max temp updated in Firestore", Toast.LENGTH_SHORT).show());
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Log.e(TAG, "updatePlantMaxTempInFirebase: " + e.getMessage());
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update plant max temp in Firestore", Toast.LENGTH_SHORT).show());
-                                            });
-                                }
-
-                                if (plant.getMin_humidity() != plantMinHumidity) {
-                                    db.collection("users").document(currentUserUid).collection("plants")
-                                            .document(plant.getId())
-                                            .update("min_humidity", plantMinHumidity)
-                                            .addOnSuccessListener(aVoid -> {
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant min humidity updated in Firestore", Toast.LENGTH_SHORT).show());
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Log.e(TAG, "updatePlantMinHumidityInFirebase: " + e.getMessage());
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update plant min humidity in Firestore", Toast.LENGTH_SHORT).show());
-                                            });
-                                }
-
-                                if (plant.getMax_humidity() != plantMaxHumidity) {
-                                    db.collection("users").document(currentUserUid).collection("plants")
-                                            .document(plant.getId())
-                                            .update("max_humidity", plantMaxHumidity)
-                                            .addOnSuccessListener(aVoid -> {
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant max humidity updated in Firestore", Toast.LENGTH_SHORT).show());
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Log.e(TAG, "updatePlantMaxHumidityInFirebase: " + e.getMessage());
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update plant max humidity in Firestore", Toast.LENGTH_SHORT).show());
-                                            });
-                                }
-
-                                if (!plant.getDescription().equals(plantDescription)) {
-                                    Log.d(TAG, "updatePlantContentInFirebase: " + plant.getNumber() + " " + plantDescription);
-                                    db.collection("users").document(currentUserUid).collection("plants")
-                                            .document(plant.getId())
-                                            .update("content", plantDescription)
-                                            .addOnSuccessListener(aVoid -> {
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant content updated in Firestore", Toast.LENGTH_SHORT).show());
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Log.e(TAG, "updatePlantContentInFirebase: " + e.getMessage());
-                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update plant content in Firestore", Toast.LENGTH_SHORT).show());
-                                            });
-                                }
-                                if (plant.getImgUri() != null) {
-                                    if (!plant.getImgUri().equals(plantImgUri)) {
-                                        db.collection("users").document(currentUserUid).collection("plants")
-                                                .document(plant.getId())
-                                                .update("imgUri", plantImgUri)
-                                                .addOnSuccessListener(aVoid -> {
-                                                    mainHandler.post(() -> Toast.makeText(requireContext(), "Plant image updated in Firestore", Toast.LENGTH_SHORT).show());
-                                                })
-                                                .addOnFailureListener(e -> {
-                                                    Log.e(TAG, "updatePlantImageInFirebase: " + e.getMessage());
-                                                    mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to update plant image in Firestore", Toast.LENGTH_SHORT).show());
-                                                });
-                                    }
-                                }
+                                db.collection("users").document(currentUserUid).collection("plants")
+                                        .document(documentSnapshot.getId())
+                                        .update(plantMap)
+                                        .addOnSuccessListener(aVoid -> {
+                                            Log.d(TAG, "DocumentSnapshot updated with ID: " + documentSnapshot.getId());
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Log.w(TAG, "Error updating document", e);
+                                        });
                             }
+                        } else {
+                            // Plant doesn't exist in Firestore, add it
+                            Map<String, Object> plantMap = new HashMap<>();
+                            plantMap.put("number", localPlant.getNumber());
+                            plantMap.put("name", localPlant.getName());
+                            plantMap.put("species", localPlant.getSpecies());
+                            plantMap.put("min_temp", localPlant.getMin_temp());
+                            plantMap.put("max_temp", localPlant.getMax_temp());
+                            plantMap.put("min_humidity", localPlant.getMin_humidity());
+                            plantMap.put("max_humidity", localPlant.getMax_humidity());
+                            plantMap.put("description", localPlant.getDescription());
+                            plantMap.put("imgUri", localPlant.getImgUri());
+
+                            db.collection("users").document(currentUserUid).collection("plants")
+                                    .add(plantMap)
+                                    .addOnSuccessListener(documentReference -> {
+                                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.w(TAG, "Error adding document", e);
+                                    });
                         }
+                    } else {
+                        Log.w(TAG, "Error getting documents", task.getException());
                     }
-            );
+                });
+            }
         });
     }
 

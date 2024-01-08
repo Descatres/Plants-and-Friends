@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlantDetailsFragment extends Fragment {
     private Toolbar toolbar;
@@ -58,6 +59,8 @@ public class PlantDetailsFragment extends Fragment {
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri selectedImageUri;
     private static final String TAG = "PlantDetailsFragment";
+
+    private final AtomicInteger return_value = new AtomicInteger(1);
 
     @Nullable
     @Override
@@ -283,11 +286,16 @@ public class PlantDetailsFragment extends Fragment {
                 return;
             }
 
-            if (isNetworkConnected()) {
-                backupPlantToFirestore(plantNumber);
-            } else {
+            if (!isNetworkConnected()) {
                 Log.d("PlantDetailsFragment", String.format("Plant %s saved successfully", plantNumber));
                 mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore", Toast.LENGTH_SHORT).show());
+            } else {
+                backupPlantToFirestore(plantNumber);
+                if (return_value.get() == 1) {
+                    mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved and backed up to Firestore", Toast.LENGTH_SHORT).show());
+                } else if (return_value.get() == 2) {
+                    mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore (1)", Toast.LENGTH_SHORT).show());
+                }
             }
         });
     }
@@ -311,20 +319,29 @@ public class PlantDetailsFragment extends Fragment {
         plant.put("max_humidity", (double) humidityRangeSlider.getValues().get(1));
         plant.put("description", plantDescriptionEditText.getText().toString());
         plant.put("imgUri", getImageUriFromLocalStorage(plantNumber));
-
-        db.collection("users").document(currentUserUid).collection("plants")
-                .add(plant)
-                .addOnSuccessListener(documentReference -> {
-                    mainHandler.post(() -> {
-                        Log.d(TAG, "Plant created and saved to Firebase");
-                        Toast.makeText(requireContext(), "Plant saved and backed up to Firestore", Toast.LENGTH_SHORT).show();
+        // check if the number of the plant already exists in firestore and save it to firebase only if it does not exist
+        db.collection("users").document(currentUserUid).collection("plants").document(plantNumber).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (task.getResult().exists()) {
+                    Log.d(TAG, "Plant already exists in Firestore");
+                    return_value.set(1);
+                } else {
+                    db.collection("users").document(currentUserUid).collection("plants").document(plantNumber).set(plant).addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+                            Log.d(TAG, "Plant saved successfully to Firestore");
+                            return_value.set(1);
+                        } else {
+                            Log.d(TAG, "Plant failed to save to Firestore");
+                            return_value.set(2);
+                        }
                     });
-                })
-                .addOnFailureListener(e -> {
-                    mainHandler.post(() -> {
-                        Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore (1)", Toast.LENGTH_SHORT).show();
-                    });
-                });
+                }
+            } else {
+                Log.d(TAG, "Failed to check if plant exists in Firestore");
+                return_value.set(2);
+            }
+        });
+        Log.d(TAG, "return_value: " + return_value.get());
     }
 
     private void navigateToHomepage() {
@@ -337,11 +354,12 @@ public class PlantDetailsFragment extends Fragment {
         if (connectivityManager != null) {
             Network network = connectivityManager.getActiveNetwork();
             if (network != null) {
+                Log.d("PlantDetailsFragment", "Network connection detected");
                 NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(network);
                 return networkCapabilities != null && (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
             }
         }
-
+        Log.d("PlantDetailsFragment", "No network connection");
         return false;
     }
 }
