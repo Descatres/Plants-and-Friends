@@ -129,12 +129,10 @@ public class PlantDetailsFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
 
         if (getArguments() != null) {
-            String plantNumber = getArguments().getString("plantNumber");
-            String plantId = getArguments().getString("plantId");
-            Log.d("GetArguments", "GetArguments: " + plantNumber);
+            int plantId = getArguments().getInt("plantId");
             Log.d("GetArguments", "GetArguments: " + plantId);
 
-            displayPlantFromLocalStorage(plantNumber);
+            displayPlantFromLocalStorage(plantId);
         }
 
         toolbar.setTitleTextColor(Color.WHITE);
@@ -142,14 +140,13 @@ public class PlantDetailsFragment extends Fragment {
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_save) {
                 if (getArguments() != null) {
-                    String plantNumber = getArguments().getString("plantNumber");
+                    int plantId = getArguments().getInt("plantId");
 //                    if (isNetworkConnected()) {
 //                        savePlantToFirestore();
 //                    }
 
-                    if (plantNumber != null && !plantNumber.isEmpty()) {
-                        savePlantToLocalStorage(plantNumber, selectedImageUri);
-                    }
+                    savePlantToLocalStorage(plantId, selectedImageUri);
+
 
                 }
                 return true;
@@ -226,21 +223,21 @@ public class PlantDetailsFragment extends Fragment {
         appDatabase = AppDatabase.getInstance(requireContext());
     }
 
-    private void displayPlantFromLocalStorage(String plantNumber) {
+    private void displayPlantFromLocalStorage(int plantId) {
         executor.execute(() -> {
-            // check if the plant exists in the local storage by plantNumber
-            if (appDatabase.plantDao().getPlantByNumber(plantNumber) == null) {
+            // check if the plant exists in the local storage by plantId
+            if (appDatabase.plantDao().getPlantByNumber(plantId) == null) {
                 Log.d("PlantDetailsFragment", "Plant does not exist in local storage");
                 return;
             }
-            String plantName = appDatabase.plantDao().getPlantByNumber(plantNumber).getName();
-            String plantContent = appDatabase.plantDao().getPlantByNumber(plantNumber).getDescription();
-            String plantSpecies = appDatabase.plantDao().getPlantByNumber(plantNumber).getSpecies();
-            double plantMinTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_temp();
-            double plantMaxTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_temp();
-            double plantMinHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_humidity();
-            double plantMaxHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_humidity();
-            Uri imageUri = getImageUriFromLocalStorage(plantNumber);
+            String plantName = appDatabase.plantDao().getPlantByNumber(plantId).getName();
+            String plantContent = appDatabase.plantDao().getPlantByNumber(plantId).getDescription();
+            String plantSpecies = appDatabase.plantDao().getPlantByNumber(plantId).getSpecies();
+            double plantMinTemp = appDatabase.plantDao().getPlantByNumber(plantId).getMin_temp();
+            double plantMaxTemp = appDatabase.plantDao().getPlantByNumber(plantId).getMax_temp();
+            double plantMinHumidity = appDatabase.plantDao().getPlantByNumber(plantId).getMin_humidity();
+            double plantMaxHumidity = appDatabase.plantDao().getPlantByNumber(plantId).getMax_humidity();
+            Uri imageUri = getImageUriFromLocalStorage(String.valueOf(plantId));
 
             mainHandler.post(() -> {
                 nameEditText.setText(plantName);
@@ -255,25 +252,25 @@ public class PlantDetailsFragment extends Fragment {
         });
     }
 
-    private Uri getImageUriFromLocalStorage(String plantNumber) {
-        String imageUriString = appDatabase.plantDao().getPlantImageUri(plantNumber);
+    private Uri getImageUriFromLocalStorage(String plantId) {
+        String imageUriString = appDatabase.plantDao().getPlantImageUri(plantId);
         if (imageUriString != null) {
             return Uri.parse(imageUriString);
         }
         return null;
     }
 
-    private void savePlantToLocalStorage(String plantNumber, Uri imageUri) {
+    private void savePlantToLocalStorage(int plantId, Uri imageUri) {
         executor.execute(() -> {
-            appDatabase.plantDao().updatePlantName(plantNumber, nameEditText.getText().toString());
-            appDatabase.plantDao().updatePlantSpecies(plantNumber, speciesEditText.getText().toString());
-            appDatabase.plantDao().updatePlantMinTemp(plantNumber, temperatureRangeSlider.getValues().get(0));
-            appDatabase.plantDao().updatePlantMaxTemp(plantNumber, temperatureRangeSlider.getValues().get(1));
-            appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
-            appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
-            appDatabase.plantDao().updatePlantDescription(plantNumber, plantDescriptionEditText.getText().toString());
+            appDatabase.plantDao().updatePlantName(plantId, nameEditText.getText().toString());
+            appDatabase.plantDao().updatePlantSpecies(plantId, speciesEditText.getText().toString());
+            appDatabase.plantDao().updatePlantMinTemp(plantId, temperatureRangeSlider.getValues().get(0));
+            appDatabase.plantDao().updatePlantMaxTemp(plantId, temperatureRangeSlider.getValues().get(1));
+            appDatabase.plantDao().updatePlantMinHumidity(plantId, humidityRangeSlider.getValues().get(0));
+            appDatabase.plantDao().updatePlantMaxHumidity(plantId, humidityRangeSlider.getValues().get(1));
+            appDatabase.plantDao().updatePlantDescription(plantId, plantDescriptionEditText.getText().toString());
             if (imageUri != null) {
-                appDatabase.plantDao().updatePlantImageUri(plantNumber, String.valueOf(imageUri));
+                appDatabase.plantDao().updatePlantImageUri(plantId, String.valueOf(imageUri));
             }
             // check if the plant name is set
             if (nameEditText.getText().toString().isEmpty()) {
@@ -282,10 +279,11 @@ public class PlantDetailsFragment extends Fragment {
             }
 
             if (!isNetworkConnected()) {
-                Log.d("PlantDetailsFragment", String.format("Plant %s saved successfully", plantNumber));
+                Log.d("PlantDetailsFragment", String.format("Plant %s saved successfully", plantId));
                 mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore", Toast.LENGTH_SHORT).show());
             } else {
-                backupPlantToFirestore(plantNumber);
+                Log.d("PlantDetailsFragment", String.format("Plant %s saved successfully (1)", plantId));
+//                backupPlantToFirestore(plantId);
                 if (return_value.get() == 1) {
                     mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved and backed up to Firestore", Toast.LENGTH_SHORT).show());
                 } else if (return_value.get() == 2) {
@@ -298,7 +296,7 @@ public class PlantDetailsFragment extends Fragment {
         });
     }
 
-    private void backupPlantToFirestore(String plantNumber) {
+    private void backupPlantToFirestore(int plantId) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             Log.d(TAG, "No user logged in");
@@ -308,7 +306,7 @@ public class PlantDetailsFragment extends Fragment {
         String currentUserUid = currentUser.getUid();
 
         Map<String, Object> plant = new HashMap<>();
-        plant.put("number", plantNumber);
+        plant.put("number", plantId);
         plant.put("name", nameEditText.getText().toString());
         plant.put("species", speciesEditText.getText().toString());
         plant.put("min_temp", (double) temperatureRangeSlider.getValues().get(0));
@@ -316,16 +314,16 @@ public class PlantDetailsFragment extends Fragment {
         plant.put("min_humidity", (double) humidityRangeSlider.getValues().get(0));
         plant.put("max_humidity", (double) humidityRangeSlider.getValues().get(1));
         plant.put("description", plantDescriptionEditText.getText().toString());
-        plant.put("imgUri", getImageUriFromLocalStorage(plantNumber));
-        Log.d(TAG, "imgUri: " + getImageUriFromLocalStorage(plantNumber));
+        plant.put("imgUri", getImageUriFromLocalStorage(String.valueOf(plantId)));
+        Log.d(TAG, "imgUri: " + getImageUriFromLocalStorage(String.valueOf(plantId)));
         // check if the number of the plant already exists in firestore and save it to firebase only if it does not exist
-        db.collection("users").document(currentUserUid).collection("plants").document(plantNumber).get().addOnCompleteListener(task -> {
+        db.collection("users").document(currentUserUid).collection("plants").document(String.valueOf(plantId)).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 if (task.getResult().exists()) {
                     Log.d(TAG, "Plant already exists in Firestore");
                     return_value.set(1);
                 } else {
-                    db.collection("users").document(currentUserUid).collection("plants").document(plantNumber).set(plant).addOnCompleteListener(task1 -> {
+                    db.collection("users").document(currentUserUid).collection("plants").document(String.valueOf(plantId)).set(plant).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             Log.d(TAG, "Plant saved successfully to Firestore");
                             return_value.set(1);
@@ -342,7 +340,7 @@ public class PlantDetailsFragment extends Fragment {
         });
 
         // update the plant in firestore if any of the fields have changed on a plant that already exists in firestore
-        db.collection("users").document(currentUserUid).collection("plants").document(plantNumber).update(plant).addOnCompleteListener(task -> {
+        db.collection("users").document(currentUserUid).collection("plants").document(String.valueOf(plantId)).update(plant).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Log.d(TAG, "Plant updated successfully in Firestore");
                 return_value.set(3);

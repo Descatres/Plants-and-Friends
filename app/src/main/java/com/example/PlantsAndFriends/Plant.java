@@ -3,8 +3,7 @@ package com.example.PlantsAndFriends;
 import androidx.annotation.Nullable;
 
 public class Plant {
-    private String id;
-    private String number;
+    private int id;
     private String name;
     private String species;
     private double min_temp;
@@ -17,9 +16,8 @@ public class Plant {
     public Plant() {
     }
 
-    public Plant(String id, String number, String name, String species, double min_temp, double max_temp, double min_humidity, double max_humidity, String description, @Nullable String imgUri) {
+    public Plant(int id, String name, String species, double min_temp, double max_temp, double min_humidity, double max_humidity, String description, @Nullable String imgUri) {
         this.id = id;
-        this.number = number;
         this.name = name;
         this.species = species;
         this.min_temp = min_temp;
@@ -31,12 +29,9 @@ public class Plant {
     }
 
     // Getters and setters for Plant fields
-    public String getId() {
-        return id;
-    }
 
-    public String getNumber() {
-        return number;
+    public int getId() {
+        return id;
     }
 
     public String getName() {
@@ -71,8 +66,8 @@ public class Plant {
         return imgUri;
     }
 
-    public void setId(String number) {
-        this.number = number;
+    public void setId(int number) {
+        this.id = number;
     }
 
     public String setNumber(String number) {

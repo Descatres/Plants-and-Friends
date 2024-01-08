@@ -36,14 +36,12 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -132,7 +130,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
     @Override
     public void onPlantClick(Plant plant) {
-        openEditPlant(plant.getNumber());
+        openEditPlant(plant.getId());
     }
 
     @Override
@@ -140,7 +138,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         int id = item.getItemId();
 
         if (id == R.id.action_add_plant) {
-            createNewPlantInLocalStorage(String.valueOf(System.currentTimeMillis()));
+            createNewPlantInLocalStorage((int) System.currentTimeMillis());
             return true;
         }
 
@@ -272,7 +270,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             for (Plant localPlant : plants) {
                 // Check if the plant exists in Firestore by its number
                 Query query = db.collection("users").document(currentUserUid).collection("plants")
-                        .whereEqualTo("number", localPlant.getNumber());
+                        .whereEqualTo("number", localPlant.getId());
 
                 query.get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -307,7 +305,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                         } else {
                             // Plant doesn't exist in Firestore, add it
                             Map<String, Object> plantMap = new HashMap<>();
-                            plantMap.put("number", localPlant.getNumber());
+                            plantMap.put("number", localPlant.getId());
                             plantMap.put("name", localPlant.getName());
                             plantMap.put("species", localPlant.getSpecies());
                             plantMap.put("min_temp", localPlant.getMin_temp());
@@ -343,7 +341,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         String currentUserUid = currentUser.getUid();
         db.collection("users").document(currentUserUid).collection("plants")
-                .document(plant.getId())
+                .document(String.valueOf(plant.getId()))
                 .delete()
                 .addOnSuccessListener(aVoid -> {
                     Log.d("deletePlantFromFirestore", "Plant deleted from Firestore");
@@ -417,10 +415,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 //        }
     }
 
-    private void openEditPlant(String plantNumber) {
+    private void openEditPlant(int plantId) {
         PlantDetailsFragment EditPlantFragment = new PlantDetailsFragment();
         Bundle args = new Bundle();
-        args.putString("plantNumber", plantNumber);
+        args.putInt("plantId", plantId);
         EditPlantFragment.setArguments(args);
 
         requireActivity().getSupportFragmentManager()
@@ -450,7 +448,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             plants.forEach(plant -> {
                 if (plant.getName().equals("")) {
                     executor.execute(() -> {
-                        appDatabase.plantDao().deletePlantByNumber(plant.getNumber());
+                        appDatabase.plantDao().deletePlantByNumber(String.valueOf(plant.getId()));
                     });
                 }
             });
@@ -465,16 +463,16 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         recyclerView.setAdapter(adapter);
     }
 
-    private void createNewPlantInLocalStorage(String plantNumber) {
+    private void createNewPlantInLocalStorage(int plantId) {
         executor.execute(() -> {
-            if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
+            if (appDatabase.plantDao().getPlantByNumber(plantId) != null) {
                 Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
                 return;
             }
 
             try {
                 PlantEntity plantEntity = new PlantEntity();
-                plantEntity.setNumber(plantNumber);
+                plantEntity.setId(plantId);
                 plantEntity.setName("");
                 plantEntity.setSpecies("");
                 plantEntity.setMin_temp(-40);
@@ -484,7 +482,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 plantEntity.setDescription("");
                 appDatabase.plantDao().insert(plantEntity);
 
-                openEditPlant(plantNumber);
+                openEditPlant(plantId);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -499,11 +497,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         List<Plant> plants = new ArrayList<>();
 
         for (PlantEntity plantEntity : plantEntities) {
-            String plantId = String.valueOf(plantEntity.getId());
+            int plantId = plantEntity.getId();
 
             Plant plant = new Plant(
                     plantId,
-                    plantEntity.getNumber(),
                     plantEntity.getName(),
                     plantEntity.getSpecies(),
                     plantEntity.getMin_temp(),
@@ -519,11 +516,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     }
 
     private Plant convertToPlant(PlantEntity plantEntity) {
-        String PlantId = String.valueOf(plantEntity.getId());
+        int PlantId = plantEntity.getId();
 
         return new Plant(
                 PlantId,
-                plantEntity.getNumber(),
                 plantEntity.getName(),
                 plantEntity.getSpecies(),
                 plantEntity.getMin_temp(),

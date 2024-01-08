@@ -98,13 +98,13 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     }
 
     private void deletePlantFromLocalStorage(Plant plant) {
-        appDatabase.plantDao().deletePlantByNumber(plant.getNumber());
+        appDatabase.plantDao().deletePlantByNumber(String.valueOf(plant.getId()));
         mainHandler.post(() -> Toast.makeText(context, "Plant deleted from local storage", Toast.LENGTH_SHORT).show());
     }
 
     private void updatePlantName(Plant plant, String newName) {
         executor.execute(() -> {
-            appDatabase.plantDao().updatePlantName(plant.getNumber(), newName);
+            appDatabase.plantDao().updatePlantName(plant.getId(), newName);
         });
     }
 
