@@ -67,7 +67,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         });
 
         holder.itemView.setOnClickListener(v -> {
-            if (plantClickListener != null) {
+            if (plantClickListener != null && position < plantsList.size()) {
                 plantClickListener.onPlantClick(plantsList.get(position));
             }
         });
