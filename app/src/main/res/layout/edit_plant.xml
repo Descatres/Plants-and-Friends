@@ -36,81 +36,107 @@
     </androidx.appcompat.widget.Toolbar>
 
     <!-- Horizontal LinearLayout for Image and Text Views -->
+    <!-- Vertical LinearLayout for Image and Add Image Button -->
     <LinearLayout
-        android:id="@+id/horizontal_layout"
-        android:layout_width="match_parent"
+        android:id="@+id/vertical_layout"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
         android:padding="30sp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <!-- Plant Image -->
+        <!-- Image Section -->
         <ImageView
-            android:paddingTop="10sp"
-            android:id="@+id/add_image"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:src="@drawable/default_plant_image"
-            android:contentDescription="@string/todo" />
+            android:layout_width="150sp"
+            android:layout_height="150sp"
+            android:layout_marginTop="20sp"
+            android:id="@+id/imageView"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/select"
+            android:id="@+id/selectImage"
+            android:layout_margin="10sp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="Upload Image"
+            android:id="@+id/uploadImage"/>
+    </LinearLayout>
+
+    <!-- Vertical LinearLayout for Text Views -->
+
+
+    <LinearLayout
+        android:id="@+id/text_views_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:layout_marginStart="-2dp"
+        android:layout_marginTop="60dp"
+        android:layout_toEndOf="@+id/vertical_layout"
+        android:orientation="vertical"
+        android:padding="0sp">
 
         <!-- Vertical LinearLayout for Text Views -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
             <!-- Plant Name Section -->
             <TextView
                 android:id="@+id/name_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/plant_name"
                 android:fontFamily="@font/poppins"
+                android:text="@string/plant_name"
                 android:textColor="@color/gray"
                 android:textSize="14sp" />
 
             <EditText
                 android:id="@+id/name"
-                android:fontFamily="@font/poppins_medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:padding="0sp"
+                android:fontFamily="@font/poppins_medium"
                 android:hint="@string/chosen_name"
-                android:paddingBottom="2dp" />
+                android:padding="0sp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
 
             <!-- Plant Species Section -->
             <TextView
                 android:id="@+id/species_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/plant_species"
                 android:fontFamily="@font/poppins"
+                android:text="@string/plant_species"
                 android:textColor="@color/gray"
                 android:textSize="14sp" />
 
             <EditText
                 android:id="@+id/species"
-                android:padding="0sp"
-                android:fontFamily="@font/poppins_medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="18sp"
+                android:fontFamily="@font/poppins_medium"
                 android:hint="@string/chosen_species"
-                android:paddingBottom="2dp" />
+                android:padding="0sp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
         </LinearLayout>
-
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/temperature_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/horizontal_layout"
+        android:layout_below="@+id/vertical_layout"
         android:paddingStart="30dp"
         android:paddingEnd="30dp"
         android:orientation="vertical">

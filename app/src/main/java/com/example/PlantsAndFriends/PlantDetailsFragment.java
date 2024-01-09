@@ -1,5 +1,7 @@
 package com.example.PlantsAndFriends;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -23,6 +25,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -30,14 +36,21 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.slider.RangeSlider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,6 +62,8 @@ public class PlantDetailsFragment extends Fragment {
     private EditText nameEditText;
     private EditText speciesEditText;
     private ImageView plantImageView;
+    private MaterialButton uploadImage, selectImage;
+
     private TextView minTemperatureTextView;
     private TextView maxTemperatureTextView;
     private TextView minHumidityTextView;
@@ -63,8 +78,8 @@ public class PlantDetailsFragment extends Fragment {
     private AppDatabase appDatabase;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri selectedImageUri;
+    StorageReference storageReference;
     private static final String TAG = "PlantDetailsFragment";
-
     private final AtomicInteger return_value = new AtomicInteger(1);
 
     @Nullable
@@ -76,19 +91,6 @@ public class PlantDetailsFragment extends Fragment {
         //Plant Attributes
         nameEditText = view.findViewById(R.id.name);
         speciesEditText = view.findViewById(R.id.species);
-
-        // Image
-        plantImageView = view.findViewById(R.id.add_image);
-
-        plantImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Handle the click event to open the image picker
-                openGallery();
-            }
-        });
-
-
         minTemperatureTextView = view.findViewById(R.id.minTemperature);
         maxTemperatureTextView = view.findViewById(R.id.maxTemperature);
         minHumidityTextView = view.findViewById(R.id.minHumidity);
@@ -163,53 +165,69 @@ public class PlantDetailsFragment extends Fragment {
             }
         });
 
+        // image
+        storageReference = FirebaseStorage.getInstance().getReference();
+        plantImageView = view.findViewById(R.id.imageView);
+        selectImage = view.findViewById(R.id.selectImage);
+        uploadImage = view.findViewById(R.id.uploadImage);
+        selectImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    // Permission already granted, launch the gallery intent
+                    openGallery();
+                } else {
+                    // Request permission
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
+                }
+
+            }
+        });
+
+        uploadImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                uploadImage(selectedImageUri);
+            }
+        });
+
         return view;
     }
 
-    // Image Picker Gallery
     private void openGallery() {
-        // Check premissions
-        if (ContextCompat.checkSelfPermission(requireContext(),
-
-                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            // Permission already granted, open the gallery
-            Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST);
-        } else {
-            // Request permission if not granted
-            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
-        }
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        activityResultLauncher.launch(intent);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         if (requestCode == REQUEST_STORAGE_PERMISSION) {
-            // Check if the permission is granted
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, open the gallery
+                // Permission granted, launch the gallery intent
                 openGallery();
             } else {
-                // Permission denied, show a message or handle it accordingly
-                Toast.makeText(requireContext(), "Permission denied. Cannot open gallery.", Toast.LENGTH_SHORT).show();
+                // Permission denied, show a message or take appropriate action
+                Toast.makeText(requireContext(), "Permission denied. Cannot access gallery.", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_REQUEST && data != null) {
-            // Handle the selected image URI
-            selectedImageUri = data.getData();
-            loadImage(selectedImageUri);
-        }
-    }
-
-    private void loadImage(Uri imageUri) {
-        Glide.with(this).load(imageUri).into(plantImageView);
+    private void uploadImage(Uri file) {
+        StorageReference ref = storageReference.child("images/" + UUID.randomUUID().toString());
+        ref.putFile(file).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Toast.makeText(requireContext(), "Image Uploaded!!", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(requireContext(), "Failed!" + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     // update the TextViews with the current temperature and humidity values
@@ -247,6 +265,28 @@ public class PlantDetailsFragment extends Fragment {
         }
     }
 
+    // load the image from the selected imageUri into the ImageView
+    private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            if (result.getResultCode() == RESULT_OK) {
+                if (result.getData() != null) {
+                    uploadImage.setEnabled(true);
+                    selectedImageUri = result.getData().getData();
+                    if (isAdded()) {
+                        Glide.with(requireContext()).load(selectedImageUri).into(plantImageView);
+                    } else {
+                        // Handle the case where the fragment is not attached to a context
+                    }
+
+
+                }
+            } else {
+                Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show();
+            }
+        }
+    });
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -276,7 +316,7 @@ public class PlantDetailsFragment extends Fragment {
                 temperatureRangeSlider.setValues((float) plantMinTemp, (float) plantMaxTemp);
                 humidityRangeSlider.setValues((float) plantMinHumidity, (float) plantMaxHumidity);
                 if (imageUri != null) {
-                    loadImage(imageUri);
+                    uploadImage(imageUri);
                 }
             });
         });

@@ -39,4 +39,6 @@
     <string name="max_humidity">Max: %1$.1f%%</string>
     <string name="add_notes_about_the_plant">Add notes about the plant…</string>
     <string name="description">Description</string>
+    <string name="upload_image">Upload Image</string>
+    <string name="select">Select</string>
 </resources>
