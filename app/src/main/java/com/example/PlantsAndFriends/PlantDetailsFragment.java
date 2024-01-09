@@ -35,6 +35,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,7 +61,8 @@ public class PlantDetailsFragment extends Fragment {
     private Uri selectedImageUri;
     private static final String TAG = "PlantDetailsFragment";
 
-    private final AtomicInteger return_value = new AtomicInteger(1);
+    private StringBuilder consolidatedResultBuilder = new StringBuilder();
+
 
     @Nullable
     @Override
@@ -75,12 +77,9 @@ public class PlantDetailsFragment extends Fragment {
         // Image
         plantImageView = view.findViewById(R.id.add_image);
 
-        plantImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Handle the click event to open the image picker
-                openGallery();
-            }
+        plantImageView.setOnClickListener(v -> {
+            // Handle the click event to open the image picker
+            openGallery();
         });
 
 
@@ -97,43 +96,39 @@ public class PlantDetailsFragment extends Fragment {
         updateHumidityRangeText(humidityRangeSlider.getValues());
 
         // Set listeners for the two RangeSliders
-        temperatureRangeSlider.addOnChangeListener(new RangeSlider.OnChangeListener() {
-            @Override
-            public void onValueChange(@NonNull RangeSlider slider, float value, boolean fromUser) {
-                List<Float> values = slider.getValues();
-                if (values.size() >= 2) {
-                    Log.d("From", values.get(0).toString());
-                    Log.d("To", values.get(1).toString());
+        temperatureRangeSlider.addOnChangeListener((slider, value, fromUser) -> {
+            List<Float> values = slider.getValues();
+            if (values.size() >= 2) {
+                Log.d("From", values.get(0).toString());
+                Log.d("To", values.get(1).toString());
 
-                    // Call your method to update humidity range text
-                    updateTemperatureRangeText(values);
-                }
+                // Call your method to update humidity range text
+                updateTemperatureRangeText(values);
             }
         });
 
-        humidityRangeSlider.addOnChangeListener(new RangeSlider.OnChangeListener() {
-            @Override
-            public void onValueChange(@NonNull RangeSlider slider, float value, boolean fromUser) {
-                List<Float> values = slider.getValues();
-                if (values.size() >= 2) {
-                    Log.d("From", values.get(0).toString());
-                    Log.d("To", values.get(1).toString());
+        humidityRangeSlider.addOnChangeListener((slider, value, fromUser) -> {
+            List<Float> values = slider.getValues();
+            if (values.size() >= 2) {
+                Log.d("From", values.get(0).toString());
+                Log.d("To", values.get(1).toString());
 
-                    // Call your method to update humidity range text
-                    updateHumidityRangeText(values);
-                }
+                // Call your method to update humidity range text
+                updateHumidityRangeText(values);
             }
         });
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+
         if (getArguments() != null) {
             String plantNumber = getArguments().getString("plantNumber");
-            String plantId = getArguments().getString("plantId");
             Log.d("GetArguments", "GetArguments: " + plantNumber);
-            Log.d("GetArguments", "GetArguments: " + plantId);
 
+            if (plantNumber != null && !plantNumber.isEmpty() && nameEditText.getText().toString().isEmpty() && speciesEditText.getText().toString().isEmpty() && plantDescriptionEditText.getText().toString().isEmpty()) {
+                createNewPlantInLocalStorage(getArguments().getString("plantNumber"));
+            }
             displayPlantFromLocalStorage(plantNumber);
         }
 
@@ -145,22 +140,31 @@ public class PlantDetailsFragment extends Fragment {
                     String plantNumber = getArguments().getString("plantNumber");
                     if (plantNumber != null && !plantNumber.isEmpty()) {
                         savePlantToLocalStorage(plantNumber, selectedImageUri);
-                    }
+                        if (isNetworkConnected()) {
+                            backupPlantToFirestore(plantNumber);
+                        }
 
-                    if (isNetworkConnected()) {
-                        backupPlantToFirestore(plantNumber);
-                        if (return_value.get() == 1) {
-                            mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved and backed up to Firestore", Toast.LENGTH_SHORT).show());
-                        } else if (return_value.get() == 2) {
-                            mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore (1)", Toast.LENGTH_SHORT).show());
-                        } else if (return_value.get() == 3) {
-                            mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved and updated to Firestore", Toast.LENGTH_SHORT).show());
+                        if (isAdded()) {
+                            Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
+                            mainHandler.post(() -> {
+                                // Only show the last message set to consolidatedResult
+                                String consolidatedMessage = consolidatedResultBuilder.toString();
+                                if (!consolidatedMessage.isEmpty()) {
+                                    Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+                                    consolidatedResultBuilder.setLength(0);
+                                }
+                            });
                         }
 
                     }
                 }
                 return true;
             } else if (item.getItemId() == R.id.action_back) {
+                if (nameEditText.getText().toString().isEmpty()) {
+                    executor.execute(() -> {
+                        appDatabase.plantDao().deletePlantByNumber(getArguments().getString("plantNumber"));
+                    });
+                }
                 navigateToHomepage();
                 return true;
             } else {
@@ -233,6 +237,31 @@ public class PlantDetailsFragment extends Fragment {
         appDatabase = AppDatabase.getInstance(requireContext());
     }
 
+    private void createNewPlantInLocalStorage(String plantNumber) {
+        executor.execute(() -> {
+            if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
+                Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
+                return;
+            }
+
+            try {
+                PlantEntity plantEntity = new PlantEntity();
+                plantEntity.setNumber(plantNumber);
+                plantEntity.setName("");
+                plantEntity.setSpecies("");
+                plantEntity.setMin_temp(-40);
+                plantEntity.setMax_temp(80);
+                plantEntity.setMin_humidity(0);
+                plantEntity.setMax_humidity(100);
+                plantEntity.setDescription("");
+                appDatabase.plantDao().insert(plantEntity);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
     private void displayPlantFromLocalStorage(String plantNumber) {
         executor.execute(() -> {
             // check if the plant exists in the local storage by plantNumber
@@ -248,17 +277,18 @@ public class PlantDetailsFragment extends Fragment {
             double plantMinHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_humidity();
             double plantMaxHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_humidity();
             Uri imageUri = getImageUriFromLocalStorage(plantNumber);
-
-            mainHandler.post(() -> {
-                nameEditText.setText(plantName);
-                speciesEditText.setText(plantSpecies);
-                plantDescriptionEditText.setText(plantContent);
-                temperatureRangeSlider.setValues((float) plantMinTemp, (float) plantMaxTemp);
-                humidityRangeSlider.setValues((float) plantMinHumidity, (float) plantMaxHumidity);
-                if (imageUri != null) {
-                    loadImage(imageUri);
-                }
-            });
+            if (isAdded()) {
+                mainHandler.post(() -> {
+                    nameEditText.setText(plantName);
+                    speciesEditText.setText(plantSpecies);
+                    plantDescriptionEditText.setText(plantContent);
+                    temperatureRangeSlider.setValues((float) plantMinTemp, (float) plantMaxTemp);
+                    humidityRangeSlider.setValues((float) plantMinHumidity, (float) plantMaxHumidity);
+                    if (imageUri != null) {
+                        loadImage(imageUri);
+                    }
+                });
+            }
         });
     }
 
@@ -272,6 +302,17 @@ public class PlantDetailsFragment extends Fragment {
 
     private void savePlantToLocalStorage(String plantNumber, Uri imageUri) {
         executor.execute(() -> {
+            if (nameEditText.getText().toString().isEmpty()) {
+                if (isAdded()) {
+                    mainHandler.post(() -> {
+                        consolidatedResultBuilder.append("Plant not saved. Name of plant required");
+                    });
+                    Log.d("PlantDetailsFragment", "Plant not saved. Name of plant required");
+                }
+
+                return;
+            }
+            Log.e("PlantDetailsFragment", "savePlantToLocalStorage: " + plantNumber);
             appDatabase.plantDao().updatePlantName(plantNumber, nameEditText.getText().toString());
             appDatabase.plantDao().updatePlantSpecies(plantNumber, speciesEditText.getText().toString());
             appDatabase.plantDao().updatePlantMinTemp(plantNumber, temperatureRangeSlider.getValues().get(0));
@@ -280,17 +321,30 @@ public class PlantDetailsFragment extends Fragment {
             appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
             appDatabase.plantDao().updatePlantDescription(plantNumber, plantDescriptionEditText.getText().toString());
             if (imageUri != null) {
+                // check if the imageUri leads to a valid image on the phone and, if so, save it to the local storage
+                try {
+                    MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), imageUri);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    if (isAdded()) {
+                        mainHandler.post(() -> {
+                            consolidatedResultBuilder.append("Plant not saved. Invalid image!");
+                        });
+                        Log.d("PlantDetailsFragment", "Plant not saved. Invalid image!");
+                    }
+                    return;
+                }
                 appDatabase.plantDao().updatePlantImageUri(plantNumber, String.valueOf(imageUri));
             }
             // check if the plant name is set
-            if (nameEditText.getText().toString().isEmpty()) {
-                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant not saved. Plant of name required", Toast.LENGTH_SHORT).show());
-                return;
-            }
 
             if (!isNetworkConnected()) {
-                Log.d("PlantDetailsFragment", String.format("Plant %s saved successfully", plantNumber));
-                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore", Toast.LENGTH_SHORT).show());
+                if (isAdded()) {
+                    mainHandler.post(() -> {
+                        consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore (No internet connection)");
+                    });
+                    Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (No internet connection)");
+                }
             }
         });
     }
@@ -306,6 +360,10 @@ public class PlantDetailsFragment extends Fragment {
 
         Map<String, Object> plant = new HashMap<>();
         executor.execute(() -> {
+                    if (nameEditText.getText().toString().isEmpty()) {
+                        Log.d(TAG, "Plant not saved. Name of plant required (online)");
+                        return;
+                    }
                     plant.put("number", plantNumber);
                     plant.put("name", nameEditText.getText().toString());
                     plant.put("species", speciesEditText.getText().toString());
@@ -315,41 +373,60 @@ public class PlantDetailsFragment extends Fragment {
                     plant.put("max_humidity", (double) humidityRangeSlider.getValues().get(1));
                     plant.put("description", plantDescriptionEditText.getText().toString());
                     plant.put("imgUri", getImageUriFromLocalStorage(plantNumber));
-                    Log.d(TAG, "imgUri: " + getImageUriFromLocalStorage(plantNumber));
+                    Log.d(TAG, "imgUri online: " + getImageUriFromLocalStorage(plantNumber));
+
                     // check if the number of the plant already exists in firestore and save it to firebase only if it does not exist
                     db.collection("users").document(currentUserUid).collection("plants").document(plantNumber).get().addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             if (task.getResult().exists()) {
-                                Log.d(TAG, "Plant already exists in Firestore");
-                                return_value.set(1);
+                                Log.d(TAG, "Plant exists in Firestore, only updates will be done");
                             } else {
                                 db.collection("users").document(currentUserUid).collection("plants").document(plantNumber).set(plant).addOnCompleteListener(task1 -> {
                                     if (task1.isSuccessful()) {
-                                        Log.d(TAG, "Plant saved successfully to Firestore");
-                                        return_value.set(1);
+                                        if (isAdded()) {
+                                            mainHandler.post(() -> {
+                                                consolidatedResultBuilder.append("Plant saved and backed up to Firestore");
+                                            });
+                                            Log.d("PlantDetailsFragment", "Plant saved and backed up to Firestore");
+                                        }
                                     } else {
-                                        Log.d(TAG, "Plant failed to save to Firestore");
-                                        return_value.set(2);
+                                        if (isAdded()) {
+                                            mainHandler.post(() -> {
+                                                consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore");
+                                            });
+                                            Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (1)");
+                                        }
                                     }
                                 });
                             }
                         } else {
-                            Log.d(TAG, "Failed to check if plant exists in Firestore");
-                            return_value.set(2);
+                            if (isAdded()) {
+                                mainHandler.post(() -> {
+                                    consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore");
+                                });
+                                Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (2)");
+                            }
                         }
                     });
 
                     // update the plant in firestore if any of the fields have changed on a plant that already exists in firestore
                     db.collection("users").document(currentUserUid).collection("plants").document(plantNumber).update(plant).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "Plant updated successfully in Firestore");
-                            return_value.set(3);
+                            if (isAdded()) {
+                                mainHandler.post(() -> {
+                                    consolidatedResultBuilder.append("Plant saved and updated to Firestore");
+                                });
+                                Log.d("PlantDetailsFragment", "Plant saved and updated to Firestore");
+                            }
                         } else {
-                            Log.d(TAG, "Plant failed to update in Firestore");
-                            return_value.set(2);
+                            if (isAdded()) {
+                                mainHandler.post(() -> {
+                                    consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore");
+                                });
+                                Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (3)");
+                            }
                         }
                     });
-                    Log.d(TAG, "return_value: " + return_value.get());
                 }
         );
     }

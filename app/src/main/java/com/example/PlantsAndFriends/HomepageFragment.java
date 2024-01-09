@@ -140,7 +140,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         int id = item.getItemId();
 
         if (id == R.id.action_add_plant) {
-            createNewPlantInLocalStorage(String.valueOf(System.currentTimeMillis()));
+//            createNewPlantInLocalStorage(String.valueOf(System.currentTimeMillis()));
+            openEditPlant(String.valueOf(System.currentTimeMillis()));
             return true;
         }
 
@@ -447,13 +448,13 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             List<Plant> plants = convertToPlantList(plantEntities);
             // TODO - create the plant only if saved on PlantDetailsFragment to avoid rerendering the list
             // if any plant as all the fields empty, delete it from the local storage
-            plants.forEach(plant -> {
-                if (plant.getName().equals("")) {
-                    executor.execute(() -> {
-                        appDatabase.plantDao().deletePlantByNumber(plant.getNumber());
-                    });
-                }
-            });
+//            plants.forEach(plant -> {
+//                if (plant.getName().equals("")) {
+//                    executor.execute(() -> {
+//                        appDatabase.plantDao().deletePlantByNumber(plant.getNumber());
+//                    });
+//                }
+//            });
             adapter.updatePlants(plants);
         });
 
@@ -465,31 +466,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         recyclerView.setAdapter(adapter);
     }
 
-    private void createNewPlantInLocalStorage(String plantNumber) {
-        executor.execute(() -> {
-            if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
-                Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
-                return;
-            }
-
-            try {
-                PlantEntity plantEntity = new PlantEntity();
-                plantEntity.setNumber(plantNumber);
-                plantEntity.setName("");
-                plantEntity.setSpecies("");
-                plantEntity.setMin_temp(-40);
-                plantEntity.setMax_temp(80);
-                plantEntity.setMin_humidity(0);
-                plantEntity.setMax_humidity(100);
-                plantEntity.setDescription("");
-                appDatabase.plantDao().insert(plantEntity);
-
-                openEditPlant(plantNumber);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
 
     private List<Plant> convertToPlantList(@Nullable List<PlantEntity> plantEntities) {
         if (plantEntities == null) {
