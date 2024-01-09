@@ -168,7 +168,7 @@ public class PlantDetailsFragment extends Fragment {
 
     // Image Picker Gallery
     private void openGallery() {
-        // Check if the app has permission to read external storage
+        // Check premissions
         if (ContextCompat.checkSelfPermission(requireContext(),
 
                 Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {

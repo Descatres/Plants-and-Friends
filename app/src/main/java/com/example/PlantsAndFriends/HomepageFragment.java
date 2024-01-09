@@ -480,6 +480,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 plantEntity.setMin_humidity(0);
                 plantEntity.setMax_humidity(100);
                 plantEntity.setDescription("");
+                plantEntity.setImgUri("");
                 appDatabase.plantDao().insert(plantEntity);
 
                 openEditPlant(plantId);
