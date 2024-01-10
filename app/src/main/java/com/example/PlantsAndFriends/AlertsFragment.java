@@ -80,8 +80,8 @@ public class AlertsFragment extends Fragment {
         temperatureRangeSlider.addOnChangeListener((slider, value, fromUser) -> {
             List<Float> values = slider.getValues();
             if (values.size() >= 2) {
-                Log.d("From", values.get(0).toString());
-                Log.d("To", values.get(1).toString());
+//                Log.d("From", values.get(0).toString());
+//                Log.d("To", values.get(1).toString());
 
                 // Call your method to update humidity range text
                 updateTemperatureRangeText(values);
@@ -91,8 +91,8 @@ public class AlertsFragment extends Fragment {
         humidityRangeSlider.addOnChangeListener((slider, value, fromUser) -> {
             List<Float> values = slider.getValues();
             if (values.size() >= 2) {
-                Log.d("From", values.get(0).toString());
-                Log.d("To", values.get(1).toString());
+//                Log.d("From", values.get(0).toString());
+//                Log.d("To", values.get(1).toString());
 
                 // Call your method to update humidity range text
                 updateHumidityRangeText(values);
@@ -103,8 +103,6 @@ public class AlertsFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
 
         fetchAndDisplayThresholds();
-
-        createNotificationChannel();
 
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.plant_details_menu);
