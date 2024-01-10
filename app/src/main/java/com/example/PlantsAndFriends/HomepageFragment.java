@@ -81,9 +81,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         toolbar.inflateMenu(R.menu.homepage_menu);
         toolbar.setOnMenuItemClickListener(this::onOptionsItemSelected);
 
-        // save the plants from firebase to plantsListFirestore at startup
-//        populatePlantsListFirestore();
-
         // load the plants from local storage at startup
         loadPlantsFromLocalStorage();
 
@@ -311,7 +308,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         });
     }
 
-    private void createNewPlantInLocalStorage(String plantNumber) {
+    private void createNewPlantInLocalStorage(String plantNumber, String plantName, String plantSpecies, float minTemp, float maxTemp, float minHumidity, float maxHumidity, String plantDescription, String plantImgUri) {
         executor.execute(() -> {
             if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
                 Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
@@ -321,13 +318,14 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             try {
                 PlantEntity plantEntity = new PlantEntity();
                 plantEntity.setNumber(plantNumber);
-                plantEntity.setName("");
-                plantEntity.setSpecies("");
-                plantEntity.setMin_temp(-40);
-                plantEntity.setMax_temp(80);
-                plantEntity.setMin_humidity(0);
-                plantEntity.setMax_humidity(100);
-                plantEntity.setDescription("");
+                plantEntity.setName(plantName);
+                plantEntity.setSpecies(plantSpecies);
+                plantEntity.setMin_temp(minTemp);
+                plantEntity.setMax_temp(maxTemp);
+                plantEntity.setMin_humidity(minHumidity);
+                plantEntity.setMax_humidity(maxHumidity);
+                plantEntity.setDescription(plantDescription);
+                plantEntity.setImgUri(plantImgUri);
                 appDatabase.plantDao().insert(plantEntity);
 
             } catch (Exception e) {
@@ -335,7 +333,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             }
         });
     }
-    
+
     private void loadFromFirestore() {
         // load the plants from firebase to local storage
         // clear the local storage and add the plants from firebase
@@ -345,7 +343,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             return;
         }
         String currentUserUid = currentUser.getUid();
-        appDatabase.plantDao().deleteAllPlants();
+        executor.execute(() -> {
+            // check if the local database is empty or not
+            appDatabase.plantDao().deleteAllPlants();
+        });
+
 
         executor.execute(() -> {
             db.collection("users").document(currentUserUid).collection("plants").get().addOnCompleteListener(task -> {
@@ -353,8 +355,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Plant plant = convertToPlant(document.toObject(PlantEntity.class));
                         executor.execute(() -> {
-
-
+                            createNewPlantInLocalStorage(plant.getNumber(), plant.getName(), plant.getSpecies(), (float) plant.getMin_temp(), (float) plant.getMax_temp(),
+                                    (float) plant.getMin_humidity(), (float) plant.getMax_humidity(), plant.getDescription(), plant.getImgUri() == null ? null : plant.getImgUri().isEmpty() ? null : plant.getImgUri());
                         });
                     }
                 } else {
@@ -434,7 +436,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
             // set color to grey of buttons
             if (isNetworkConnected()) {
-//                updateFirebase();
+                loadFromFirestore();
                 dialog.cancel();
             } else {
                 mainHandler.post(() -> {
