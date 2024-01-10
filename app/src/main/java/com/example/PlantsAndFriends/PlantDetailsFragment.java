@@ -413,15 +413,6 @@ public class PlantDetailsFragment extends Fragment {
                                 });
                             }
                         }
-//                        else {
-//                            if (isAdded()) {
-//                                mainHandler.post(() -> {
-//                                    consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore");
-//                                    callback.run();
-//                                });
-//                                Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (2)");
-//                            }
-//                        }
                     });
 
                     // update the plant in firestore if any of the fields have changed on a plant that already exists in firestore
