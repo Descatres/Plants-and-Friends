@@ -6,7 +6,7 @@
     <string name="not_registered">Not registered?</string>
     <string name="password">Password</string>
     <string name="email">Email</string>
-    <string name="log_out">Log Out</string>
+    <string name="log_out">Log out</string>
     <string name="welcome">Welcome</string>
     <string name="name">name</string>
     <string name="login">Login</string>
@@ -14,11 +14,11 @@
     <string name="save">Save</string>
     <string name="back">Back</string>
     <string name="plants_list">Plant List</string>
-    <string name="add_plant">Add Plant</string>
-    <string name="search_plants">Search Plant</string>
+    <string name="add_plant">Add plant</string>
+    <string name="search_plants">Search plant</string>
     <string name="default_web_client_id">879052393297-ml0akv96vnmt66ajjjclavnljeosk7gi.apps.googleusercontent.com</string>
     <string name="plant_title">Plant Title</string>
-    <string name="refresh">Refresh</string>
+    <string name="save_plants_to_firestore">Save plants to Firestore</string>
     <string name="go_back">Go Back</string>
     <string name="create_account">Create Account</string>
     <string name="register_here">Register Here</string>
@@ -39,10 +39,11 @@
     <string name="max_humidity">%1$.1f</string>
     <string name="add_notes_about_the_plant">Add notes about the plant…</string>
     <string name="description">Description</string>
-    <string name="alerts">Alerts</string>
+    <string name="alerts">Room\'s sensor alerts</string>
     <string name="negative_logo">negative_logo</string>
     <string name="alerts_text">This is where you can set the ideal intervals for temperature and humidity for the room where your plants are.\nIf the sensor in the room detects temperature or humidity values outside of the ideal range, you will receive a notification!</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="no_internet_connection_feature_unavailable">Warning:\nThis feature is currently unavailable.\nPlease connect to the internet.</string>
+    <string name="load_plants_from_firestore">Load plants from Firestore</string>
 </resources>
