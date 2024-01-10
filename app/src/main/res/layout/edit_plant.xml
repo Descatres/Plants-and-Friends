@@ -106,133 +106,133 @@
 
     </LinearLayout>
 
-    <!--    <LinearLayout-->
-    <!--        android:id="@+id/temperature_layout"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_below="@+id/horizontal_layout"-->
-    <!--        android:paddingStart="30dp"-->
-    <!--        android:paddingEnd="30dp"-->
-    <!--        android:orientation="vertical">-->
+    <LinearLayout
+        android:id="@+id/temperature_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/horizontal_layout"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        android:orientation="vertical">
 
-    <!--        &lt;!&ndash; Title for the range slider &ndash;&gt;-->
-    <!--        <TextView-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:fontFamily="@font/poppins_medium"-->
-    <!--            android:text="@string/ideal_temperature"-->
-    <!--            android:textColor="@color/black"-->
-    <!--            android:textSize="17sp" />-->
+        <!-- Title for the range slider -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"
+            android:text="@string/ideal_temperature"
+            android:textColor="@color/black"
+            android:textSize="17sp" />
 
-    <!--        &lt;!&ndash; Material Components Range Slider &ndash;&gt;-->
-    <!--        <com.google.android.material.slider.RangeSlider-->
-    <!--            android:id="@+id/temperatureRangeSlider"-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:layout_marginTop="8dp"-->
-    <!--            android:contentDescription="@string/ideal_temperature"-->
-    <!--            android:valueFrom="-40.0"-->
-    <!--            android:valueTo="80.0"-->
-    <!--            app:thumbColor="@color/green"-->
-    <!--            app:trackColorActive="@color/green"-->
-    <!--            app:trackColorInactive="@color/light_gray"-->
-    <!--            app:values="@array/default_temperature_range" />-->
+        <!-- Material Components Range Slider -->
+        <com.google.android.material.slider.RangeSlider
+            android:id="@+id/temperatureRangeSlider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/ideal_temperature"
+            android:valueFrom="-40.0"
+            android:valueTo="80.0"
+            app:thumbColor="@color/green"
+            app:trackColorActive="@color/green"
+            app:trackColorInactive="@color/light_gray"
+            app:values="@array/default_temperature_range" />
 
-    <!--        &lt;!&ndash; Display Temperature Limits &ndash;&gt;-->
-    <!--        <LinearLayout-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:orientation="horizontal">-->
+        <!-- Display Temperature Limits -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-    <!--            <TextView-->
-    <!--                android:id="@+id/minTemperature"-->
-    <!--                android:layout_width="0dp"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:layout_weight="1"-->
-    <!--                android:text="@string/min_temperature"-->
-    <!--                android:textSize="12sp"-->
-    <!--                android:textColor="@color/black"-->
-    <!--                android:fontFamily="@font/poppins" />-->
+            <TextView
+                android:id="@+id/minTemperature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/min_temperature"
+                android:textSize="12sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/poppins" />
 
-    <!--            <TextView-->
-    <!--                android:id="@+id/maxTemperature"-->
-    <!--                android:layout_width="0dp"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:layout_weight="1"-->
-    <!--                android:text="@string/max_temperature"-->
-    <!--                android:textSize="12sp"-->
-    <!--                android:fontFamily="@font/poppins"-->
-    <!--                android:textAlignment="textEnd"-->
-    <!--                android:textColor="@color/black" />-->
-    <!--        </LinearLayout>-->
-    <!--    </LinearLayout>-->
+            <TextView
+                android:id="@+id/maxTemperature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/max_temperature"
+                android:textSize="12sp"
+                android:fontFamily="@font/poppins"
+                android:textAlignment="textEnd"
+                android:textColor="@color/black" />
+        </LinearLayout>
+    </LinearLayout>
 
-    <!--    <LinearLayout-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_below="@+id/temperature_layout"-->
-    <!--        android:paddingStart="30dp"-->
-    <!--        android:paddingEnd="30dp"-->
-    <!--        android:paddingTop="10sp"-->
-    <!--        android:id="@+id/humidity_layout"-->
-    <!--        android:orientation="vertical">-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/temperature_layout"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        android:paddingTop="10sp"
+        android:id="@+id/humidity_layout"
+        android:orientation="vertical">
 
-    <!--        <TextView-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:fontFamily="@font/poppins_medium"-->
-    <!--            android:text="@string/ideal_humidity"-->
-    <!--            android:textColor="@color/black"-->
-    <!--            android:textSize="17sp" />-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"
+            android:text="@string/ideal_humidity"
+            android:textColor="@color/black"
+            android:textSize="17sp" />
 
-    <!--        &lt;!&ndash; Material Components Range Slider &ndash;&gt;-->
-    <!--        <com.google.android.material.slider.RangeSlider-->
-    <!--            android:id="@+id/humidityRangeSlider"-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:layout_marginTop="8dp"-->
-    <!--            android:contentDescription="@string/ideal_humidity"-->
-    <!--            android:valueFrom="0"-->
-    <!--            android:valueTo="100"-->
-    <!--            app:thumbColor="@color/green"-->
-    <!--            app:trackColorActive="@color/green"-->
-    <!--            app:trackColorInactive="@color/light_gray"-->
-    <!--            app:values="@array/default_humidity_range" />-->
+        <!-- Material Components Range Slider -->
+        <com.google.android.material.slider.RangeSlider
+            android:id="@+id/humidityRangeSlider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/ideal_humidity"
+            android:valueFrom="0"
+            android:valueTo="100"
+            app:thumbColor="@color/green"
+            app:trackColorActive="@color/green"
+            app:trackColorInactive="@color/light_gray"
+            app:values="@array/default_humidity_range" />
 
-    <!--        &lt;!&ndash; Display Temperature Limits &ndash;&gt;-->
-    <!--        <LinearLayout-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:orientation="horizontal">-->
+        <!-- Display Temperature Limits -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-    <!--            <TextView-->
-    <!--                android:id="@+id/minHumidity"-->
-    <!--                android:layout_width="0dp"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:layout_weight="1"-->
-    <!--                android:text="@string/min_humidity"-->
-    <!--                android:textSize="12sp"-->
-    <!--                android:textColor="@color/black"-->
-    <!--                android:fontFamily="@font/poppins" />-->
+            <TextView
+                android:id="@+id/minHumidity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/min_humidity"
+                android:textSize="12sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/poppins" />
 
-    <!--            <TextView-->
-    <!--                android:id="@+id/maxHumidity"-->
-    <!--                android:layout_width="0dp"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:layout_weight="1"-->
-    <!--                android:text="@string/max_humidity"-->
-    <!--                android:textSize="12sp"-->
-    <!--                android:fontFamily="@font/poppins"-->
-    <!--                android:textAlignment="textEnd"-->
-    <!--                android:textColor="@color/black" />-->
-    <!--        </LinearLayout>-->
-    <!--    </LinearLayout>-->
+            <TextView
+                android:id="@+id/maxHumidity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/max_humidity"
+                android:textSize="12sp"
+                android:fontFamily="@font/poppins"
+                android:textAlignment="textEnd"
+                android:textColor="@color/black" />
+        </LinearLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/plants_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/horizontal_layout"
+        android:layout_below="@+id/humidity_layout"
         android:paddingStart="30dp"
         android:paddingEnd="30dp"
         android:paddingTop="10dp"

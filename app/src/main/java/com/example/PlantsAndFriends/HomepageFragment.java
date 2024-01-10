@@ -140,7 +140,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         int id = item.getItemId();
 
         if (id == R.id.action_add_plant) {
-//            createNewPlantInLocalStorage(String.valueOf(System.currentTimeMillis()));
             openEditPlant(String.valueOf(System.currentTimeMillis()));
             return true;
         }

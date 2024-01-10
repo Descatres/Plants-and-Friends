@@ -9,6 +9,7 @@ import android.net.NetworkCapabilities;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -31,6 +36,8 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
 
     public PlantsGridAdapter(Context context, List<Plant> plantsList, AppDatabase appDatabase) {
@@ -53,6 +60,8 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.grid_item_plant_title, parent, false);
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
         return new ViewHolder(view);
     }
 
@@ -88,18 +97,46 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     }
 
     private void deletePlantAndRefreshView(Plant plant, int position) {
-        executor.execute(() -> {
-            deletePlantFromLocalStorage(plant);
+        if (isNetworkConnected()) {
+            deletePlantFromFirestore(plant);
+            mainHandler.post(() -> Toast.makeText(context, "Pant deleted from local storage and Firestore", Toast.LENGTH_SHORT).show());
+        } else {
+            mainHandler.post(() -> Toast.makeText(context, "Pant deleted from local storage", Toast.LENGTH_SHORT).show());
+        }
+
+        deletePlantFromLocalStorage(plant);
+
+        mainHandler.post(() -> {
+            plantsList.remove(position);
+            notifyItemRemoved(position);
         });
 
-        // Update the list and notify the adapter
-        plantsList.remove(plant);
-        notifyItemRemoved(position);
     }
 
     private void deletePlantFromLocalStorage(Plant plant) {
-        appDatabase.plantDao().deletePlantByNumber(plant.getNumber());
-        mainHandler.post(() -> Toast.makeText(context, "Plant deleted from local storage", Toast.LENGTH_SHORT).show());
+        executor.execute(() -> {
+            appDatabase.plantDao().deletePlantByNumber(plant.getNumber());
+        });
+    }
+
+    private void deletePlantFromFirestore(Plant plant) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        String currentUserUid = currentUser.getUid();
+        executor.execute(() -> {
+            db.collection("users").document(currentUserUid).collection("plants")
+                    .document(plant.getNumber())
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        mainHandler.post(() -> Log.d("deletePlantFromFirestore", "Plant deleted from Firestore"));
+                    })
+                    .addOnFailureListener(e -> {
+                        mainHandler.post(() -> Toast.makeText(context, "Failed to delete plant from Firestore", Toast.LENGTH_SHORT).show());
+                    });
+        });
     }
 
     private void updatePlantName(Plant plant, String newName) {

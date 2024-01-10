@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
@@ -26,6 +27,9 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -38,8 +42,8 @@ public class MqttMonitorService extends Service {
     private MqttAndroidClient mqttAndroidClient;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private static final int CHECK_INTERVAL = 5000; // 5 seconds
-
+    private static final int CHECK_INTERVAL = 60000; // 60 seconds
+    private static final String CHANNEL_ID = "MyChannel";
 
     @Override
     public void onCreate() {
@@ -68,6 +72,7 @@ public class MqttMonitorService extends Service {
                 // Log.e("MainActivity", "Message arrived" + message.toString());
                 String payload = new String(message.getPayload());
                 // make the notification here
+
             }
 
             @Override
@@ -76,7 +81,11 @@ public class MqttMonitorService extends Service {
             }
         });
 
+        createNotificationChannel();
+
         connectMQTT();
+
+        fetchAndVerifyThresholds();
     }
 
     @Override
@@ -97,23 +106,76 @@ public class MqttMonitorService extends Service {
         disconnectMQTT();
     }
 
+    private void fetchAndVerifyThresholds() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String currentUserUid = currentUser.getUid();
+
+            db.collection("users").document(currentUserUid).collection("thresholds")
+                    .document("sensorThresholds")
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            // Thresholds document exists, update UI with retrieved values
+                            Map<String, Object> thresholdsData = documentSnapshot.getData();
+                            if (thresholdsData != null) {
+                                checkAndSendNotifications(thresholdsData);
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        // Handle failure
+                        Log.e("AlertsFragment", "Error fetching thresholds from Firestore", e);
+                    });
+        }
+    }
+
     private void startMonitoring() {
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 // Check MQTT values and send notifications
-                checkAndSendNotifications();
+//                checkAndSendNotifications();
 
                 handler.postDelayed(this, CHECK_INTERVAL);
             }
         }, CHECK_INTERVAL);
     }
 
-    private void checkAndSendNotifications() {
-        // compare MQTT values with thresholds
-        // If the values fall outside the specified intervals, use the NotificationCompat.Builder
-        // to create and display notifications
+    private float parseFloatWithDefault(Object value) {
+        try {
+            return Float.parseFloat(String.valueOf(value));
+        } catch (NumberFormatException e) {
+            return Float.NaN;
+        }
+    }
+
+    private void checkAndSendNotifications(Map<String, Object> thresholdsData) {
+        // Update UI elements with retrieved thresholds
+        if (thresholdsData.containsKey("minTemperature")) {
+            float minTemperature = parseFloatWithDefault(thresholdsData.get("minTemperature"));
+            float maxTemperature = parseFloatWithDefault(thresholdsData.get("maxTemperature"));
+            List<Float> temperatureValues = Arrays.asList(minTemperature, maxTemperature);
+        }
+
+        if (thresholdsData.containsKey("minHumidity")) {
+            float minHumidity = parseFloatWithDefault(thresholdsData.get("minHumidity"));
+            float maxHumidity = parseFloatWithDefault(thresholdsData.get("maxHumidity"));
+            List<Float> humidityValues = Arrays.asList(minHumidity, maxHumidity);
+            //
+        }
+
+//        if (currentTemperature < minTemperatureThreshold || currentTemperature > maxTemperatureThreshold) {
+//            // Temperature is outside the threshold, send a temperature alert notification
+//            showNotification("Temperature Alert", "Temperature is outside the threshold");
+//        }
+
+        // Check if humidity is outside the threshold
+//        if (currentHumidity < minHumidityThreshold || currentHumidity > maxHumidityThreshold) {
+//            // Humidity is outside the threshold, send a humidity alert notification
+//            showNotification("Humidity Alert", "Humidity is outside the threshold");
+//        }
     }
 
     private void connectMQTT() {
@@ -227,34 +289,40 @@ public class MqttMonitorService extends Service {
     }
 
 
-//    private void showNotification(String title, String message) {
-//        NotificationCompat.Builder builder = new NotificationCompat.Builder(requireContext(), CHANNEL_ID)
-//                .setSmallIcon(R.drawable.ic_notification)
-//                .setContentTitle(title)
-//                .setContentText(message)
-//                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-//
-//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(requireContext());
-//        if (ActivityCompat.checkSelfPermission(requireContext(), android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-//            // TODO: call ActivityCompat#requestPermissions here to request the missing permissions, and then overriding
-//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
-//            return;
-//        }
-//        if (title.equals("Temperature Alert")) {
-//            notificationManager.notify(1, builder.build());
-//        } else if (title.equals("Humidity Alert")) {
-//            notificationManager.notify(2, builder.build());
-//        }
-//    }
-//
-//    private void createNotificationChannel() {
-//        CharSequence name = "MyChannel";
-//        String description = "Channel for my app";
-//        int importance = NotificationManager.IMPORTANCE_DEFAULT;
-//        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-//        channel.setDescription(description);
-//
-//        NotificationManager notificationManager = requireContext().getSystemService(NotificationManager.class);
-//        notificationManager.createNotificationChannel(channel);
-//    }
+    private void showNotification(String title, String message) {
+        // Use NotificationCompat.Builder to create and display notifications
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: call ActivityCompat#requestPermissions here to request the missing permissions, and then overriding
+            // public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+            return;
+        }
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
+        if (title.equals("Temperature Alert")) {
+            notificationManager.notify(1, builder.build());
+        } else if (title.equals("Humidity Alert")) {
+            notificationManager.notify(2, builder.build());
+        }
+    }
+
+    private void createNotificationChannel() {
+        // Create the notification channel if it doesn't exist
+        CharSequence name = "MyChannel";
+        String description = "Temperature and Humidity Alerts";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+        channel.setDescription(description);
+
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+
+    }
+
 }
