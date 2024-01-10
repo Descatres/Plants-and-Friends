@@ -447,14 +447,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             Log.d(TAG, "loadPlantsFromLocalStorage: " + plantEntities);
             List<Plant> plants = convertToPlantList(plantEntities);
             // TODO - create the plant only if saved on PlantDetailsFragment to avoid rerendering the list
-            // if any plant as all the fields empty, delete it from the local storage
-//            plants.forEach(plant -> {
-//                if (plant.getName().equals("")) {
-//                    executor.execute(() -> {
-//                        appDatabase.plantDao().deletePlantByNumber(plant.getNumber());
-//                    });
-//                }
-//            });
             adapter.updatePlants(plants);
         });
 

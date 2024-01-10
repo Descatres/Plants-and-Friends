@@ -139,28 +139,43 @@ public class PlantDetailsFragment extends Fragment {
                 if (getArguments() != null) {
                     String plantNumber = getArguments().getString("plantNumber");
                     if (plantNumber != null && !plantNumber.isEmpty()) {
-                        savePlantToLocalStorage(plantNumber, selectedImageUri);
-                        if (isNetworkConnected()) {
-                            backupPlantToFirestore(plantNumber);
-                        }
-
-                        if (isAdded()) {
-                            Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
-                            mainHandler.post(() -> {
-                                // Only show the last message set to consolidatedResult
-                                String consolidatedMessage = consolidatedResultBuilder.toString();
-                                if (!consolidatedMessage.isEmpty()) {
-                                    Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
-                                    consolidatedResultBuilder.setLength(0);
+                        savePlantToLocalStorage(plantNumber, selectedImageUri, () -> {
+                            if (isAdded()) {
+                                if (isNetworkConnected()) {
+                                    backupPlantToFirestore(plantNumber, () -> {
+                                        Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
+                                        mainHandler.post(() -> {
+                                            // Only show the last message set to consolidatedResult
+                                            String consolidatedMessage = consolidatedResultBuilder.toString();
+                                            if (!consolidatedMessage.isEmpty()) {
+                                                Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+                                                consolidatedResultBuilder.setLength(0);
+                                            }
+                                        });
+                                    });
+                                } else {
+                                    mainHandler.post(() -> {
+                                        // Only show the last message set to consolidatedResult
+                                        String consolidatedMessage = consolidatedResultBuilder.toString();
+                                        if (!consolidatedMessage.isEmpty()) {
+                                            Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+                                            consolidatedResultBuilder.setLength(0);
+                                        }
+                                    });
                                 }
-                            });
-                        }
 
+                            }
+
+                        });
                     }
                 }
                 return true;
             } else if (item.getItemId() == R.id.action_back) {
-                if (nameEditText.getText().toString().isEmpty()) {
+                // TODO verify if there is a selected image or not (otherwise, if it is only saved the name and image and the name is deleted, the plant will not be deleted entirely, as opposed to the other fields
+                //  check for (selectedImageUri == null or empty) won't work;
+                //  something like (getImageUriFromLocalStorage(getArguments().getString("plantNumber")) == null) would but it locks the main thread
+                if (nameEditText.getText().toString().isEmpty() && speciesEditText.getText().toString().isEmpty() && plantDescriptionEditText.getText().toString().isEmpty()
+                        && temperatureRangeSlider.getValues().get(0) == -40 && temperatureRangeSlider.getValues().get(1) == 80 && humidityRangeSlider.getValues().get(0) == 0 && humidityRangeSlider.getValues().get(1) == 100) {
                     executor.execute(() -> {
                         appDatabase.plantDao().deletePlantByNumber(getArguments().getString("plantNumber"));
                     });
@@ -300,16 +315,16 @@ public class PlantDetailsFragment extends Fragment {
         return null;
     }
 
-    private void savePlantToLocalStorage(String plantNumber, Uri imageUri) {
+    private void savePlantToLocalStorage(String plantNumber, Uri imageUri, Runnable callback) {
         executor.execute(() -> {
             if (nameEditText.getText().toString().isEmpty()) {
                 if (isAdded()) {
                     mainHandler.post(() -> {
                         consolidatedResultBuilder.append("Plant not saved. Name of plant required");
+                        callback.run();
                     });
                     Log.d("PlantDetailsFragment", "Plant not saved. Name of plant required");
                 }
-
                 return;
             }
             Log.e("PlantDetailsFragment", "savePlantToLocalStorage: " + plantNumber);
@@ -322,18 +337,19 @@ public class PlantDetailsFragment extends Fragment {
             appDatabase.plantDao().updatePlantDescription(plantNumber, plantDescriptionEditText.getText().toString());
             if (imageUri != null) {
                 // check if the imageUri leads to a valid image on the phone and, if so, save it to the local storage
-                try {
-                    MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), imageUri);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    if (isAdded()) {
-                        mainHandler.post(() -> {
-                            consolidatedResultBuilder.append("Plant not saved. Invalid image!");
-                        });
-                        Log.d("PlantDetailsFragment", "Plant not saved. Invalid image!");
-                    }
-                    return;
-                }
+//                try {
+//                    MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), imageUri);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                if (isAdded()) {
+//                    mainHandler.post(() -> {
+//                        consolidatedResultBuilder.append("Plant not saved. Invalid image!");
+//                        callback.run();
+//                    });
+//                    Log.d("PlantDetailsFragment", "Plant not saved. Invalid image!");
+//                }
+//                    return;
+//                }
                 appDatabase.plantDao().updatePlantImageUri(plantNumber, String.valueOf(imageUri));
             }
             // check if the plant name is set
@@ -342,6 +358,7 @@ public class PlantDetailsFragment extends Fragment {
                 if (isAdded()) {
                     mainHandler.post(() -> {
                         consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore (No internet connection)");
+                        callback.run();
                     });
                     Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (No internet connection)");
                 }
@@ -349,7 +366,7 @@ public class PlantDetailsFragment extends Fragment {
         });
     }
 
-    private void backupPlantToFirestore(String plantNumber) {
+    private void backupPlantToFirestore(String plantNumber, Runnable callback) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             Log.d(TAG, "No user logged in");
@@ -386,6 +403,7 @@ public class PlantDetailsFragment extends Fragment {
                                         if (isAdded()) {
                                             mainHandler.post(() -> {
                                                 consolidatedResultBuilder.append("Plant saved and backed up to Firestore");
+                                                callback.run();
                                             });
                                             Log.d("PlantDetailsFragment", "Plant saved and backed up to Firestore");
                                         }
@@ -393,6 +411,7 @@ public class PlantDetailsFragment extends Fragment {
                                         if (isAdded()) {
                                             mainHandler.post(() -> {
                                                 consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore");
+                                                callback.run();
                                             });
                                             Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (1)");
                                         }
@@ -403,6 +422,7 @@ public class PlantDetailsFragment extends Fragment {
                             if (isAdded()) {
                                 mainHandler.post(() -> {
                                     consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore");
+                                    callback.run();
                                 });
                                 Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (2)");
                             }
@@ -415,6 +435,7 @@ public class PlantDetailsFragment extends Fragment {
                             if (isAdded()) {
                                 mainHandler.post(() -> {
                                     consolidatedResultBuilder.append("Plant saved and updated to Firestore");
+                                    callback.run();
                                 });
                                 Log.d("PlantDetailsFragment", "Plant saved and updated to Firestore");
                             }
@@ -422,6 +443,7 @@ public class PlantDetailsFragment extends Fragment {
                             if (isAdded()) {
                                 mainHandler.post(() -> {
                                     consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore");
+                                    callback.run();
                                 });
                                 Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (3)");
                             }
