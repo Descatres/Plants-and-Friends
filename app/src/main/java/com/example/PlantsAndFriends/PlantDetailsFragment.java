@@ -139,15 +139,7 @@ public class PlantDetailsFragment extends Fragment {
                 if (getArguments() != null) {
                     String plantNumber = getArguments().getString("plantNumber");
                     if (plantNumber != null && !plantNumber.isEmpty()) {
-                        savePlantToLocalStorage(plantNumber, selectedImageUri, () -> {
-                            if (isAdded() && !isNetworkConnected()) {
-                                mainHandler.post(() -> {
-                                    Toast.makeText(requireContext(), consolidatedResultBuilder.toString(), Toast.LENGTH_SHORT).show();
-                                    navigateToHomepage();
-                                });
-                            }
-
-                        });
+                        savePlantToLocalStorage(plantNumber, selectedImageUri);
                         if (isNetworkConnected()) {
                             backupPlantToFirestore(plantNumber, () -> {
                                 Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
@@ -309,13 +301,12 @@ public class PlantDetailsFragment extends Fragment {
         return null;
     }
 
-    private void savePlantToLocalStorage(String plantNumber, Uri imageUri, Runnable callback) {
+    private void savePlantToLocalStorage(String plantNumber, Uri imageUri) {
         executor.execute(() -> {
             if (nameEditText.getText().toString().isEmpty()) {
                 if (isAdded()) {
                     mainHandler.post(() -> {
-                        consolidatedResultBuilder.append("Plant not saved. Name of plant required");
-                        callback.run();
+                        Toast.makeText(requireContext(), "Plant not saved. Name of plant required", Toast.LENGTH_SHORT).show();
                     });
                     Log.d("PlantDetailsFragment", "Plant not saved. Name of plant required");
                 }
@@ -351,8 +342,7 @@ public class PlantDetailsFragment extends Fragment {
             if (!isNetworkConnected()) {
                 if (isAdded()) {
                     mainHandler.post(() -> {
-                        consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore (No internet connection)");
-                        callback.run();
+                        Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore (No internet connection)", Toast.LENGTH_SHORT).show();
                     });
                     Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (No internet connection)");
                 }
