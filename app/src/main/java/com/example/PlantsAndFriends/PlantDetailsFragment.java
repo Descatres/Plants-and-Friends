@@ -140,33 +140,27 @@ public class PlantDetailsFragment extends Fragment {
                     String plantNumber = getArguments().getString("plantNumber");
                     if (plantNumber != null && !plantNumber.isEmpty()) {
                         savePlantToLocalStorage(plantNumber, selectedImageUri, () -> {
-                            if (isAdded()) {
-                                if (isNetworkConnected()) {
-                                    backupPlantToFirestore(plantNumber, () -> {
-                                        Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
-                                        mainHandler.post(() -> {
-                                            // Only show the last message set to consolidatedResult
-                                            String consolidatedMessage = consolidatedResultBuilder.toString();
-                                            if (!consolidatedMessage.isEmpty()) {
-                                                Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
-                                                consolidatedResultBuilder.setLength(0);
-                                            }
-                                        });
-                                    });
-                                } else {
-                                    mainHandler.post(() -> {
-                                        // Only show the last message set to consolidatedResult
-                                        String consolidatedMessage = consolidatedResultBuilder.toString();
-                                        if (!consolidatedMessage.isEmpty()) {
-                                            Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
-                                            consolidatedResultBuilder.setLength(0);
-                                        }
-                                    });
-                                }
-
+                            if (isAdded() && !isNetworkConnected()) {
+                                mainHandler.post(() -> {
+                                    Toast.makeText(requireContext(), consolidatedResultBuilder.toString(), Toast.LENGTH_SHORT).show();
+                                    navigateToHomepage();
+                                });
                             }
 
                         });
+                        if (isNetworkConnected()) {
+                            backupPlantToFirestore(plantNumber, () -> {
+                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
+                                mainHandler.post(() -> {
+                                    // Only show the last message set to consolidatedResult
+                                    String consolidatedMessage = consolidatedResultBuilder.toString();
+                                    if (!consolidatedMessage.isEmpty()) {
+                                        Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+                                        consolidatedResultBuilder.setLength(0);
+                                    }
+                                });
+                            });
+                        }
                     }
                 }
                 return true;
@@ -418,15 +412,16 @@ public class PlantDetailsFragment extends Fragment {
                                     }
                                 });
                             }
-                        } else {
-                            if (isAdded()) {
-                                mainHandler.post(() -> {
-                                    consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore");
-                                    callback.run();
-                                });
-                                Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (2)");
-                            }
                         }
+//                        else {
+//                            if (isAdded()) {
+//                                mainHandler.post(() -> {
+//                                    consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore");
+//                                    callback.run();
+//                                });
+//                                Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (2)");
+//                            }
+//                        }
                     });
 
                     // update the plant in firestore if any of the fields have changed on a plant that already exists in firestore
