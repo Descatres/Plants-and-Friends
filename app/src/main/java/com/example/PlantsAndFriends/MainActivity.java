@@ -12,9 +12,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import android.animation.ObjectAnimator;
 import android.view.View;
 import android.widget.ImageView;
