@@ -1,0 +1,212 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/green"
+        android:titleTextColor="#FFFFFF">
+
+        <ImageView
+            android:id="@+id/toolbar_icon"
+            android:layout_width="35sp"
+            android:layout_height="35sp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/negative_logo"
+            app:tint="#FFFFFF"
+            android:contentDescription="@string/negative_logo" />
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/toolbar_icon"
+            android:paddingStart="8dp"
+            android:paddingEnd="16dp"
+            android:fontFamily="@font/poppins_medium"
+            android:text="@string/app_name"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+    </androidx.appcompat.widget.Toolbar>
+
+    <LinearLayout
+        android:id="@+id/horizontal_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:padding="30sp"
+        android:orientation="vertical">
+
+        <!-- Vertical LinearLayout for Text Views -->
+        <!-- Plant Name Section -->
+        <TextView
+            android:id="@+id/alerts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/alerts"
+            android:fontFamily="@font/poppins"
+            android:textColor="@color/black"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/alerts_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/alerts_text"
+            android:fontFamily="@font/poppins"
+            android:textColor="@color/gray"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/temperature_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/horizontal_layout"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        android:orientation="vertical">
+
+        <!-- Title for the range slider -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"
+            android:text="@string/ideal_temperature"
+            android:textColor="@color/black"
+            android:textSize="17sp" />
+
+        <!-- Material Components Range Slider -->
+        <com.google.android.material.slider.RangeSlider
+            android:id="@+id/temperatureRangeSlider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/ideal_temperature"
+            android:valueFrom="-40.0"
+            android:valueTo="80.0"
+            app:thumbColor="@color/green"
+            app:trackColorActive="@color/green"
+            app:trackColorInactive="@color/light_gray"
+            app:values="@array/default_temperature_range" />
+
+        <!-- Display Temperature Limits -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/minTemperature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/min_temperature"
+                android:textSize="12sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:id="@+id/maxTemperature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/max_temperature"
+                android:textSize="12sp"
+                android:fontFamily="@font/poppins"
+                android:textAlignment="textEnd"
+                android:textColor="@color/black" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/temperature_layout"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        android:paddingTop="10sp"
+        android:id="@+id/humidity_layout"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"
+            android:text="@string/ideal_humidity"
+            android:textColor="@color/black"
+            android:textSize="17sp" />
+
+        <!-- Material Components Range Slider -->
+        <com.google.android.material.slider.RangeSlider
+            android:id="@+id/humidityRangeSlider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/ideal_humidity"
+            android:valueFrom="0"
+            android:valueTo="100"
+            app:thumbColor="@color/green"
+            app:trackColorActive="@color/green"
+            app:trackColorInactive="@color/light_gray"
+            app:values="@array/default_humidity_range" />
+
+        <!-- Display Temperature Limits -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/minHumidity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/min_humidity"
+                android:textSize="12sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:id="@+id/maxHumidity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/max_humidity"
+                android:textSize="12sp"
+                android:fontFamily="@font/poppins"
+                android:textAlignment="textEnd"
+                android:textColor="@color/black" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/humidity_layout"
+        android:padding="30sp"
+        android:orientation="vertical">
+
+        <!-- Vertical LinearLayout for Text Views -->
+        <!-- Plant Name Section -->
+        <TextView
+            android:id="@+id/warning_text"
+            android:layout_width="match_parent"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:text="@string/no_internet_connection_feature_unavailable"
+            android:fontFamily="@font/poppins"
+            android:textColor="@color/red"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+</RelativeLayout>

@@ -26,6 +26,13 @@
                 app:showAsAction="ifRoom" />
 
             <item
+                android:id="@+id/action_alerts"
+                android:icon="@drawable/ic_notification"
+                app:iconTint="@color/black"
+                android:title="@string/alerts"
+                app:showAsAction="ifRoom" />
+
+            <item
                 android:id="@+id/action_logout"
                 android:icon="@drawable/baseline_lock_24"
                 app:iconTint="@color/black"

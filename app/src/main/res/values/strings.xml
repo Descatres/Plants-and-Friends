@@ -31,12 +31,18 @@
     <string name="add_plant_icon">Add Plant Icon</string>
     <string name="todo">TODO</string>
     <string name="temperature">Temperature</string>
-    <string name="min_temperature">Min: %1$.1f°C</string>
-    <string name="max_temperature">Max: %1$.1f°C</string>
+    <string name="min_temperature">%1$.1f</string>
+    <string name="max_temperature">%1$.1f</string>
     <string name="ideal_temperature">Ideal Temperature</string>
     <string name="ideal_humidity">Ideal Humidity</string>
-    <string name="min_humidity">Min: %1$.1f%%</string>
-    <string name="max_humidity">Max: %1$.1f%%</string>
+    <string name="min_humidity">%1$.1f</string>
+    <string name="max_humidity">%1$.1f</string>
     <string name="add_notes_about_the_plant">Add notes about the plant…</string>
     <string name="description">Description</string>
+    <string name="alerts">Alerts</string>
+    <string name="negative_logo">negative_logo</string>
+    <string name="alerts_text">This is where you can set the ideal intervals for temperature and humidity for the room where your plants are.\nIf the sensor in the room detects temperature or humidity values outside of the ideal range, you will receive a notification!</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="no_internet_connection_feature_unavailable">Warning:\nThis feature is currently unavailable.\nPlease connect to the internet.</string>
 </resources>

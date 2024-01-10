@@ -150,6 +150,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             return true;
         }
 
+        if (id == R.id.action_alerts) {
+            loadAlertsFragment();
+            return true;
+        }
+
         if (id == R.id.refresh) {
             loadPlantsFromLocalStorage();
             if (isNetworkConnected()) {
@@ -265,6 +270,14 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             return;
         }
         String currentUserUid = currentUser.getUid();
+
+//        for (Plant plant : plantsListFirestore) {
+//            Log.e(TAG, "Delete note number: " + plant.getNumber());
+//            if (appDatabase.plantDao().getPlantByNumber(plant.getNumber()) == null) {
+//                Log.d(TAG, "Deleting note from Firebase: " + plant.getNumber());
+//                deletePlantFromFirestore(plant);
+//            }
+//        }
 
         localPlants = appDatabase.plantDao().getAllPlants();
         localPlants.observe(getViewLifecycleOwner(), plantEntities -> {
@@ -427,6 +440,14 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         requireActivity().getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, EditPlantFragment, "PlantDetailsFragment")
+                .addToBackStack(TAG)
+                .commit();
+    }
+
+    private void loadAlertsFragment() {
+        AlertsFragment alertsFragment = new AlertsFragment();
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, alertsFragment)
                 .addToBackStack(TAG)
                 .commit();
     }

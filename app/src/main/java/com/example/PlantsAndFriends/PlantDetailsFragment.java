@@ -45,13 +45,7 @@ public class PlantDetailsFragment extends Fragment {
     private EditText nameEditText;
     private EditText speciesEditText;
     private ImageView plantImageView;
-    private TextView minTemperatureTextView;
-    private TextView maxTemperatureTextView;
-    private TextView minHumidityTextView;
-    private TextView maxHumidityTextView;
     private EditText plantDescriptionEditText;
-    private RangeSlider temperatureRangeSlider;
-    private RangeSlider humidityRangeSlider;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private final Executor executor = Executors.newSingleThreadExecutor();
@@ -82,41 +76,7 @@ public class PlantDetailsFragment extends Fragment {
             openGallery();
         });
 
-
-        minTemperatureTextView = view.findViewById(R.id.minTemperature);
-        maxTemperatureTextView = view.findViewById(R.id.maxTemperature);
-        minHumidityTextView = view.findViewById(R.id.minHumidity);
-        maxHumidityTextView = view.findViewById(R.id.maxHumidity);
         plantDescriptionEditText = view.findViewById(R.id.plantsEditText); // Plant Description
-
-        // Temperature and Humidity Ranges
-        temperatureRangeSlider = view.findViewById(R.id.temperatureRangeSlider);
-        humidityRangeSlider = view.findViewById(R.id.humidityRangeSlider);
-        updateTemperatureRangeText(temperatureRangeSlider.getValues());
-        updateHumidityRangeText(humidityRangeSlider.getValues());
-
-        // Set listeners for the two RangeSliders
-        temperatureRangeSlider.addOnChangeListener((slider, value, fromUser) -> {
-            List<Float> values = slider.getValues();
-            if (values.size() >= 2) {
-                Log.d("From", values.get(0).toString());
-                Log.d("To", values.get(1).toString());
-
-                // Call your method to update humidity range text
-                updateTemperatureRangeText(values);
-            }
-        });
-
-        humidityRangeSlider.addOnChangeListener((slider, value, fromUser) -> {
-            List<Float> values = slider.getValues();
-            if (values.size() >= 2) {
-                Log.d("From", values.get(0).toString());
-                Log.d("To", values.get(1).toString());
-
-                // Call your method to update humidity range text
-                updateHumidityRangeText(values);
-            }
-        });
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -160,8 +120,7 @@ public class PlantDetailsFragment extends Fragment {
                 // TODO verify if there is a selected image or not (otherwise, if it is only saved the name and image and the name is deleted, the plant will not be deleted entirely, as opposed to the other fields
                 //  check for (selectedImageUri == null or empty) won't work;
                 //  something like (getImageUriFromLocalStorage(getArguments().getString("plantNumber")) == null) would but it locks the main thread
-                if (nameEditText.getText().toString().isEmpty() && speciesEditText.getText().toString().isEmpty() && plantDescriptionEditText.getText().toString().isEmpty()
-                        && temperatureRangeSlider.getValues().get(0) == -40 && temperatureRangeSlider.getValues().get(1) == 80 && humidityRangeSlider.getValues().get(0) == 0 && humidityRangeSlider.getValues().get(1) == 100) {
+                if (nameEditText.getText().toString().isEmpty() && speciesEditText.getText().toString().isEmpty() && plantDescriptionEditText.getText().toString().isEmpty()) {
                     executor.execute(() -> {
                         appDatabase.plantDao().deletePlantByNumber(getArguments().getString("plantNumber"));
                     });
@@ -195,41 +154,6 @@ public class PlantDetailsFragment extends Fragment {
 
     private void loadImage(Uri imageUri) {
         Glide.with(this).load(imageUri).into(plantImageView);
-    }
-
-    // update the TextViews with the current temperature and humidity values
-    private void updateTemperatureRangeText(List<Float> values) {
-        if (values != null && values.size() >= 2) {
-            float minTemperature = values.get(0);
-            float maxTemperature = values.get(1);
-
-            String minRangeText = getString(R.string.min_temperature, minTemperature);
-            String maxRangeText = getString(R.string.max_temperature, maxTemperature);
-
-            minTemperatureTextView.setText(minRangeText);
-            maxTemperatureTextView.setText(maxRangeText);
-        } else {
-            // Handle the case where there are not enough values in the list
-            minTemperatureTextView.setText("");
-            maxTemperatureTextView.setText("");
-        }
-    }
-
-    private void updateHumidityRangeText(List<Float> values) {
-        if (values != null && values.size() >= 2) {
-            float minValue = values.get(0);
-            float maxValue = values.get(1);
-
-            String minRangeText = getString(R.string.min_humidity, minValue);
-            String maxRangeText = getString(R.string.max_humidity, maxValue);
-
-            minHumidityTextView.setText(minRangeText);
-            maxHumidityTextView.setText(maxRangeText);
-        } else {
-            // Handle the case where there are not enough values in the list
-            minHumidityTextView.setText("");
-            maxHumidityTextView.setText("");
-        }
     }
 
     @Override
@@ -273,18 +197,12 @@ public class PlantDetailsFragment extends Fragment {
             String plantName = appDatabase.plantDao().getPlantByNumber(plantNumber).getName();
             String plantContent = appDatabase.plantDao().getPlantByNumber(plantNumber).getDescription();
             String plantSpecies = appDatabase.plantDao().getPlantByNumber(plantNumber).getSpecies();
-            double plantMinTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_temp();
-            double plantMaxTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_temp();
-            double plantMinHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_humidity();
-            double plantMaxHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_humidity();
             Uri imageUri = getImageUriFromLocalStorage(plantNumber);
             if (isAdded()) {
                 mainHandler.post(() -> {
                     nameEditText.setText(plantName);
                     speciesEditText.setText(plantSpecies);
                     plantDescriptionEditText.setText(plantContent);
-                    temperatureRangeSlider.setValues((float) plantMinTemp, (float) plantMaxTemp);
-                    humidityRangeSlider.setValues((float) plantMinHumidity, (float) plantMaxHumidity);
                     if (imageUri != null) {
                         loadImage(imageUri);
                     }
@@ -315,10 +233,6 @@ public class PlantDetailsFragment extends Fragment {
             Log.e("PlantDetailsFragment", "savePlantToLocalStorage: " + plantNumber);
             appDatabase.plantDao().updatePlantName(plantNumber, nameEditText.getText().toString());
             appDatabase.plantDao().updatePlantSpecies(plantNumber, speciesEditText.getText().toString());
-            appDatabase.plantDao().updatePlantMinTemp(plantNumber, temperatureRangeSlider.getValues().get(0));
-            appDatabase.plantDao().updatePlantMaxTemp(plantNumber, temperatureRangeSlider.getValues().get(1));
-            appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
-            appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
             appDatabase.plantDao().updatePlantDescription(plantNumber, plantDescriptionEditText.getText().toString());
             if (imageUri != null) {
                 // check if the imageUri leads to a valid image on the phone and, if so, save it to the local storage
@@ -368,10 +282,6 @@ public class PlantDetailsFragment extends Fragment {
                     plant.put("number", plantNumber);
                     plant.put("name", nameEditText.getText().toString());
                     plant.put("species", speciesEditText.getText().toString());
-                    plant.put("min_temp", (double) temperatureRangeSlider.getValues().get(0));
-                    plant.put("max_temp", (double) temperatureRangeSlider.getValues().get(1));
-                    plant.put("min_humidity", (double) humidityRangeSlider.getValues().get(0));
-                    plant.put("max_humidity", (double) humidityRangeSlider.getValues().get(1));
                     plant.put("description", plantDescriptionEditText.getText().toString());
                     plant.put("imgUri", getImageUriFromLocalStorage(plantNumber));
                     Log.d(TAG, "imgUri online: " + getImageUriFromLocalStorage(plantNumber));
@@ -416,13 +326,13 @@ public class PlantDetailsFragment extends Fragment {
                                 Log.d("PlantDetailsFragment", "Plant saved and updated to Firestore");
                             }
                         } else {
-                            if (isAdded()) {
-                                mainHandler.post(() -> {
-                                    consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore");
-                                    callback.run();
-                                });
-                                Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (3)");
-                            }
+//                            if (isAdded()) {
+//                                mainHandler.post(() -> {
+//                                    consolidatedResultBuilder.append("Plant saved but failed to backup to Firestore");
+//                                    callback.run();
+//                                });
+                            Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (3)");
+//                        }
                         }
                     });
                 }

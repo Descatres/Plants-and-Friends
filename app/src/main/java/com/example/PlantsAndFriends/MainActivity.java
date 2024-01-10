@@ -1,13 +1,8 @@
 package com.example.PlantsAndFriends;
 
 import android.animation.AnimatorSet;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -26,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
         animatorSet.start();
 
+
         new Handler().postDelayed(() -> {
             // This method will be executed once the timer is over
             // Start your app main activity
@@ -71,11 +66,6 @@ public class MainActivity extends AppCompatActivity {
                 checkUser();
             }
         }, 2000); // 2 seconds
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     public void onPause() {
@@ -122,4 +112,5 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container, new HomepageFragment(), "HomepageFragment")
                 .commit();
     }
+
 }
