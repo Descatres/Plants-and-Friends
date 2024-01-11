@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
@@ -14,15 +15,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -57,16 +61,26 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.grid_item_plant_title, parent, false);
+        View view = inflater.inflate(R.layout.grid_item_plant, parent, false);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         return new ViewHolder(view);
     }
 
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Plant plant = plantsList.get(position);
         holder.plantTitleTextView.setText(plant.getName());
+        if (plant.getImgUri() != null && !plant.getImgUri().isEmpty() && isNetworkConnected()) {
+            Picasso.get().load(plant.getImgUri()).into(holder.plantImageView);
+            loadImage(holder, Uri.parse(plant.getImgUri()));
+        } else if (!isNetworkConnected()) {
+            loadImage(holder, Uri.parse(plant.getImgUri()));
+        } else {
+            // Set a placeholder image if the URI is null or empty
+            holder.plantImageView.setImageResource(R.drawable.plant_logo);
+        }
 
         holder.itemView.setOnLongClickListener(v -> {
             showOptionsDialog(plant, position);
@@ -80,6 +94,10 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         });
     }
 
+    private void loadImage(@NonNull ViewHolder holder, Uri imageUri) {
+        Glide.with(context).load(imageUri).into(holder.plantImageView);
+    }
+
     @Override
     public int getItemCount() {
         return plantsList.size();
@@ -87,12 +105,17 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView plantTitleTextView;
+        // image view for plant image
+        ImageView plantImageView;
+
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             plantTitleTextView = itemView.findViewById(R.id.plantTitleTextView);
+            plantImageView = itemView.findViewById(R.id.plant_image_view);
         }
     }
+
 
     private void deletePlantAndRefreshView(Plant plant, int position) {
         if (isNetworkConnected()) {

@@ -167,9 +167,10 @@ public class PlantDetailsFragment extends Fragment {
                                     // Only show the last message set to consolidatedResult
                                     String consolidatedMessage = consolidatedResultBuilder.toString();
                                     if (!consolidatedMessage.isEmpty()) {
-                                        Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT)
-                                                .show();
-                                        consolidatedResultBuilder.setLength(0);
+                                        mainHandler.post(() -> {
+                                            Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+                                            consolidatedResultBuilder.setLength(0);
+                                        });
                                     }
                                 });
                             });
@@ -210,8 +211,7 @@ public class PlantDetailsFragment extends Fragment {
         selectImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (ContextCompat.checkSelfPermission(requireContext(),
-                        Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                     // Permission already granted, launch the gallery intent
                     openGallery();
                 } else {
@@ -234,39 +234,41 @@ public class PlantDetailsFragment extends Fragment {
     }
 
     private void openGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
-        activityResultLauncher.launch(intent);
+        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        activityResultLauncher.launch(galleryIntent);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_STORAGE_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, launch the gallery intent
                 openGallery();
             } else {
-                // Permission denied, show a message or take appropriate action
-                Toast.makeText(requireContext(), "Permission denied. Cannot access gallery.", Toast.LENGTH_SHORT)
-                        .show();
+                mainHandler.post(() -> {
+                    Toast.makeText(requireContext(), "Permission denied. Cannot access gallery.", Toast.LENGTH_SHORT).show();
+                });
             }
         }
     }
 
-    private void uploadImage(Uri file) {
+    private void uploadImage(Uri imageUri) {
+        Glide.with(this).load(imageUri).into(plantImageView);
         StorageReference ref = storageReference.child("images/" + UUID.randomUUID().toString());
-        ref.putFile(file).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        ref.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Toast.makeText(requireContext(), "Image Uploaded!!", Toast.LENGTH_SHORT).show();
+                mainHandler.post(() -> {
+                    Toast.makeText(requireContext(), "Image Uploaded!", Toast.LENGTH_SHORT).show();
+                });
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(requireContext(), "Failed!" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                mainHandler.post(() -> {
+                    Toast.makeText(requireContext(), "Failed!" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
             }
         });
     }
@@ -324,12 +326,14 @@ public class PlantDetailsFragment extends Fragment {
                             if (isAdded()) {
                                 Glide.with(requireContext()).load(selectedImageUri).into(plantImageView);
                             } else {
-                                // Handle the case where the fragment is not attached to a context
+                                Log.d(TAG, "onActivityResult: " + "Fragment not added");
                             }
 
                         }
                     } else {
-                        Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show();
+                        mainHandler.post(() -> {
+                            Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show();
+                        });
                     }
                 }
             });
@@ -365,6 +369,10 @@ public class PlantDetailsFragment extends Fragment {
         });
     }
 
+    private void loadImage(Uri imageUri) {
+        Glide.with(this).load(imageUri).into(plantImageView);
+    }
+
     private void displayPlantFromLocalStorage(String plantNumber) {
         executor.execute(() -> {
             // check if the plant exists in the local storage by plantId
@@ -388,7 +396,7 @@ public class PlantDetailsFragment extends Fragment {
                     temperatureRangeSlider.setValues((float) plantMinTemp, (float) plantMaxTemp);
                     humidityRangeSlider.setValues((float) plantMinHumidity, (float) plantMaxHumidity);
                     if (imageUri != null) {
-                        uploadImage(imageUri);
+                        loadImage(imageUri);
                     }
                 });
             }

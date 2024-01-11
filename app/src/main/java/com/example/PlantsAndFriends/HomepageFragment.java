@@ -316,7 +316,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                                         }
                                     }
                                     if (!plantExists.get()) {
-                                        deletePlantFromFirestore(convertToPlant(document.toObject(PlantEntity.class)));
+                                        mainHandler.post(() -> deletePlantFromFirestore(convertToPlant(document.toObject(PlantEntity.class))));
                                     }
                                 }
                             } else {
@@ -328,8 +328,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         });
     }
 
-    private void createNewPlantInLocalStorage(String plantNumber, String plantName, String plantSpecies, float minTemp,
-                                              float maxTemp, float minHumidity, float maxHumidity, String plantDescription, String plantImgUri) {
+    private void createNewPlantInLocalStorage(String plantNumber, String plantName, String plantSpecies, float minTemp, float maxTemp, float minHumidity, float maxHumidity, String plantDescription, String plantImgUri) {
         executor.execute(() -> {
             if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
                 Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
