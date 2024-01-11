@@ -9,6 +9,7 @@ import android.net.NetworkCapabilities;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,98 +20,134 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.ViewHolder> {
-    private List<Note> notesList;
+public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.ViewHolder> {
+    private List<Plant> plantsList;
     private LayoutInflater inflater;
     private Context context;
-    private OnNoteClickListener noteClickListener;
+    private OnPlantClickListener plantClickListener;
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
 
-    public NotesGridAdapter(Context context, List<Note> notesList, AppDatabase appDatabase) {
+    public PlantsGridAdapter(Context context, List<Plant> plantsList, AppDatabase appDatabase) {
         this.context = context;
-        this.notesList = notesList;
+        this.plantsList = plantsList;
         this.appDatabase = appDatabase;
         inflater = LayoutInflater.from(context);
     }
 
 
-    public interface OnNoteClickListener {
-        void onNoteClick(Note note);
+    public interface OnPlantClickListener {
+        void onPlantClick(Plant plant);
     }
 
-    public void setOnNoteClickListener(OnNoteClickListener listener) {
-        this.noteClickListener = listener;
+    public void setOnPlantClickListener(OnPlantClickListener listener) {
+        this.plantClickListener = listener;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.grid_item_note_title, parent, false);
+        View view = inflater.inflate(R.layout.grid_item_plant_title, parent, false);
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Note note = notesList.get(position);
-        holder.noteTitleTextView.setText(note.getTitle());
+        Plant plant = plantsList.get(position);
+        holder.plantTitleTextView.setText(plant.getName());
 
         holder.itemView.setOnLongClickListener(v -> {
-            showOptionsDialog(note, position);
+            showOptionsDialog(plant, position);
             return true;
         });
 
         holder.itemView.setOnClickListener(v -> {
-            if (noteClickListener != null) {
-                noteClickListener.onNoteClick(notesList.get(position));
+            if (plantClickListener != null && position < plantsList.size()) {
+                plantClickListener.onPlantClick(plantsList.get(position));
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return notesList.size();
+        return plantsList.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView noteTitleTextView;
+        TextView plantTitleTextView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            noteTitleTextView = itemView.findViewById(R.id.noteTitleTextView);
+            plantTitleTextView = itemView.findViewById(R.id.plantTitleTextView);
         }
     }
 
-    private void deleteNoteAndRefreshView(Note note, int position) {
-        executor.execute(() -> {
-            deleteNoteFromLocalStorage(note);
+    private void deletePlantAndRefreshView(Plant plant, int position) {
+        if (isNetworkConnected()) {
+            deletePlantFromFirestore(plant);
+            mainHandler.post(() -> Toast.makeText(context, "Pant deleted from local storage and Firestore", Toast.LENGTH_SHORT).show());
+        } else {
+            mainHandler.post(() -> Toast.makeText(context, "Pant deleted from local storage", Toast.LENGTH_SHORT).show());
+        }
+
+        deletePlantFromLocalStorage(plant);
+
+        mainHandler.post(() -> {
+            plantsList.remove(position);
+            notifyItemRemoved(position);
         });
 
-        // Update the list and notify the adapter
-        notesList.remove(note);
-        notifyItemRemoved(position);
     }
 
-    private void deleteNoteFromLocalStorage(Note note) {
-        appDatabase.noteDao().deleteNoteByNumber(note.getNumber());
-        mainHandler.post(() -> Toast.makeText(context, "Note deleted from local storage", Toast.LENGTH_SHORT).show());
-    }
-
-    private void updateNoteTitle(Note note, String newTitle) {
+    private void deletePlantFromLocalStorage(Plant plant) {
         executor.execute(() -> {
-            appDatabase.noteDao().updateNoteTitle(note.getNumber(), newTitle);
+            appDatabase.plantDao().deletePlantByNumber(plant.getNumber());
         });
     }
 
-    private void showRenameNoteDialog(Note note) {
+    private void deletePlantFromFirestore(Plant plant) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        String currentUserUid = currentUser.getUid();
+        executor.execute(() -> {
+            db.collection("users").document(currentUserUid).collection("plants")
+                    .document(plant.getNumber())
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        mainHandler.post(() -> Log.d("deletePlantFromFirestore", "Plant deleted from Firestore"));
+                    })
+                    .addOnFailureListener(e -> {
+                        mainHandler.post(() -> Toast.makeText(context, "Failed to delete plant from Firestore", Toast.LENGTH_SHORT).show());
+                    });
+        });
+    }
+
+    private void updatePlantName(Plant plant, String newName) {
+        executor.execute(() -> {
+            appDatabase.plantDao().updatePlantName(plant.getNumber(), newName);
+        });
+    }
+
+    private void showRenamePlantDialog(Plant plant) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Enter a new title for your note");
+        builder.setTitle("Enter a new title for your plant");
 
         final EditText input = new EditText(context);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -118,7 +155,7 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
 
         builder.setPositiveButton("Rename", (dialog, which) -> {
             String newTitle = input.getText().toString();
-            updateNoteTitle(note, newTitle);
+            updatePlantName(plant, newTitle);
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
@@ -129,12 +166,12 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
     }
 
-    private void showOptionsDialog(Note note, int position) {
+    private void showOptionsDialog(Plant plant, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Choose an action");
 
-        builder.setPositiveButton("Rename note", (dialog, which) -> showRenameNoteDialog(note));
-        builder.setNegativeButton("Delete note", (dialog, which) -> deleteNoteAndRefreshView(note, position));
+        builder.setPositiveButton("Rename plant", (dialog, which) -> showRenamePlantDialog(plant));
+        builder.setNegativeButton("Delete plant", (dialog, which) -> deletePlantAndRefreshView(plant, position));
         builder.setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
@@ -144,33 +181,33 @@ public class NotesGridAdapter extends RecyclerView.Adapter<NotesGridAdapter.View
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(Color.BLACK);
     }
 
-    public void updateNotes(List<Note> newNotesList) {
-        int oldSize = notesList.size();
-        int newSize = newNotesList.size();
+    public void updatePlants(List<Plant> newPlantsList) {
+        int oldSize = plantsList.size();
+        int newSize = newPlantsList.size();
 
         // Find the common prefix between old and new lists
         int commonPrefix = 0;
         while (commonPrefix < oldSize && commonPrefix < newSize &&
-                notesList.get(commonPrefix).equals(newNotesList.get(commonPrefix))) {
+                plantsList.get(commonPrefix).equals(newPlantsList.get(commonPrefix))) {
             commonPrefix++;
         }
 
         // Notify items that were removed
         for (int i = oldSize - 1; i >= commonPrefix; i--) {
-            notesList.remove(i);
+            plantsList.remove(i);
             notifyItemRemoved(i);
         }
 
         // Notify items that were added
         for (int i = commonPrefix; i < newSize; i++) {
-            notesList.add(newNotesList.get(i));
+            plantsList.add(newPlantsList.get(i));
             notifyItemInserted(i);
         }
 
         // Notify items that were changed
         for (int i = commonPrefix; i < newSize; i++) {
-            if (!notesList.get(i).equals(newNotesList.get(i))) {
-                notesList.set(i, newNotesList.get(i));
+            if (!plantsList.get(i).equals(newPlantsList.get(i))) {
+                plantsList.set(i, newPlantsList.get(i));
                 notifyItemChanged(i);
             }
         }

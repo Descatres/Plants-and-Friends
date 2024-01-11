@@ -7,11 +7,11 @@
     android:layout_marginBottom="20dp">
 
     <TextView
-        android:id="@+id/noteTitleTextView"
+        android:id="@+id/plantTitleTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/note_title"
+        android:text="@string/plant_title"
         android:textColor="@android:color/black"
         android:textSize="20sp" />
 </FrameLayout>
