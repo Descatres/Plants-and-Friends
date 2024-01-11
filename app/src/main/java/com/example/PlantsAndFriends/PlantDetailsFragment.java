@@ -1,13 +1,16 @@
 package com.example.PlantsAndFriends;
 
 import android.app.Activity;
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,6 +27,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
@@ -62,6 +67,11 @@ public class PlantDetailsFragment extends Fragment {
     private static final String TAG = "PlantDetailsFragment";
 
     private StringBuilder consolidatedResultBuilder = new StringBuilder();
+
+    public static final String READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES";
+    public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
+
+    private static final int GALLERY_PERMISSION_REQUEST_CODE = 101;
 
 
     @Nullable
@@ -176,10 +186,27 @@ public class PlantDetailsFragment extends Fragment {
         return view;
     }
 
+
+    private boolean isGalleryPermissionGranted() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2) {
+            return requireContext().checkSelfPermission(READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        } else {
+            return requireContext().checkSelfPermission(READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED;
+        }
+    }
+
     // Image Picker Gallery
     private void openGallery() {
         Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST);
+        if (!isGalleryPermissionGranted()) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2) {
+                ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{READ_EXTERNAL_STORAGE}, GALLERY_PERMISSION_REQUEST_CODE);
+            } else {
+                ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{READ_MEDIA_IMAGES}, GALLERY_PERMISSION_REQUEST_CODE);
+            }
+        } else {
+            startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST);
+        }
     }
 
     @Override
@@ -189,12 +216,17 @@ public class PlantDetailsFragment extends Fragment {
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_REQUEST && data != null) {
             // Handle the selected image URI
             selectedImageUri = data.getData();
+            // if permission to read the image is negative dont load it
+
             loadImage(selectedImageUri);
+
         }
     }
 
     private void loadImage(Uri imageUri) {
-        Glide.with(this).load(imageUri).into(plantImageView);
+        if (isGalleryPermissionGranted()) {
+            Glide.with(this).load(imageUri).into(plantImageView);
+        }
     }
 
     // update the TextViews with the current temperature and humidity values

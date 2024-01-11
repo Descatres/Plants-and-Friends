@@ -1,16 +1,22 @@
 package com.example.PlantsAndFriends;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
+import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +29,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -58,6 +65,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
     private LiveData<List<PlantEntity>> localPlants;
+    public static final String READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES";
+    public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
+    public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
+    public static final String MANAGE_EXTERNAL_STORAGE = "android.permission.MANAGE_EXTERNAL_STORAGE";
+
 
     @Nullable
     @Override
@@ -91,6 +103,19 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
             });
         }
+
+        if (!isGalleryPermissionGranted()) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{READ_EXTERNAL_STORAGE}, 101);
+            } else {
+                ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{READ_MEDIA_IMAGES}, 101);
+            }
+        } else {
+            Log.d(TAG, "onCreateView: " + "Permission granted");
+        }
+
+//        if (!isWriteExternalStoragePermissionGranted())
+//            requestWriteExternalStoragePermission();
 
         startMqttMonitorService();
         return view;
@@ -198,6 +223,42 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         }
         Intent serviceIntent = new Intent(getActivity(), MqttMonitorService.class);
         requireActivity().startService(serviceIntent);
+    }
+
+    private boolean isGalleryPermissionGranted() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return requireContext().checkSelfPermission(READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        } else {
+            return requireContext().checkSelfPermission(READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED;
+        }
+    }
+
+    private boolean isWriteExternalStoragePermissionGranted() {
+        return requireContext().checkSelfPermission(WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean isManageExternalStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2) {
+            return Environment.isExternalStorageManager();
+        }
+        return true;
+    }
+
+    private void requestWriteExternalStoragePermission() {
+        if (!isWriteExternalStoragePermissionGranted()) {
+            ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{WRITE_EXTERNAL_STORAGE}, 102);
+        } else {
+            requestManageExternalStoragePermission();
+        }
+    }
+
+    private void requestManageExternalStoragePermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2 && !isManageExternalStoragePermissionGranted()) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+            startActivityForResult(intent, 103);
+        } else {
+            Log.d(TAG, "requestManageExternalStoragePermission: " + "Permission granted");
+        }
     }
 
     private boolean isNetworkConnected() {
