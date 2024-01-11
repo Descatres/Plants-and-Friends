@@ -255,7 +255,15 @@ public class PlantDetailsFragment extends Fragment {
 
     private void uploadImage(Uri imageUri) {
         Glide.with(this).load(imageUri).into(plantImageView);
-        StorageReference ref = storageReference.child("images/" + UUID.randomUUID().toString());
+
+        // get plant number
+        assert getArguments() != null;
+        String plantNumber = getArguments().getString("plantNumber");
+        StorageReference ref = storageReference.child("images/" + plantNumber);
+
+        // verify if plant exists on firestore already
+
+
         ref.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
