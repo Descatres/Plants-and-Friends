@@ -41,7 +41,7 @@
     <string name="description">Description</string>
     <string name="alerts">Room\'s sensor alerts</string>
     <string name="negative_logo">negative_logo</string>
-    <string name="alerts_text">\t\tThis is where you can set the ideal intervals for temperature and humidity for the room where your plants are.\n\t\tIf the sensor in the room detects temperature or humidity values outside of the ideal range, you will receive a notification!\n\t\tNote: Please update the plants to Firestore so this feature works best.</string>
+    <string name="alerts_text">\t\tThis is where you can set the ideal intervals for temperature and humidity for the room where your plants are.\n\t\tIf the sensor in the room detects temperature or humidity values outside of the ideal range, you will receive a notification!\nNotes:\n\t\t- Please update the plants to Firestore so this feature works best.\n\t\t- This functionality is not supported for versions of Android 12 or higher.</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="no_internet_connection_feature_unavailable">Warning:\nThis feature is currently unavailable.\nPlease connect to the internet.</string>
