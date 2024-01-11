@@ -35,108 +35,41 @@
             android:textSize="20sp" />
     </androidx.appcompat.widget.Toolbar>
 
-    <!-- Horizontal LinearLayout for Image and Text Views -->
-    <!-- Vertical LinearLayout for Image and Add Image Button -->
     <LinearLayout
-        android:id="@+id/vertical_layout"
-        android:layout_width="wrap_content"
+        android:id="@+id/horizontal_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
         android:padding="30sp"
         android:orientation="vertical">
 
-        <!-- Image Section -->
-        <ImageView
-            android:layout_width="150sp"
-            android:layout_height="150sp"
-            android:layout_marginTop="20sp"
-            android:id="@+id/imageView"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/select"
-            android:id="@+id/selectImage"
-            android:layout_margin="10sp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text="Upload Image"
-            android:id="@+id/uploadImage"/>
-    </LinearLayout>
-
-    <!-- Vertical LinearLayout for Text Views -->
-
-
-    <LinearLayout
-        android:id="@+id/text_views_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
-        android:layout_marginStart="-2dp"
-        android:layout_marginTop="60dp"
-        android:layout_toEndOf="@+id/vertical_layout"
-        android:orientation="vertical"
-        android:padding="0sp">
-
         <!-- Vertical LinearLayout for Text Views -->
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <!-- Plant Name Section -->
+        <TextView
+            android:id="@+id/alerts"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:text="@string/alerts"
+            android:fontFamily="@font/poppins"
+            android:textColor="@color/black"
+            android:textSize="30sp" />
 
-            <!-- Plant Name Section -->
-            <TextView
-                android:id="@+id/name_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/poppins"
-                android:text="@string/plant_name"
-                android:textColor="@color/gray"
-                android:textSize="14sp" />
-
-            <EditText
-                android:id="@+id/name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/poppins_medium"
-                android:hint="@string/chosen_name"
-                android:padding="0sp"
-                android:paddingBottom="2dp"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <!-- Plant Species Section -->
-            <TextView
-                android:id="@+id/species_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/poppins"
-                android:text="@string/plant_species"
-                android:textColor="@color/gray"
-                android:textSize="14sp" />
-
-            <EditText
-                android:id="@+id/species"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/poppins_medium"
-                android:hint="@string/chosen_species"
-                android:padding="0sp"
-                android:paddingBottom="2dp"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/alerts_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/alerts_text"
+            android:fontFamily="@font/poppins"
+            android:textColor="@color/gray"
+            android:textSize="14sp" />
     </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/temperature_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/vertical_layout"
+        android:layout_below="@+id/horizontal_layout"
         android:paddingStart="30dp"
         android:paddingEnd="30dp"
         android:orientation="vertical">
@@ -251,42 +184,29 @@
                 android:fontFamily="@font/poppins"
                 android:textAlignment="textEnd"
                 android:textColor="@color/black" />
+
         </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/plants_layout"
+        android:id="@+id/warning"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/humidity_layout"
-        android:paddingStart="30dp"
-        android:paddingEnd="30dp"
-        android:paddingTop="10dp"
+        android:layout_below="@id/humidity_layout"
+        android:padding="30sp"
         android:orientation="vertical">
 
+        <!-- Vertical LinearLayout for Text Views -->
+        <!-- Plant Name Section -->
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins_medium"
-            android:text="@string/description"
-            android:textColor="@color/black"
-            android:textSize="17sp" />
-
-        <EditText
-            android:id="@+id/plantsEditText"
+            android:id="@+id/warning_text"
             android:layout_width="match_parent"
+            android:layout_gravity="center"
             android:layout_height="wrap_content"
-            android:hint="@string/add_notes_about_the_plant"
-            android:inputType="textMultiLine"
-            android:gravity="top|start"
-            android:minLines="5"
-            android:padding="8dp"
-            android:textSize="16sp"
-            android:background="@drawable/round"
-            android:autofillHints="" />
-
+            android:text="@string/no_internet_connection_feature_unavailable"
+            android:fontFamily="@font/poppins"
+            android:textColor="@color/red"
+            android:textSize="20sp" />
     </LinearLayout>
-
-    <!-- Add more UI elements like humidity seekbars, description edit text, etc. -->
 
 </RelativeLayout>

@@ -2,6 +2,7 @@ package com.example.PlantsAndFriends;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.ConnectivityManager;
@@ -32,11 +33,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,9 +45,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPlantClickListener {
-    private List<Plant> plantsListFirestore = new ArrayList<>();
     private RecyclerView recyclerView;
     private PlantsGridAdapter adapter;
     private Toolbar toolbar;
@@ -61,7 +62,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.homepage, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
         mAuth = FirebaseAuth.getInstance();
@@ -80,10 +82,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         toolbar = view.findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
-        toolbar.inflateMenu(R.menu.plants_repo_menu);
+        toolbar.inflateMenu(R.menu.homepage_menu);
         toolbar.setOnMenuItemClickListener(this::onOptionsItemSelected);
 
-// load the plants from local storage at startup
+        // load the plants from local storage at startup
         loadPlantsFromLocalStorage();
 
         if (!isNetworkConnected()) {
@@ -91,14 +93,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
             });
         }
-//        if (isNetworkConnected()) {
-//            updateFirebase();
-//        }
 
-
+        startMqttMonitorService();
         return view;
     }
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -130,7 +128,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
     @Override
     public void onPlantClick(Plant plant) {
-        openEditPlant(plant.getId());
+        openEditPlant(plant.getNumber());
     }
 
     @Override
@@ -138,7 +136,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         int id = item.getItemId();
 
         if (id == R.id.action_add_plant) {
-            createNewPlantInLocalStorage((int) System.currentTimeMillis());
+            openEditPlant(String.valueOf(System.currentTimeMillis()));
             return true;
         }
 
@@ -147,34 +145,48 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             return true;
         }
 
-        if (id == R.id.refresh) {
-            loadPlantsFromLocalStorage();
-            if (isNetworkConnected()) {
-//                updateFirebase();
-            }
+        if (id == R.id.action_alerts) {
+            loadAlertsFragment();
             return true;
+        }
+
+        if (id == R.id.load_plants_from_firestore) {
+            // Create a load button to load the plants from firebase to local storage
+            // Create a warning message to warn the user that the plants on local storage
+            // will be overwritten and
+            // select ok or cancel
+            showDownloadDialog();
+            return true;
+        }
+
+        if (id == R.id.save_plants_to_firestore) {
+            // Create here a save button to save the plants from local storage to firebase
+            // Create a warning message to warn the user that the plants on firestore will
+            // be overwritten and
+            // select ok or cancel
+            showUploadDialog();
         }
 
         if (id == R.id.action_logout) {
             FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
             if (firebaseUser != null) {
                 FirebaseAuth.getInstance().signOut();
-                Toast.makeText(requireContext(), firebaseUser.getEmail() + "Logged out successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), firebaseUser.getEmail() + "Logged out successfully",
+                        Toast.LENGTH_SHORT).show();
                 loadLoginFragment();
                 return true;
             }
 
             // Logout the user
-            GoogleSignInOptions gso = new GoogleSignInOptions.
-                    Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).
-                    build();
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build();
 
             GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(requireContext(), gso);
             googleSignInClient.signOut().addOnCompleteListener(task -> {
-                        Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
-                        loadLoginFragment();
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(requireContext(), "Logout failed", Toast.LENGTH_SHORT).show());
+                Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+                loadLoginFragment();
+            })
+                    .addOnFailureListener(
+                            e -> Toast.makeText(requireContext(), "Logout failed", Toast.LENGTH_SHORT).show());
 
             return true;
         }
@@ -182,80 +194,29 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         return super.onOptionsItemSelected(item);
     }
 
+    private void startMqttMonitorService() {
+        Intent serviceIntent = new Intent(getActivity(), MqttMonitorService.class);
+        requireActivity().startService(serviceIntent);
+    }
+
     private boolean isNetworkConnected() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
 
         if (connectivityManager != null) {
             Network network = connectivityManager.getActiveNetwork();
             if (network != null) {
                 NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(network);
-                return networkCapabilities != null && (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
+                return networkCapabilities != null
+                        && (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                                || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
             }
         }
 
         return false;
     }
 
-//    private void loadPlantsFromFirebase() {
-//        FirebaseUser currentUser = mAuth.getCurrentUser();
-//        if (currentUser == null) {
-//            loadLoginFragment();
-//            return;
-//        }
-//
-//        String currentUserUid = currentUser.getUid();
-//
-//        executor.execute(() -> {
-//            // delete plant from firebase if it does not exist on the local storage
-//            for (Plant plant : plantsList) {
-//                Log.e(TAG, "Delete plant number: " + plant.getNumber());
-//                if (appDatabase.plantDao().getPlantByNumber(plant.getNumber()) == null) {
-//                    Log.d(TAG, "Deleting plant from Firebase: " + plant.getNumber());
-//                    deletePlantFromFirestore(plant);
-//                }
-//            }
-//
-//            Log.d(TAG, "loadPlantsFromFirebase: " + currentUserUid);
-//            db.collection("users").document(currentUserUid).collection("plants")
-//                    .get()
-//                    .addOnCompleteListener(task -> {
-//                        if (task.isSuccessful()) {
-//                            adapter = new PlantsGridAdapter(requireContext(), plantsList, appDatabase);
-//                            adapter.setOnPlantClickListener(HomepageFragment.this);
-//                            recyclerView.setAdapter(adapter);
-//
-//                            plantsList.clear(); // Clear the list before adding updated plants
-//
-//                            for (QueryDocumentSnapshot document : task.getResult()) {
-//                                String plantId = document.getId();
-//                                String number = document.getString("number");
-//                                String plantName = document.getString("name");
-//                                String plantSpecies = document.getString("species");
-//                                float plantMinTemp = Float.parseFloat(Objects.requireNonNull(document.getString("min_temp")));
-//                                float plantMaxTemp = Float.parseFloat(Objects.requireNonNull(document.getString("max_temp")));
-//                                float plantMinHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("min_humidity")));
-//                                float plantMaxHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("max_humidity")));
-//                                String plantDescription = document.getString("content");
-//
-//                                Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantMinTemp, plantMaxTemp, plantMinHumidity, plantMaxHumidity, plantDescription != null ? plantDescription : "");
-//                                plantsList.add(plant); // Add plant to the list
-//                            }
-//
-//                            updateFirebase();
-//                            saveToLocalStorage();
-//
-//                        } else {
-//                            mainHandler.post(() -> {
-//                                Toast.makeText(requireContext(), "Failed to retrieve plants from Firebase", Toast.LENGTH_SHORT).show();
-//                            });
-//                        }
-//                    });
-//        });
-//    }
-
-
-    private void updateFirebase() {
-        // TODO - this still needs work xd
+    private void updateFirestore() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             loadLoginFragment();
@@ -268,68 +229,165 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             List<Plant> plants = convertToPlantList(plantEntities);
 
             for (Plant localPlant : plants) {
-                // Check if the plant exists in Firestore by its number
-                Query query = db.collection("users").document(currentUserUid).collection("plants")
-                        .whereEqualTo("number", localPlant.getId());
+                executor.execute(() -> {
+                    db.collection("users").document(currentUserUid).collection("plants")
+                            .document(localPlant.getNumber()).get().addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    if (task.getResult().exists()) {
+                                        Log.d(TAG, "Plant exists in Firestore, only updates will be done");
+                                        Map<String, Object> plant = new HashMap<>();
+                                        plant.put("number", localPlant.getNumber());
+                                        plant.put("name", localPlant.getName());
+                                        plant.put("species", localPlant.getSpecies());
+                                        plant.put("min_temp", localPlant.getMin_temp());
+                                        plant.put("max_temp", localPlant.getMax_temp());
+                                        plant.put("min_humidity", localPlant.getMin_humidity());
+                                        plant.put("max_humidity", localPlant.getMax_humidity());
+                                        plant.put("description", localPlant.getDescription());
+                                        plant.put("imgUri", localPlant.getImgUri());
 
-                query.get().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                            // Plant exists in Firestore, check for differences and update if needed
-                            DocumentSnapshot documentSnapshot = querySnapshot.getDocuments().get(0);
-                            Plant firestorePlant = documentSnapshot.toObject(Plant.class);
-
-                            if (firestorePlant != null && !localPlant.equals(firestorePlant)) {
-                                // Fields are different, update the plant in Firestore
-                                Map<String, Object> plantMap = new HashMap<>();
-                                plantMap.put("name", localPlant.getName());
-                                plantMap.put("species", localPlant.getSpecies());
-                                plantMap.put("min_temp", localPlant.getMin_temp());
-                                plantMap.put("max_temp", localPlant.getMax_temp());
-                                plantMap.put("min_humidity", localPlant.getMin_humidity());
-                                plantMap.put("max_humidity", localPlant.getMax_humidity());
-                                plantMap.put("description", localPlant.getDescription());
-                                plantMap.put("imgUri", localPlant.getImgUri());
-
-                                db.collection("users").document(currentUserUid).collection("plants")
-                                        .document(documentSnapshot.getId())
-                                        .update(plantMap)
-                                        .addOnSuccessListener(aVoid -> {
-                                            Log.d(TAG, "DocumentSnapshot updated with ID: " + documentSnapshot.getId());
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            Log.w(TAG, "Error updating document", e);
+                                        // if plant exists in firestore but not locally to delete it else update it
+                                        Log.d(TAG, "Plant does not exist locally, it will be deleted from Firestore");
+                                        executor.execute(() -> {
+                                            db.collection("users").document(currentUserUid).collection("plants")
+                                                    .document(localPlant.getNumber())
+                                                    .update(plant)
+                                                    .addOnSuccessListener(aVoid -> {
+                                                        Log.d(TAG, "Plant updated in Firestore");
+                                                        // mainHandler.post(() -> Toast.makeText(requireContext(),
+                                                        // "Plant updated in Firestore", Toast.LENGTH_SHORT).show());
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.w(TAG, "Error updating plant in Firestore", e);
+                                                        mainHandler.post(() -> Toast.makeText(requireContext(),
+                                                                "Failed to update plant in Firestore",
+                                                                Toast.LENGTH_SHORT).show());
+                                                    });
                                         });
-                            }
-                        } else {
-                            // Plant doesn't exist in Firestore, add it
-                            Map<String, Object> plantMap = new HashMap<>();
-                            plantMap.put("number", localPlant.getId());
-                            plantMap.put("name", localPlant.getName());
-                            plantMap.put("species", localPlant.getSpecies());
-                            plantMap.put("min_temp", localPlant.getMin_temp());
-                            plantMap.put("max_temp", localPlant.getMax_temp());
-                            plantMap.put("min_humidity", localPlant.getMin_humidity());
-                            plantMap.put("max_humidity", localPlant.getMax_humidity());
-                            plantMap.put("description", localPlant.getDescription());
-                            plantMap.put("imgUri", localPlant.getImgUri());
 
-                            db.collection("users").document(currentUserUid).collection("plants")
-                                    .add(plantMap)
-                                    .addOnSuccessListener(documentReference -> {
-                                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Log.w(TAG, "Error adding document", e);
-                                    });
-                        }
-                    } else {
-                        Log.w(TAG, "Error getting documents", task.getException());
-                    }
+                                    } else {
+                                        Log.d(TAG, "Plant does not exist in Firestore, it will be added");
+                                        Map<String, Object> plant = new HashMap<>();
+                                        plant.put("number", localPlant.getNumber());
+                                        plant.put("name", localPlant.getName());
+                                        plant.put("species", localPlant.getSpecies());
+                                        plant.put("min_temp", localPlant.getMin_temp());
+                                        plant.put("max_temp", localPlant.getMax_temp());
+                                        plant.put("min_humidity", localPlant.getMin_humidity());
+                                        plant.put("max_humidity", localPlant.getMax_humidity());
+                                        plant.put("description", localPlant.getDescription());
+                                        plant.put("imgUri", localPlant.getImgUri());
+                                        executor.execute(() -> {
+                                            db.collection("users").document(currentUserUid).collection("plants")
+                                                    .document(localPlant.getNumber())
+                                                    .set(plant)
+                                                    .addOnSuccessListener(aVoid -> {
+                                                        Log.d(TAG, "Plant added to Firestore");
+                                                        mainHandler.post(() -> Toast.makeText(requireContext(),
+                                                                "Plant added to Firestore", Toast.LENGTH_SHORT).show());
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.w(TAG, "Error adding plant to Firestore", e);
+                                                        mainHandler.post(() -> Toast.makeText(requireContext(),
+                                                                "Failed to add plant to Firestore", Toast.LENGTH_SHORT)
+                                                                .show());
+                                                    });
+                                        });
+                                    }
+                                } else {
+                                    Log.w(TAG, "Error getting documents", task.getException());
+                                }
+                            });
                 });
             }
+
+            // delete the plants from firestore that are not in local storage
+            executor.execute(() -> {
+                db.collection("users").document(currentUserUid).collection("plants").get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    String plantNumber = document.getString("number");
+                                    AtomicBoolean plantExists = new AtomicBoolean(false);
+                                    for (Plant localPlant : plants) {
+                                        if (localPlant.getNumber().equals(plantNumber)) {
+                                            plantExists.set(true);
+                                            break;
+                                        }
+                                    }
+                                    if (!plantExists.get()) {
+                                        deletePlantFromFirestore(convertToPlant(document.toObject(PlantEntity.class)));
+                                    }
+                                }
+                            } else {
+                                Log.w(TAG, "Error getting documents", task.getException());
+                            }
+                        });
+            });
+
         });
+    }
+
+    private void createNewPlantInLocalStorage(String plantNumber, String plantName, String plantSpecies, float minTemp,
+            float maxTemp, float minHumidity, float maxHumidity, String plantDescription, String plantImgUri) {
+        executor.execute(() -> {
+            if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
+                Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
+                return;
+            }
+
+            try {
+                PlantEntity plantEntity = new PlantEntity();
+                plantEntity.setNumber(plantNumber);
+                plantEntity.setName(plantName);
+                plantEntity.setSpecies(plantSpecies);
+                plantEntity.setMin_temp(minTemp);
+                plantEntity.setMax_temp(maxTemp);
+                plantEntity.setMin_humidity(minHumidity);
+                plantEntity.setMax_humidity(maxHumidity);
+                plantEntity.setDescription(plantDescription);
+                plantEntity.setImgUri(plantImgUri);
+                appDatabase.plantDao().insert(plantEntity);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void loadFromFirestore() {
+        // load the plants from firebase to local storage
+        // clear the local storage and add the plants from firebase
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            loadLoginFragment();
+            return;
+        }
+        String currentUserUid = currentUser.getUid();
+        executor.execute(() -> {
+            // check if the local database is empty or not
+            appDatabase.plantDao().deleteAllPlants();
+        });
+
+        executor.execute(() -> {
+            db.collection("users").document(currentUserUid).collection("plants").get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Plant plant = convertToPlant(document.toObject(PlantEntity.class));
+                        executor.execute(() -> {
+                            createNewPlantInLocalStorage(plant.getNumber(), plant.getName(), plant.getSpecies(),
+                                    (float) plant.getMin_temp(), (float) plant.getMax_temp(),
+                                    (float) plant.getMin_humidity(), (float) plant.getMax_humidity(),
+                                    plant.getDescription(), plant.getImgUri() == null ? null
+                                            : plant.getImgUri().isEmpty() ? null : plant.getImgUri());
+                        });
+                    }
+                } else {
+                    Log.w(TAG, "Error getting documents", task.getException());
+                }
+            });
+        });
+
     }
 
     private void deletePlantFromFirestore(Plant plant) {
@@ -340,16 +398,79 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         }
 
         String currentUserUid = currentUser.getUid();
-        db.collection("users").document(currentUserUid).collection("plants")
-                .document(String.valueOf(plant.getId()))
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    Log.d("deletePlantFromFirestore", "Plant deleted from Firestore");
-                    mainHandler.post(() -> Toast.makeText(requireContext(), "Plant deleted from storage and Firestore", Toast.LENGTH_SHORT).show());
-                })
-                .addOnFailureListener(e -> {
-                    mainHandler.post(() -> Toast.makeText(requireContext(), "Failed to delete plant from Firestore", Toast.LENGTH_SHORT).show());
+        executor.execute(() -> {
+            db.collection("users").document(currentUserUid).collection("plants")
+                    .document(plant.getNumber())
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("deletePlantFromFirestore", "Plant deleted from Firestore");
+                        mainHandler.post(() -> Toast
+                                .makeText(requireContext(), "Plant deleted from Firestore", Toast.LENGTH_SHORT).show());
+                    })
+                    .addOnFailureListener(e -> {
+                        mainHandler.post(() -> Toast
+                                .makeText(requireContext(), "Failed to delete plant from Firestore", Toast.LENGTH_SHORT)
+                                .show());
+                    });
+        });
+    }
+
+    private void showUploadDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Save plants to Firestore?");
+        builder.setMessage("Careful! This will overwrite the plants on Firestore with the ones on local storage.");
+
+        builder.setPositiveButton("Confirm", null);
+        builder.setNeutralButton("Cancel", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(Color.BLACK);
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+            // set color to grey of buttons
+            if (isNetworkConnected()) {
+                updateFirestore();
+                dialog.cancel();
+            } else {
+                mainHandler.post(() -> {
+                    Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
                 });
+            }
+        });
+
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(view -> dialog.cancel());
+    }
+
+    private void showDownloadDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Load plants from Firestore?");
+        builder.setMessage("Careful! This will overwrite the plants locally with the ones on Firestore.");
+
+        builder.setPositiveButton("Confirm", null);
+        builder.setNeutralButton("Cancel", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(Color.BLACK);
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+            // set color to grey of buttons
+            if (isNetworkConnected()) {
+                loadFromFirestore();
+                dialog.cancel();
+            } else {
+                mainHandler.post(() -> {
+                    Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(view -> dialog.cancel());
     }
 
     private void showSearchDialog() {
@@ -378,11 +499,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(view -> {
             input.setText("");
-//            if (isNetworkConnected()) {
-//                loadPlantsFromFirebase();
-//            } else {
+            // if (isNetworkConnected()) {
+            // loadPlantsFromFirebase();
+            // } else {
             loadPlantsFromLocalStorage();
-//            }
+            // }
         });
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(view -> dialog.cancel());
     }
@@ -412,18 +533,26 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
             adapter.updatePlants(filteredPlants);
         });
-//        }
+        // }
     }
 
-    private void openEditPlant(int plantId) {
+    private void openEditPlant(int plantNumber) {
         PlantDetailsFragment EditPlantFragment = new PlantDetailsFragment();
         Bundle args = new Bundle();
-        args.putInt("plantId", plantId);
+        args.putInt("plantNumber", plantNumber);
         EditPlantFragment.setArguments(args);
 
         requireActivity().getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, EditPlantFragment, "PlantDetailsFragment")
+                .addToBackStack(TAG)
+                .commit();
+    }
+
+    private void loadAlertsFragment() {
+        AlertsFragment alertsFragment = new AlertsFragment();
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, alertsFragment)
                 .addToBackStack(TAG)
                 .commit();
     }
@@ -443,51 +572,14 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         localPlants.observe(getViewLifecycleOwner(), plantEntities -> {
             Log.d(TAG, "loadPlantsFromLocalStorage: " + plantEntities);
             List<Plant> plants = convertToPlantList(plantEntities);
-            // TODO - create the plant only if saved on PlantDetailsFragment to avoid rerendering the list
-            // if any plant as all the fields empty, delete it from the local storage
-            plants.forEach(plant -> {
-                if (plant.getName().equals("")) {
-                    executor.execute(() -> {
-                        appDatabase.plantDao().deletePlantByNumber(String.valueOf(plant.getId()));
-                    });
-                }
-            });
             adapter.updatePlants(plants);
         });
-
 
         List<Plant> plantsAux = convertToPlantList(localPlants.getValue());
 
         adapter = new PlantsGridAdapter(requireContext(), plantsAux, appDatabase);
         adapter.setOnPlantClickListener(HomepageFragment.this);
         recyclerView.setAdapter(adapter);
-    }
-
-    private void createNewPlantInLocalStorage(int plantId) {
-        executor.execute(() -> {
-            if (appDatabase.plantDao().getPlantByNumber(plantId) != null) {
-                Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
-                return;
-            }
-
-            try {
-                PlantEntity plantEntity = new PlantEntity();
-                plantEntity.setId(plantId);
-                plantEntity.setName("");
-                plantEntity.setSpecies("");
-                plantEntity.setMin_temp(-40);
-                plantEntity.setMax_temp(80);
-                plantEntity.setMin_humidity(0);
-                plantEntity.setMax_humidity(100);
-                plantEntity.setDescription("");
-                plantEntity.setImgUri("");
-                appDatabase.plantDao().insert(plantEntity);
-
-                openEditPlant(plantId);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
     }
 
     private List<Plant> convertToPlantList(@Nullable List<PlantEntity> plantEntities) {
@@ -498,10 +590,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         List<Plant> plants = new ArrayList<>();
 
         for (PlantEntity plantEntity : plantEntities) {
-            int plantId = plantEntity.getId();
+            String plantId = String.valueOf(plantEntity.getId());
 
             Plant plant = new Plant(
                     plantId,
+                    plantEntity.getNumber(),
                     plantEntity.getName(),
                     plantEntity.getSpecies(),
                     plantEntity.getMin_temp(),
@@ -509,18 +602,18 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                     plantEntity.getMin_humidity(),
                     plantEntity.getMax_humidity(),
                     plantEntity.getDescription(),
-                    plantEntity.getImgUri()
-            );
+                    plantEntity.getImgUri());
             plants.add(plant);
         }
         return plants;
     }
 
     private Plant convertToPlant(PlantEntity plantEntity) {
-        int PlantId = plantEntity.getId();
+        String PlantId = String.valueOf(plantEntity.getId());
 
         return new Plant(
                 PlantId,
+                plantEntity.getNumber(),
                 plantEntity.getName(),
                 plantEntity.getSpecies(),
                 plantEntity.getMin_temp(),
@@ -528,7 +621,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 plantEntity.getMin_humidity(),
                 plantEntity.getMax_humidity(),
                 plantEntity.getDescription(),
-                plantEntity.getImgUri()
-        );
+                plantEntity.getImgUri());
     }
 }
