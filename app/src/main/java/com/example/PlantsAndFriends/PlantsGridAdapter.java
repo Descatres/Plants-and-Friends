@@ -142,7 +142,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
 
     private void updatePlantName(Plant plant, String newName) {
         executor.execute(() -> {
-            appDatabase.plantDao().updatePlantName(plant.getId(), newName);
+            appDatabase.plantDao().updatePlantName(plant.getNumber(), newName);
         });
     }
 
@@ -224,7 +224,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
                 NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(network);
                 return networkCapabilities != null
                         && (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                                || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
+                        || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
             }
         }
 

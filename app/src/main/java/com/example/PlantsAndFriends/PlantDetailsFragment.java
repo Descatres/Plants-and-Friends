@@ -86,8 +86,7 @@ public class PlantDetailsFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.edit_plant, container, false);
         toolbar = view.findViewById(R.id.toolbar);
 
@@ -96,12 +95,12 @@ public class PlantDetailsFragment extends Fragment {
         speciesEditText = view.findViewById(R.id.species);
 
         // Image
-        plantImageView = view.findViewById(R.id.add_image);
+//        plantImageView = view.findViewById(R.id.add_image);
 
-        plantImageView.setOnClickListener(v -> {
-            // Handle the click event to open the image picker
-            openGallery();
-        });
+//        plantImageView.setOnClickListener(v -> {
+        // Handle the click event to open the image picker
+//            openGallery();
+//        });
 
         minTemperatureTextView = view.findViewById(R.id.minTemperature);
         maxTemperatureTextView = view.findViewById(R.id.maxTemperature);
@@ -217,7 +216,7 @@ public class PlantDetailsFragment extends Fragment {
                     openGallery();
                 } else {
                     // Request permission
-                    requestPermissions(new String[] { Manifest.permission.READ_EXTERNAL_STORAGE },
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                             REQUEST_STORAGE_PERMISSION);
                 }
 
@@ -242,7 +241,7 @@ public class PlantDetailsFragment extends Fragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-            @NonNull int[] grantResults) {
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == REQUEST_STORAGE_PERMISSION) {
@@ -369,7 +368,7 @@ public class PlantDetailsFragment extends Fragment {
     private void displayPlantFromLocalStorage(String plantNumber) {
         executor.execute(() -> {
             // check if the plant exists in the local storage by plantId
-            if (appDatabase.plantDao().getPlantByNumber(plantId) == null) {
+            if (appDatabase.plantDao().getPlantByNumber(plantNumber) == null) {
                 Log.d("PlantDetailsFragment", "Plant does not exist in local storage");
                 return;
             }
@@ -404,13 +403,12 @@ public class PlantDetailsFragment extends Fragment {
         return null;
     }
 
-    private void savePlantToLocalStorage(int plantId, Uri imageUri) {
+    private void savePlantToLocalStorage(String plantNumber, Uri imageUri) {
         executor.execute(() -> {
             if (nameEditText.getText().toString().isEmpty()) {
                 if (isAdded()) {
                     mainHandler.post(() -> {
-                        Toast.makeText(requireContext(), "Plant not saved. Name of plant required", Toast.LENGTH_SHORT)
-                                .show();
+                        Toast.makeText(requireContext(), "Plant not saved. Name of plant required", Toast.LENGTH_SHORT).show();
                     });
                     Log.d("PlantDetailsFragment", "Plant not saved. Name of plant required");
                 }
@@ -425,22 +423,20 @@ public class PlantDetailsFragment extends Fragment {
             appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
             appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
             if (imageUri != null) {
-                // check if the imageUri leads to a valid image on the phone and, if so, save it
-                // to the local storage
-                // try {
-                // MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(),
-                // imageUri);
-                // } catch (Exception e) {
-                // e.printStackTrace();
-                // if (isAdded()) {
-                // mainHandler.post(() -> {
-                // consolidatedResultBuilder.append("Plant not saved. Invalid image!");
-                // callback.run();
-                // });
-                // Log.d("PlantDetailsFragment", "Plant not saved. Invalid image!");
-                // }
-                // return;
-                // }
+                // check if the imageUri leads to a valid image on the phone and, if so, save it to the local storage
+//                try {
+//                    MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), imageUri);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                if (isAdded()) {
+//                    mainHandler.post(() -> {
+//                        consolidatedResultBuilder.append("Plant not saved. Invalid image!");
+//                        callback.run();
+//                    });
+//                    Log.d("PlantDetailsFragment", "Plant not saved. Invalid image!");
+//                }
+//                    return;
+//                }
                 appDatabase.plantDao().updatePlantImageUri(plantNumber, String.valueOf(imageUri));
             }
             // check if the plant name is set
@@ -448,12 +444,9 @@ public class PlantDetailsFragment extends Fragment {
             if (!isNetworkConnected()) {
                 if (isAdded()) {
                     mainHandler.post(() -> {
-                        Toast.makeText(requireContext(),
-                                "Plant saved but failed to backup to Firestore (No internet connection)",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore (No internet connection)", Toast.LENGTH_SHORT).show();
                     });
-                    Log.d("PlantDetailsFragment",
-                            "Plant saved but failed to backup to Firestore (No internet connection)");
+                    Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (No internet connection)");
                 }
             }
         });
@@ -562,7 +555,7 @@ public class PlantDetailsFragment extends Fragment {
                 NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(network);
                 return networkCapabilities != null
                         && (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                                || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
+                        || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
             }
         }
         Log.d("PlantDetailsFragment", "No network connection");

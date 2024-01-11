@@ -63,7 +63,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.homepage, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
         mAuth = FirebaseAuth.getInstance();
@@ -182,9 +182,9 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
             GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(requireContext(), gso);
             googleSignInClient.signOut().addOnCompleteListener(task -> {
-                Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
-                loadLoginFragment();
-            })
+                        Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+                        loadLoginFragment();
+                    })
                     .addOnFailureListener(
                             e -> Toast.makeText(requireContext(), "Logout failed", Toast.LENGTH_SHORT).show());
 
@@ -209,7 +209,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(network);
                 return networkCapabilities != null
                         && (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                                || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
+                        || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
             }
         }
 
@@ -289,7 +289,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                                                     .addOnFailureListener(e -> {
                                                         Log.w(TAG, "Error adding plant to Firestore", e);
                                                         mainHandler.post(() -> Toast.makeText(requireContext(),
-                                                                "Failed to add plant to Firestore", Toast.LENGTH_SHORT)
+                                                                        "Failed to add plant to Firestore", Toast.LENGTH_SHORT)
                                                                 .show());
                                                     });
                                         });
@@ -329,7 +329,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     }
 
     private void createNewPlantInLocalStorage(String plantNumber, String plantName, String plantSpecies, float minTemp,
-            float maxTemp, float minHumidity, float maxHumidity, String plantDescription, String plantImgUri) {
+                                              float maxTemp, float minHumidity, float maxHumidity, String plantDescription, String plantImgUri) {
         executor.execute(() -> {
             if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
                 Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
@@ -536,10 +536,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         // }
     }
 
-    private void openEditPlant(int plantNumber) {
+    private void openEditPlant(String plantNumber) {
         PlantDetailsFragment EditPlantFragment = new PlantDetailsFragment();
         Bundle args = new Bundle();
-        args.putInt("plantNumber", plantNumber);
+        args.putString("plantNumber", plantNumber);
         EditPlantFragment.setArguments(args);
 
         requireActivity().getSupportFragmentManager()
