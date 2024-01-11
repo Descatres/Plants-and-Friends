@@ -64,20 +64,22 @@ public class MqttMonitorService extends Service {
             @Override
             public void connectionLost(Throwable cause) {
                 // Handle connection lost
-                Log.e("MainActivity", "Connection lost");
+                Log.e(TAG, "Connection lost");
             }
 
             @Override
             public void messageArrived(String topic, org.eclipse.paho.client.mqttv3.MqttMessage message) {
                 // Log.e("MainActivity", "Message arrived" + message.toString());
                 String payload = new String(message.getPayload());
+                // log message received every 60 seconds
+                Log.e(TAG, "Message arrived" + payload);
                 // make the notification here
 
             }
 
             @Override
             public void deliveryComplete(IMqttDeliveryToken token) {
-                // Log.e("MainActivity", "Delivery complete");
+                // Log.e(TAG, "Delivery complete");
             }
         });
 
@@ -152,30 +154,31 @@ public class MqttMonitorService extends Service {
     }
 
     private void checkAndSendNotifications(Map<String, Object> thresholdsData) {
-        // Update UI elements with retrieved thresholds
+        float minTemperature;
+        float maxTemperature;
+        float minHumidity;
+        float maxHumidity;
+
         if (thresholdsData.containsKey("minTemperature")) {
-            float minTemperature = parseFloatWithDefault(thresholdsData.get("minTemperature"));
-            float maxTemperature = parseFloatWithDefault(thresholdsData.get("maxTemperature"));
+            minTemperature = parseFloatWithDefault(thresholdsData.get("minTemperature"));
+            maxTemperature = parseFloatWithDefault(thresholdsData.get("maxTemperature"));
             List<Float> temperatureValues = Arrays.asList(minTemperature, maxTemperature);
+
+//            if ((current < minTemperature || current > maxTemperature) && current != prevValue) {
+//                showNotification("Temperature Alert", "Temperature value is (" + currentValue + ")");
+//            }
         }
 
         if (thresholdsData.containsKey("minHumidity")) {
-            float minHumidity = parseFloatWithDefault(thresholdsData.get("minHumidity"));
-            float maxHumidity = parseFloatWithDefault(thresholdsData.get("maxHumidity"));
+            minHumidity = parseFloatWithDefault(thresholdsData.get("minHumidity"));
+            maxHumidity = parseFloatWithDefault(thresholdsData.get("maxHumidity"));
             List<Float> humidityValues = Arrays.asList(minHumidity, maxHumidity);
-            //
+
+//            if ((current < minTemperature || current > maxTemperature) && current != prevValue) {
+//                showNotification("Humidity Alert", Humidity + " value is (" + currentValue + ")");
+//            }
+
         }
-
-//        if (currentTemperature < minTemperatureThreshold || currentTemperature > maxTemperatureThreshold) {
-//            // Temperature is outside the threshold, send a temperature alert notification
-//            showNotification("Temperature Alert", "Temperature is outside the threshold");
-//        }
-
-        // Check if humidity is outside the threshold
-//        if (currentHumidity < minHumidityThreshold || currentHumidity > maxHumidityThreshold) {
-//            // Humidity is outside the threshold, send a humidity alert notification
-//            showNotification("Humidity Alert", "Humidity is outside the threshold");
-//        }
     }
 
     private void connectMQTT() {
@@ -192,7 +195,7 @@ public class MqttMonitorService extends Service {
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    // Log.e("MainActivity", "Failed to connect to MQTT broker");
+                    // Log.e(TAG, "Failed to connect to MQTT broker");
 //                    unsubscribeFromTopics();
                 }
             });
@@ -209,13 +212,13 @@ public class MqttMonitorService extends Service {
             subToken1.setActionCallback(new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    // Log.e("MainActivity", "Subscribed to temperature topic");
+                    Log.i(TAG, "Subscribed to temperature topic");
                     // Handle successful subscription to temperature topic
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    // Log.e("MainActivity", "Failed to subscribe to temperature topic");
+                    // Log.e(TAG, "Failed to subscribe to temperature topic");
                     // Handle failure
                 }
             });
@@ -224,21 +227,21 @@ public class MqttMonitorService extends Service {
             subToken2.setActionCallback(new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    // Log.e("MainActivity", "Subscribed to humidity topic");
+                    Log.i(TAG, "Subscribed to humidity topic");
                     // Handle successful subscription to humidity topic
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    // Log.e("MainActivity", "Failed to subscribe to humidity topic");
+                    // Log.e(TAG, "Failed to subscribe to humidity topic");
                     // Handle failure
                 }
             });
         } catch (MqttSecurityException e) {
-            // Log.e("MainActivity", "security exception", e);
+            // Log.e(TAG, "security exception", e);
             throw new RuntimeException(e);
         } catch (MqttException e) {
-            // Log.e("MainActivity", "mqtt exception", e);
+            // Log.e(TAG, "mqtt exception", e);
             e.printStackTrace();
         }
     }

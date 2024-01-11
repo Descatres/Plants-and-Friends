@@ -2,6 +2,7 @@ package com.example.PlantsAndFriends;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.ConnectivityManager;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -90,6 +92,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             });
         }
 
+        startMqttMonitorService();
         return view;
     }
 
@@ -186,6 +189,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void startMqttMonitorService() {
+        Intent serviceIntent = new Intent(getActivity(), MqttMonitorService.class);
+        requireActivity().startService(serviceIntent);
     }
 
     private boolean isNetworkConnected() {

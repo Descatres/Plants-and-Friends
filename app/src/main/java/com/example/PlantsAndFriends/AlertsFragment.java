@@ -1,7 +1,6 @@
 package com.example.PlantsAndFriends;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -102,8 +101,6 @@ public class AlertsFragment extends Fragment {
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_save) {
                 saveThresholdsFirestore();
-//                Intent serviceIntent = new Intent(this, MqttMonitorService.class);
-//                startService(serviceIntent);
                 return true;
             } else if (item.getItemId() == R.id.action_back) {
                 navigateToHomepage();
