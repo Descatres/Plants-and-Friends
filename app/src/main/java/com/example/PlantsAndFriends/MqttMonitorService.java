@@ -45,6 +45,8 @@ public class MqttMonitorService extends Service {
     private static final int CHECK_INTERVAL = 60000; // 60 seconds
     private static final String CHANNEL_ID = "MyChannel";
 
+    private CustomAlarmPingSender customAlarmPingSender;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -52,6 +54,8 @@ public class MqttMonitorService extends Service {
         String serverUri = "tcp://broker.hivemq.com:1883";
         String clientId = "androidClient_" + UUID.randomUUID().toString();
 
+        customAlarmPingSender = new CustomAlarmPingSender(this, "your_client_id");
+        customAlarmPingSender.start();
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -82,7 +86,6 @@ public class MqttMonitorService extends Service {
                 // Log.e(TAG, "Delivery complete");
             }
         });
-
         createNotificationChannel();
 
         connectMQTT();
@@ -105,6 +108,7 @@ public class MqttMonitorService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        customAlarmPingSender.stop();
         disconnectMQTT();
     }
 

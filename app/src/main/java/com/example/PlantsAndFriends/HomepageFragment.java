@@ -1,6 +1,7 @@
 package com.example.PlantsAndFriends;
 
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -193,9 +194,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
     private void startMqttMonitorService() {
         // if api > 31 return
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            return;
-        }
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+//            return;
+//        }
+
         Intent serviceIntent = new Intent(getActivity(), MqttMonitorService.class);
         requireActivity().startService(serviceIntent);
     }
