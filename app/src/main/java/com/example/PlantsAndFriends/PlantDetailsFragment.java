@@ -217,7 +217,6 @@ public class PlantDetailsFragment extends Fragment {
             // Handle the selected image URI
             selectedImageUri = data.getData();
             // if permission to read the image is negative dont load it
-
             loadImage(selectedImageUri);
 
         }
@@ -226,6 +225,8 @@ public class PlantDetailsFragment extends Fragment {
     private void loadImage(Uri imageUri) {
         if (isGalleryPermissionGranted()) {
             Glide.with(this).load(imageUri).into(plantImageView);
+        } else {
+            Toast.makeText(requireContext(), "Enable permission to show images", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -316,6 +317,7 @@ public class PlantDetailsFragment extends Fragment {
             double plantMaxTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_temp();
             double plantMinHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_humidity();
             double plantMaxHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_humidity();
+
             Uri imageUri = getImageUriFromLocalStorage(plantNumber);
             if (isAdded()) {
                 mainHandler.post(() -> {
@@ -334,7 +336,7 @@ public class PlantDetailsFragment extends Fragment {
 
     private Uri getImageUriFromLocalStorage(String plantNumber) {
         String imageUriString = appDatabase.plantDao().getPlantImageUri(plantNumber);
-        if (imageUriString != null) {
+        if (imageUriString != null && isGalleryPermissionGranted()) {
             return Uri.parse(imageUriString);
         }
         return null;
@@ -359,7 +361,7 @@ public class PlantDetailsFragment extends Fragment {
             appDatabase.plantDao().updatePlantMaxTemp(plantNumber, temperatureRangeSlider.getValues().get(1));
             appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
             appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
-            if (imageUri != null) {
+            if (imageUri != null && isGalleryPermissionGranted()) {
                 // check if the imageUri leads to a valid image on the phone and, if so, save it to the local storage
 //                try {
 //                    MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), imageUri);
