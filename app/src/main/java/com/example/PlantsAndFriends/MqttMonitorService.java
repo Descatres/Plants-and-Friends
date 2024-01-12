@@ -45,7 +45,6 @@ public class MqttMonitorService extends Service {
     private static final int CHECK_INTERVAL = 300000; // 5 minutes
     private static final String CHANNEL_ID = "MyChannel";
     private MqttViewModel mqttViewModel;
-    // Declare variables to store current temperature and humidity
     private float currentTemperature = Float.NaN;
     private float currentHumidity = Float.NaN;
     private boolean notificationTemperatureSent = false;
