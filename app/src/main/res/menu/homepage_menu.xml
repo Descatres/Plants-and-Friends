@@ -5,7 +5,7 @@
         android:icon="@drawable/bakcup_icon"
         android:title="@string/save_plants_to_firestore"
         app:showAsAction="ifRoom"
-        
+
         />
     <item
         android:id="@+id/menu_more"
@@ -33,7 +33,7 @@
                 app:iconTint="@color/blue_gray"
                 android:title="@string/alerts"
                 app:showAsAction="ifRoom" />
-
+            <!-- TODO - remake the icon below to be smaller -->
             <item
                 android:id="@+id/load_plants_from_firestore"
                 android:icon="@drawable/baseline_download_24"

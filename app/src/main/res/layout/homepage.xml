@@ -1,19 +1,27 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="#FFF">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFF">
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/green"
         android:titleTextColor="#FFFFFF">
+
         <ImageView
             android:id="@+id/toolbar_icon"
             android:layout_width="35sp"
             android:layout_height="35sp"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
-            android:src="@drawable/white_logo"
+            android:src="@drawable/negative_logo"
             android:contentDescription="@string/add_plant_icon"
-            app:tint="#FFFFFF"/>
+            app:tint="#FFFFFF" />
+
         <TextView
             android:id="@+id/toolbar_title"
             android:layout_width="wrap_content"
@@ -24,8 +32,10 @@
             android:paddingEnd="16dp"
             android:fontFamily="@font/poppins_medium"
             android:text="@string/app_name"
-            android:textColor="#FFFFFF" android:textSize="20sp"/>
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
     </androidx.appcompat.widget.Toolbar>
+
     <RelativeLayout
         android:id="@+id/infoLayout"
         android:layout_width="match_parent"
@@ -34,17 +44,19 @@
         android:layout_marginTop="20dp"
         android:layout_marginHorizontal="20dp"
         android:background="#FFF">
+
         <LinearLayout
             android:id="@+id/leftLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true">
 
-            <ImageView android:id="@+id/leftIcon"
+            <ImageView
+                android:id="@+id/leftIcon"
                 android:layout_width="10dp"
                 android:layout_height="10dp"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/grid_icon"/>
+                android:src="@drawable/grid_icon" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switchButton"
@@ -54,12 +66,13 @@
                 android:textOn=""
                 app:thumbTint="@color/green"
                 app:trackTint="#DDDDDD" />
+
             <ImageView
                 android:id="@+id/rightIcon"
                 android:layout_width="10dp"
                 android:layout_height="10dp"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/list_icon"/>
+                android:src="@drawable/list_icon" />
         </LinearLayout>
         <!--  Linear Layout with Temperature and Humidity Icons and Displays  -->
         <LinearLayout
@@ -72,8 +85,7 @@
             android:orientation="horizontal"
             android:background="@drawable/box"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            >
+            android:layout_centerVertical="true">
 
             <!--  Temperature Icon and Display  -->
             <ImageView
@@ -82,14 +94,15 @@
                 android:src="@drawable/temperature_icon"
                 android:contentDescription="Temperature Icon"
                 android:layout_gravity="center_vertical"
-                android:layout_marginEnd="4dp"/>
+                android:layout_marginEnd="4dp" />
+
             <TextView
                 android:id="@+id/temperatureTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:text="Off"/>
+                android:text="Off" />
             <!--  Humidity Icon and Display  -->
             <ImageView
                 android:layout_width="18dp"
@@ -98,14 +111,16 @@
                 android:contentDescription="Humidity Icon"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="10dp"
-                android:layout_marginEnd="4dp"/>
-            <TextView android:id="@+id/humidityTextView"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/humidityTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
                 android:paddingEnd="1dp"
-                android:text="Off"/>
+                android:text="Off" />
         </LinearLayout>
         <!--  Search Icon on the Right  -->
         <ImageView
@@ -114,8 +129,7 @@
             android:layout_height="25dp"
             android:src="@drawable/search_icon"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-          />
+            android:layout_centerVertical="true" />
     </RelativeLayout>
     <!--  RecyclerView  -->
     <androidx.recyclerview.widget.RecyclerView
@@ -167,7 +181,6 @@
             android:textAlignment="center"
             android:textAllCaps="false"
             android:textColor="@color/white"
-            android:textSize="18sp"
-            />
+            android:textSize="18sp" />
     </RelativeLayout>
 </RelativeLayout>
