@@ -12,11 +12,10 @@ import android.util.Log;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
@@ -29,8 +28,6 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -45,7 +42,7 @@ public class MqttMonitorService extends Service {
     private MqttAndroidClient mqttAndroidClient;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private static final int CHECK_INTERVAL = 60000; // 60 seconds
+    private static final int CHECK_INTERVAL = 300000; // 5 minutes
     private static final String CHANNEL_ID = "MyChannel";
     private MqttViewModel mqttViewModel;
     // Declare variables to store current temperature and humidity
@@ -54,14 +51,12 @@ public class MqttMonitorService extends Service {
     private boolean notificationTemperatureSent = false;
     private boolean notificationHumiditySent = false;
 
-
     @Override
     public void onCreate() {
         super.onCreate();
 
         String serverUri = "tcp://broker.hivemq.com:1883";
         String clientId = "androidClient_" + UUID.randomUUID().toString();
-
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -74,7 +69,6 @@ public class MqttMonitorService extends Service {
         mqttAndroidClient.setCallback(new MqttCallback() {
             @Override
             public void connectionLost(Throwable cause) {
-                // Handle connection lost
                 Log.e(TAG, "Connection lost");
                 updateMqttData(humidityTopic, "Connection Lost");
                 updateMqttData(temperatureTopic, "Connection Lost");
@@ -83,37 +77,29 @@ public class MqttMonitorService extends Service {
             @Override
             public void messageArrived(String topic, org.eclipse.paho.client.mqttv3.MqttMessage message) {
                 String payload = new String(message.getPayload());
-                // log message received every 60 seconds
                 Log.e(TAG, "Message arrived" + payload);
 
-                // Parse the payload to extract temperature and humidity values
                 if (topic.equals(temperatureTopic)) {
                     currentTemperature = parseFloatWithDefault(payload);
                 } else if (topic.equals(humidityTopic)) {
                     currentHumidity = parseFloatWithDefault(payload);
                 }
 
-                // Check and send notifications based on the received values
                 fetchAndVerifyThresholds();
             }
 
             @Override
             public void deliveryComplete(IMqttDeliveryToken token) {
-                // Log.e(TAG, "Delivery complete");
             }
         });
 
         createNotificationChannel();
-
         connectMQTT();
-
-        //fetchAndVerifyThresholds();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         startMonitoring();
-
         return START_STICKY;
     }
 
@@ -138,16 +124,30 @@ public class MqttMonitorService extends Service {
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            // Thresholds document exists, update UI with retrieved values
                             Map<String, Object> thresholdsData = documentSnapshot.getData();
                             if (thresholdsData != null) {
-                                checkAndSendNotifications(thresholdsData);
+                                checkAndSendRoomNotifications(thresholdsData);
                             }
                         }
                     })
                     .addOnFailureListener(e -> {
-                        // Handle failure
                         Log.e("AlertsFragment", "Error fetching thresholds from Firestore", e);
+                    });
+
+            db.collection("users").document(currentUserUid).collection("plants")
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        if (!querySnapshot.isEmpty() && !notificationTemperatureSent && !notificationHumiditySent) {
+                            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                                Map<String, Object> plantData = document.getData();
+                                if (plantData != null) {
+                                    checkAndSendPlantNotifications(plantData);
+                                }
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("AlertsFragment", "Error fetching plant data from Firestore", e);
                     });
         }
     }
@@ -157,10 +157,9 @@ public class MqttMonitorService extends Service {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                notificationTemperatureSent = false; // Reset the flag
-                notificationHumiditySent = false; // Reset the flag
+                notificationTemperatureSent = false;
+                notificationHumiditySent = false;
                 fetchAndVerifyThresholds();
-
                 handler.postDelayed(this, CHECK_INTERVAL);
             }
         }, CHECK_INTERVAL);
@@ -174,35 +173,65 @@ public class MqttMonitorService extends Service {
         }
     }
 
-    private void checkAndSendNotifications(Map<String, Object> thresholdsData) {
-
-        if (thresholdsData.containsKey("minTemperature") && thresholdsData.containsKey("maxTemperature") && !notificationTemperatureSent) {
-            float minTemperature = parseFloatWithDefault(thresholdsData.get("minTemperature"));
-            float maxTemperature = parseFloatWithDefault(thresholdsData.get("maxTemperature"));
-            checkTemperatureInterval(minTemperature, maxTemperature);
+    private void checkAndSendRoomNotifications(Map<String, Object> thresholdsData) {
+        if (thresholdsData.containsKey("minRoomTemperature") && thresholdsData.containsKey("maxRoomTemperature")
+                && !notificationTemperatureSent) {
+            float minRoomTemperature = parseFloatWithDefault(thresholdsData.get("minRoomTemperature"));
+            float maxRoomTemperature = parseFloatWithDefault(thresholdsData.get("maxRoomTemperature"));
+            checkRoomTemperatureInterval(minRoomTemperature, maxRoomTemperature);
         }
 
-        if (thresholdsData.containsKey("minHumidity") && thresholdsData.containsKey("maxHumidity") && !notificationHumiditySent) {
-            float minHumidity = parseFloatWithDefault(thresholdsData.get("minHumidity"));
-            float maxHumidity = parseFloatWithDefault(thresholdsData.get("maxHumidity"));
-            checkHumidityInterval(minHumidity, maxHumidity);
+        if (thresholdsData.containsKey("minRoomHumidity") && thresholdsData.containsKey("maxRoomHumidity")
+                && !notificationHumiditySent) {
+            float minRoomHumidity = parseFloatWithDefault(thresholdsData.get("minRoomHumidity"));
+            float maxRoomHumidity = parseFloatWithDefault(thresholdsData.get("maxRoomHumidity"));
+            checkRoomHumidityInterval(minRoomHumidity, maxRoomHumidity);
         }
     }
 
-    private void checkTemperatureInterval(float minTemperature, float maxTemperature) {
-        if (!Float.isNaN(currentTemperature) && (currentTemperature < minTemperature || currentTemperature > maxTemperature)) {
-            showNotification("Temperature Alert", "Temperature value is outside the specified interval");
+    private void checkRoomTemperatureInterval(float minRoomTemperature, float maxRoomTemperature) {
+        if (!Float.isNaN(currentTemperature) && (currentTemperature < minRoomTemperature || currentTemperature > maxRoomTemperature)) {
+            showNotification("Temperature Alert", "Room temperature value is outside the specified interval");
             notificationTemperatureSent = true;
         }
     }
 
-    private void checkHumidityInterval(float minHumidity, float maxHumidity) {
-        if (!Float.isNaN(currentHumidity) && (currentHumidity < minHumidity || currentHumidity > maxHumidity)) {
-            showNotification("Humidity Alert", "Humidity value is outside the specified interval");
+    private void checkRoomHumidityInterval(float minRoomHumidity, float maxRoomHumidity) {
+        if (!Float.isNaN(currentHumidity) && (currentHumidity < minRoomHumidity || currentHumidity > maxRoomHumidity)) {
+            showNotification("Humidity Alert", "Room humidity value is outside the specified interval");
             notificationHumiditySent = true;
         }
     }
 
+    private void checkAndSendPlantNotifications(Map<String, Object> plantData) {
+        if (plantData.containsKey("minTemperature") && plantData.containsKey("maxTemperature")) {
+            float minTemperature = parseFloatWithDefault(plantData.get("minTemperature"));
+            float maxTemperature = parseFloatWithDefault(plantData.get("maxTemperature"));
+            checkPlantTemperatureInterval(minTemperature, maxTemperature, plantData);
+        }
+
+        if (plantData.containsKey("minHumidity") && plantData.containsKey("maxHumidity")) {
+            float minHumidity = parseFloatWithDefault(plantData.get("minHumidity"));
+            float maxHumidity = parseFloatWithDefault(plantData.get("maxHumidity"));
+            checkPlantHumidityInterval(minHumidity, maxHumidity, plantData);
+        }
+    }
+
+    private void checkPlantTemperatureInterval(float minTemperature, float maxTemperature, Map<String, Object> plantData) {
+        if (!Float.isNaN(currentTemperature) && (currentTemperature < minTemperature || currentTemperature > maxTemperature)) {
+            showNotification("Temperature Alert", "Temperature value is outside the specified interval for plant: " + getPlantName(plantData));
+        }
+    }
+
+    private void checkPlantHumidityInterval(float minHumidity, float maxHumidity, Map<String, Object> plantData) {
+        if (!Float.isNaN(currentHumidity) && (currentHumidity < minHumidity || currentHumidity > maxHumidity)) {
+            showNotification("Humidity Alert", "Humidity value is outside the specified interval for plant: " + getPlantName(plantData));
+        }
+    }
+
+    private String getPlantName(Map<String, Object> plantData) {
+        return plantData.get("plantName").toString();
+    }
 
     private void connectMQTT() {
         try {
@@ -211,15 +240,12 @@ public class MqttMonitorService extends Service {
             token.setActionCallback(new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    // Subscribe to MQTT
-                    // Log.e("MainActivity", "Connected to MQTT broker");
                     subscribeToTopics();
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    // Log.e(TAG, "Failed to connect to MQTT broker");
-//                    unsubscribeFromTopics();
+                    // Handle failure
                 }
             });
         } catch (MqttException e) {
@@ -236,12 +262,10 @@ public class MqttMonitorService extends Service {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     Log.i(TAG, "Subscribed to temperature topic");
-                    // Handle successful subscription to temperature topic
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    // Log.e(TAG, "Failed to subscribe to temperature topic");
                     // Handle failure
                 }
             });
@@ -251,20 +275,16 @@ public class MqttMonitorService extends Service {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     Log.i(TAG, "Subscribed to humidity topic");
-                    // Handle successful subscription to humidity topic
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    // Log.e(TAG, "Failed to subscribe to humidity topic");
                     // Handle failure
                 }
             });
         } catch (MqttSecurityException e) {
-            // Log.e(TAG, "security exception", e);
             throw new RuntimeException(e);
         } catch (MqttException e) {
-            // Log.e(TAG, "mqtt exception", e);
             e.printStackTrace();
         }
     }
@@ -279,50 +299,11 @@ public class MqttMonitorService extends Service {
         }
     }
 
-    private void unsubscribeFromTopics() {
-        try {
-
-            IMqttToken unsubToken1 = mqttAndroidClient.unsubscribe(temperatureTopic);
-            unsubToken1.setActionCallback(new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    // Log.e("MainActivity", "Unsubscribed from temperature topic");
-                }
-
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    // Log.e("MainActivity", "Failed to unsubscribe from temperature topic");
-                }
-            });
-
-            IMqttToken unsubToken2 = mqttAndroidClient.unsubscribe(humidityTopic);
-            unsubToken2.setActionCallback(new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    // Log.e("MainActivity", "Unsubscribed from humidity topic");
-                }
-
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    // Log.e("MainActivity", "Failed to unsubscribe from humidity topic");
-                }
-            });
-        } catch (MqttException e) {
-            // Log.e("MainActivity", "Connection exception", e);
-            e.printStackTrace();
-        }
-
-    }
-
     private void updateMqttData(String topic, String payload) {
-        // update DataRepository with received MQTT data
-        // Log.e("MainActivity", "Received message on topic: " + topic + ", payload: " + payload);
         dataRepository.updateData(topic, payload);
     }
 
     private void showNotification(String title, String message) {
-        // Use NotificationCompat.Builder to create and display notifications
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(title)
@@ -330,8 +311,6 @@ public class MqttMonitorService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: call ActivityCompat#requestPermissions here to request the missing permissions, and then overriding
-            // public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
             return;
         }
 
@@ -344,7 +323,6 @@ public class MqttMonitorService extends Service {
     }
 
     private void createNotificationChannel() {
-        // Create the notification channel if it doesn't exist
         CharSequence name = "MyChannel";
         String description = "Temperature and Humidity Alerts";
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -353,7 +331,5 @@ public class MqttMonitorService extends Service {
 
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
-
     }
-
 }
