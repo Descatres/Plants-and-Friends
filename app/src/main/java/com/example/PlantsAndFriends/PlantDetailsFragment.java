@@ -32,10 +32,15 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.slider.RangeSlider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +78,8 @@ public class PlantDetailsFragment extends Fragment {
 
     private static final int GALLERY_PERMISSION_REQUEST_CODE = 101;
 
+    StorageReference storageReference;
+
 
     @Nullable
     @Override
@@ -88,7 +95,6 @@ public class PlantDetailsFragment extends Fragment {
         plantImageView = view.findViewById(R.id.add_image);
 
         plantImageView.setOnClickListener(v -> {
-            // Handle the click event to open the image picker
             openGallery();
         });
 
@@ -141,13 +147,18 @@ public class PlantDetailsFragment extends Fragment {
             displayPlantFromLocalStorage(plantNumber);
         }
 
+
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.plant_details_menu);
+
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_save) {
                 if (getArguments() != null) {
                     String plantNumber = getArguments().getString("plantNumber");
                     if (plantNumber != null && !plantNumber.isEmpty()) {
+                        if (isNetworkConnected()) {
+                            uploadImage(selectedImageUri);
+                        }
                         savePlantToLocalStorage(plantNumber, selectedImageUri);
                         if (isNetworkConnected()) {
                             backupPlantToFirestore(plantNumber, () -> {
@@ -161,6 +172,7 @@ public class PlantDetailsFragment extends Fragment {
                                     }
                                 });
                             });
+
                         }
                     }
                 }
@@ -182,6 +194,9 @@ public class PlantDetailsFragment extends Fragment {
                 return false;
             }
         });
+
+        storageReference = FirebaseStorage.getInstance().getReference();
+
 
         return view;
     }
@@ -227,6 +242,31 @@ public class PlantDetailsFragment extends Fragment {
             Glide.with(this).load(imageUri).into(plantImageView);
         } else {
             Toast.makeText(requireContext(), "Enable permission to show images", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    private void uploadImage(Uri imageUri) {
+        Log.e(TAG, "uploadImage: " + imageUri);
+        if (imageUri != null && isNetworkConnected()) {
+            assert getArguments() != null;
+            String plantNumber = getArguments().getString("plantNumber");
+            StorageReference ref = storageReference.child("images/" + plantNumber);
+            Log.e(TAG, "uploadImage: " + ref);
+            ref.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Log.e(TAG, "uploadImage sucesso");
+                    mainHandler.post(() -> {
+                        Toast.makeText(requireContext(), "Image Uploaded!", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }).addOnFailureListener(e -> {
+                Log.e(TAG, "uploadImage sucesso");
+                mainHandler.post(() -> {
+                    Toast.makeText(requireContext(), "Failed!" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            });
         }
     }
 
