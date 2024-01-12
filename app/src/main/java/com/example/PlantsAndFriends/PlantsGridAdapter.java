@@ -9,13 +9,12 @@ import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +32,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.ViewHolder> {
+    private static final int VIEW_TYPE_GRID = 1;
+    private static final int VIEW_TYPE_LIST = 2;
+    private boolean isGridMode = true;
     private List<Plant> plantsList;
     private LayoutInflater inflater;
     private Context context;
@@ -51,7 +53,18 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         inflater = LayoutInflater.from(context);
     }
 
-
+    public void switchLayoutMode() {
+        isGridMode = !isGridMode;
+        Log.d("PlantsGridAdapter", "Switching layout mode to Grid: " + isGridMode);
+        notifyLayoutChanged();
+    }
+    private void notifyLayoutChanged() {
+        notifyDataSetChanged();
+    }
+    @Override
+    public int getItemViewType(int position) {
+        return isGridMode ? VIEW_TYPE_GRID : VIEW_TYPE_LIST;
+    }
     public interface OnPlantClickListener {
         void onPlantClick(Plant plant);
     }
@@ -63,16 +76,26 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.grid_item_plant, parent, false);
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        int layoutRes;
+        switch (viewType) {
+            case VIEW_TYPE_GRID:
+                layoutRes = R.layout.grid_item_plant;
+                break;
+            case VIEW_TYPE_LIST:
+                layoutRes = R.layout.list_item_plant;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid view type");
+        }
+        View view = inflater.inflate(layoutRes, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Plant plant = plantsList.get(position);
-        holder.plantTitleTextView.setText(plant.getName());
+
+        // Image
         if (plant.getImgUri() != null && !plant.getImgUri().isEmpty() && isNetworkConnected()) {
             Picasso.get().load(plant.getImgUri()).into(holder.plantImageView);
             loadImage(holder, Uri.parse(plant.getImgUri()));
@@ -80,14 +103,39 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
             loadImage(holder, Uri.parse(plant.getImgUri()));
         } else {
             // Set a placeholder image if the URI is null or empty
-            holder.plantImageView.setImageResource(R.drawable.plant_logo);
+            holder.plantImageView.setImageResource(R.drawable.default_image_homepage);
+        }
+        holder.plantNameTextView.setText(plant.getName());
+        // List vs Grid
+        if (getItemViewType(position) == VIEW_TYPE_GRID) {
+            // Grid mode: show only the plant title
+            holder.plantTitleSpecieView.setVisibility(View.GONE);
+            holder.plantMinTempTextView.setVisibility(View.GONE);
+            holder.plantMinHumidityTextView.setVisibility(View.GONE);
+        } else {
+            // List mode: show additional information along with the plant title
+            holder.plantTitleSpecieView.setText(plant.getSpecies());
+            holder.plantMinTempTextView.setText(String.format("%.2f°C", plant.getMin_temp()));
+            holder.plantMinHumidityTextView.setText(String.format("%.2f%%", plant.getMin_humidity()));
+            holder.plantMaxTempTextView.setText(String.format("|  %.2f°C", plant.getMax_temp()));
+            holder.plantMaxHumidityTextView.setText(String.format("|  %.2f%%", plant.getMax_humidity()));
+
+            holder.plantTitleSpecieView.setVisibility(View.VISIBLE);
+            holder.plantMinTempTextView.setVisibility(View.VISIBLE);
+            holder.plantMinHumidityTextView.setVisibility(View.VISIBLE);
+
+            // Adjust layout params for list mode
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) holder.plantNameTextView.getLayoutParams();
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_START);
+            layoutParams.addRule(RelativeLayout.END_OF, R.id.plant_image_view);
+            holder.plantNameTextView.setLayoutParams(layoutParams);
         }
 
-        holder.itemView.setOnLongClickListener(v -> {
-            showOptionsDialog(plant, position);
-            return true;
+        holder.itemView.setOnClickListener(v -> {
+            if (plantClickListener != null) {
+                plantClickListener.onPlantClick(plantsList.get(position));
+            }
         });
-
         holder.itemView.setOnClickListener(v -> {
             if (plantClickListener != null && position < plantsList.size()) {
                 plantClickListener.onPlantClick(plantsList.get(position));
@@ -105,16 +153,25 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView plantTitleTextView;
+        TextView plantNameTextView;
+        TextView plantTitleSpecieView;
+        TextView plantMaxHumidityTextView;
+        TextView plantMinHumidityTextView;
+        TextView plantMaxTempTextView;
+        TextView plantMinTempTextView;
         ImageView plantImageView;
-
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            plantTitleTextView = itemView.findViewById(R.id.plant_title_text_view);
             plantImageView = itemView.findViewById(R.id.plant_image_view);
+            plantNameTextView = itemView.findViewById(R.id.plantNameTextView);
+            plantTitleSpecieView = itemView.findViewById(R.id.plantSpecieTextView); // Add this line
+            plantMaxHumidityTextView = itemView.findViewById(R.id.plantMaxHumTextView); // Add this line
+            plantMinHumidityTextView = itemView.findViewById(R.id.plantMinHumTextView); // Add this line
+            plantMaxTempTextView = itemView.findViewById(R.id.plantMaxTempTextView); // Add this line
+            plantMinTempTextView = itemView.findViewById(R.id.plantMinTempTextView); // Add this line
         }
     }
+
 
     private void deletePlantAndRefreshView(Plant plant, int position) {
         if (isNetworkConnected()) {

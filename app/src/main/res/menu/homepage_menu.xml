@@ -2,9 +2,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/save_plants_to_firestore"
-        android:icon="@drawable/baseline_save_24"
+        android:icon="@drawable/bakcup_icon"
         android:title="@string/save_plants_to_firestore"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        
+        />
     <item
         android:id="@+id/menu_more"
         android:icon="@drawable/round_menu_24"
@@ -14,35 +16,35 @@
             <item
                 android:id="@+id/action_add_plant"
                 android:icon="@drawable/ic_add_plant"
-                app:iconTint="@color/black"
+                app:iconTint="@color/blue_gray"
                 android:title="@string/add_plant"
                 app:showAsAction="ifRoom" />
 
             <item
                 android:id="@+id/action_search_plant"
                 android:icon="@drawable/ic_search_plant"
-                app:iconTint="@color/black"
+                app:iconTint="@color/blue_gray"
                 android:title="@string/search_plants"
                 app:showAsAction="ifRoom" />
 
             <item
                 android:id="@+id/action_alerts"
                 android:icon="@drawable/ic_notification"
-                app:iconTint="@color/black"
+                app:iconTint="@color/blue_gray"
                 android:title="@string/alerts"
                 app:showAsAction="ifRoom" />
 
             <item
                 android:id="@+id/load_plants_from_firestore"
                 android:icon="@drawable/baseline_download_24"
-                app:iconTint="@color/black"
+                app:iconTint="@color/blue_gray"
                 android:title="@string/load_plants_from_firestore"
                 app:showAsAction="ifRoom" />
 
             <item
                 android:id="@+id/action_logout"
                 android:icon="@drawable/baseline_lock_24"
-                app:iconTint="@color/black"
+                app:iconTint="@color/blue_gray"
                 android:title="@string/log_out"
                 app:showAsAction="ifRoom" />
         </menu>
