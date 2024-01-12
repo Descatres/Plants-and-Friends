@@ -270,9 +270,15 @@ public class PlantDetailsFragment extends Fragment {
             Log.e(TAG, "uploadImage: " + "imageUri null or no internet connection");
             return;
         }
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+        String currentUserUid = currentUser.getUid();
+
         assert getArguments() != null;
         String plantNumber = getArguments().getString("plantNumber");
-        StorageReference ref = storageReference.child("images/" + plantNumber);
+        StorageReference ref = storageReference.child("images/" + currentUser + "/" + plantNumber);
         Log.e(TAG, "uploadImage: " + ref);
         ref.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
             Log.e(TAG, "uploadImage sucesso");
