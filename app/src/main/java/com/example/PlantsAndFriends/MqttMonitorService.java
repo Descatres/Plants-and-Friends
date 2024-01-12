@@ -93,7 +93,7 @@ public class MqttMonitorService extends Service {
                 }
 
                 // Check and send notifications based on the received values
-                checkAndSendNotifications();
+                fetchAndVerifyThresholds();
             }
 
             @Override
@@ -106,7 +106,7 @@ public class MqttMonitorService extends Service {
 
         connectMQTT();
 
-        fetchAndVerifyThresholds();
+        //fetchAndVerifyThresholds();
     }
 
     @Override
@@ -172,37 +172,19 @@ public class MqttMonitorService extends Service {
         }
     }
 
-    private void checkAndSendNotifications() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            String currentUserUid = currentUser.getUid();
+    private void checkAndSendNotifications(Map<String, Object> thresholdsData) {
+        if (thresholdsData != null) {
+            if (thresholdsData.containsKey("minTemperature") && thresholdsData.containsKey("maxTemperature")) {
+                float minTemperature = parseFloatWithDefault(thresholdsData.get("minTemperature"));
+                float maxTemperature = parseFloatWithDefault(thresholdsData.get("maxTemperature"));
+                checkTemperatureInterval(minTemperature, maxTemperature);
+            }
 
-            db.collection("users").document(currentUserUid).collection("thresholds")
-                    .document("sensorThresholds")
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            // Thresholds document exists, update UI with retrieved values
-                            Map<String, Object> thresholdsData = documentSnapshot.getData();
-                            if (thresholdsData != null) {
-                                if (thresholdsData.containsKey("minTemperature") && thresholdsData.containsKey("maxTemperature")) {
-                                    float minTemperature = parseFloatWithDefault(thresholdsData.get("minTemperature"));
-                                    float maxTemperature = parseFloatWithDefault(thresholdsData.get("maxTemperature"));
-                                    checkTemperatureInterval(minTemperature, maxTemperature);
-                                }
-
-                                if (thresholdsData.containsKey("minHumidity") && thresholdsData.containsKey("maxHumidity")) {
-                                    float minHumidity = parseFloatWithDefault(thresholdsData.get("minHumidity"));
-                                    float maxHumidity = parseFloatWithDefault(thresholdsData.get("maxHumidity"));
-                                    checkHumidityInterval(minHumidity, maxHumidity);
-                                }
-                            }
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        // Handle failure
-                        Log.e("AlertsFragment", "Error fetching thresholds from Firestore", e);
-                    });
+            if (thresholdsData.containsKey("minHumidity") && thresholdsData.containsKey("maxHumidity")) {
+                float minHumidity = parseFloatWithDefault(thresholdsData.get("minHumidity"));
+                float maxHumidity = parseFloatWithDefault(thresholdsData.get("maxHumidity"));
+                checkHumidityInterval(minHumidity, maxHumidity);
+            }
         }
     }
 
