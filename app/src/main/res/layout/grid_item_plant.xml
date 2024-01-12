@@ -10,11 +10,9 @@
     <ImageView
         android:id="@+id/plant_image_view"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="90dp"
         android:src="@drawable/plant_logo"
-        android:scaleType="centerCrop"
-        android:adjustViewBounds="true"
-        android:layout_margin="4dp" />
+        android:adjustViewBounds="true" />
 
     <TextView
         android:id="@+id/plant_title_text_view"

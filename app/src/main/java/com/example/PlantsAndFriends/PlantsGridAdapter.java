@@ -74,7 +74,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         Plant plant = plantsList.get(position);
         holder.plantTitleTextView.setText(plant.getName());
         if (plant.getImgUri() != null && !plant.getImgUri().isEmpty() && isNetworkConnected()) {
-//            Picasso.get().load(plant.getImgUri()).into(holder.plantImageView);
+            Picasso.get().load(plant.getImgUri()).into(holder.plantImageView);
             loadImage(holder, Uri.parse(plant.getImgUri()));
         } else if (!isNetworkConnected()) {
             loadImage(holder, Uri.parse(plant.getImgUri()));
