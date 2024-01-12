@@ -4,11 +4,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="30dp">
+    android:padding="30dp"
+    android:background="@drawable/plant_background">
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/primary_leaf_icon"
+            android:src="@drawable/logo"
             android:layout_gravity="center"
             android:padding="20dp"
             />
@@ -19,7 +20,7 @@
             android:fontFamily="@font/poppins"
             android:text="@string/register_here"
             android:textAlignment="center"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="26sp"
             android:textStyle="bold"
             android:padding="20dp"/>
@@ -74,7 +75,7 @@
             android:layout_marginTop="20dp"
             android:padding="8dp"
             android:text="@string/already_an_user_login"
-            android:textColor="@color/gray"
+            android:textColor="@color/light_gray"
             android:textStyle="bold"
             android:textSize="14sp" />
 

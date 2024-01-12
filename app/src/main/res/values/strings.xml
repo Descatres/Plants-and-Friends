@@ -41,4 +41,6 @@
     <string name="description">Description</string>
     <string name="upload_image">Upload Image</string>
     <string name="select">Select</string>
+    <string name="plant_name_list">Plant Name</string>
+    <string name="species">Species</string>
 </resources>

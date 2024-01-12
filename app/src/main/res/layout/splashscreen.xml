@@ -6,14 +6,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@drawable/plant_background">
 
     <ImageView
         android:id="@+id/splash_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/primary_leaf_icon"
-        android:padding="20dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/logo"
+        android:padding="0dp"
         tools:ignore="ImageContrastCheck"
         android:contentDescription="@string/app_name" />
 
@@ -23,7 +24,7 @@
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:text="@string/app_name"
-        android:textColor="@color/black"
+        android:textColor="@color/white"
         android:fontFamily="@font/poppins"
         android:textSize="26sp"
         android:textStyle="bold"

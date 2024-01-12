@@ -25,11 +25,13 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -58,22 +60,43 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
     private LiveData<List<PlantEntity>> localPlants;
+    private SwitchMaterial switchButton;
+    private boolean isGridLayout = true;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.homepage, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
+        switchButton = view.findViewById(R.id.switchButton);
+        // Inside HomepageFragment.onCreateView
+
+        adapter = new PlantsGridAdapter(requireContext(), new ArrayList<>(), appDatabase);
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setAdapter(adapter);
+
+
+        switchButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (adapter != null) {
+                adapter.switchLayoutMode();
+                isGridLayout = !isChecked; // Toggle the layout mode
+                setLayoutManager(); // Set the appropriate layout manager
+            }
+        });
+
+
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        adapter = new PlantsGridAdapter(requireContext(), new ArrayList<>(), appDatabase);
-        recyclerView.setAdapter(adapter);
+
+
+
+        setLayoutManager(); // Add this line
 
         setHasOptionsMenu(true);
 
         // Use GridLayoutManager with 3 columns
-        recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        // recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
 
         int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.horizontal_spacing);
         recyclerView.addItemDecoration(new HorizontalSpaceItemDecoration(spacingInPixels));
@@ -99,6 +122,13 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         return view;
     }
 
+    private void setLayoutManager() {
+        if (isGridLayout) {
+            recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        } else {
+            recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        }
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -195,63 +225,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         return false;
     }
-
-//    private void loadPlantsFromFirebase() {
-//        FirebaseUser currentUser = mAuth.getCurrentUser();
-//        if (currentUser == null) {
-//            loadLoginFragment();
-//            return;
-//        }
-//
-//        String currentUserUid = currentUser.getUid();
-//
-//        executor.execute(() -> {
-//            // delete plant from firebase if it does not exist on the local storage
-//            for (Plant plant : plantsList) {
-//                Log.e(TAG, "Delete plant number: " + plant.getNumber());
-//                if (appDatabase.plantDao().getPlantByNumber(plant.getNumber()) == null) {
-//                    Log.d(TAG, "Deleting plant from Firebase: " + plant.getNumber());
-//                    deletePlantFromFirestore(plant);
-//                }
-//            }
-//
-//            Log.d(TAG, "loadPlantsFromFirebase: " + currentUserUid);
-//            db.collection("users").document(currentUserUid).collection("plants")
-//                    .get()
-//                    .addOnCompleteListener(task -> {
-//                        if (task.isSuccessful()) {
-//                            adapter = new PlantsGridAdapter(requireContext(), plantsList, appDatabase);
-//                            adapter.setOnPlantClickListener(HomepageFragment.this);
-//                            recyclerView.setAdapter(adapter);
-//
-//                            plantsList.clear(); // Clear the list before adding updated plants
-//
-//                            for (QueryDocumentSnapshot document : task.getResult()) {
-//                                String plantId = document.getId();
-//                                String number = document.getString("number");
-//                                String plantName = document.getString("name");
-//                                String plantSpecies = document.getString("species");
-//                                float plantMinTemp = Float.parseFloat(Objects.requireNonNull(document.getString("min_temp")));
-//                                float plantMaxTemp = Float.parseFloat(Objects.requireNonNull(document.getString("max_temp")));
-//                                float plantMinHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("min_humidity")));
-//                                float plantMaxHumidity = Float.parseFloat(Objects.requireNonNull(document.getString("max_humidity")));
-//                                String plantDescription = document.getString("content");
-//
-//                                Plant plant = new Plant(plantId, number, plantName, plantSpecies, plantMinTemp, plantMaxTemp, plantMinHumidity, plantMaxHumidity, plantDescription != null ? plantDescription : "");
-//                                plantsList.add(plant); // Add plant to the list
-//                            }
-//
-//                            updateFirebase();
-//                            saveToLocalStorage();
-//
-//                        } else {
-//                            mainHandler.post(() -> {
-//                                Toast.makeText(requireContext(), "Failed to retrieve plants from Firebase", Toast.LENGTH_SHORT).show();
-//                            });
-//                        }
-//                    });
-//        });
-//    }
 
 
     private void updateFirebase() {
