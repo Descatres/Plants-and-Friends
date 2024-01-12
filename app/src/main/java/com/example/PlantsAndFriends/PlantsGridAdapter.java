@@ -106,7 +106,6 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView plantTitleTextView;
-        // image view for plant image
         ImageView plantImageView;
 
 
@@ -166,6 +165,25 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         });
     }
 
+    private void updatePlantNameFirestore(Plant plant, String newName) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        executor.execute(() -> {
+            db.collection("users").document(currentUser.getUid()).collection("plants")
+                    .document(plant.getNumber())
+                    .update("name", newName)
+                    .addOnSuccessListener(aVoid -> {
+                        mainHandler.post(() -> Log.d("updatePlantNameFirestore", "Plant name updated in Firestore"));
+                    })
+                    .addOnFailureListener(e -> {
+                        mainHandler.post(() -> Toast.makeText(context, "Failed to update plant name in Firestore", Toast.LENGTH_SHORT).show());
+                    });
+        });
+    }
+
     private void showRenamePlantDialog(Plant plant) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Enter a new title for your plant");
@@ -177,6 +195,9 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         builder.setPositiveButton("Rename", (dialog, which) -> {
             String newTitle = input.getText().toString();
             updatePlantName(plant, newTitle);
+            if (isNetworkConnected()) {
+                updatePlantNameFirestore(plant, newTitle);
+            }
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
