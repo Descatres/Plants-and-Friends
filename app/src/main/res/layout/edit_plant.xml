@@ -35,13 +35,29 @@
             android:textSize="20sp" />
     </androidx.appcompat.widget.Toolbar>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins_medium"
+        android:text="Your Plant"
+        android:id="@+id/title"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:layout_below="@+id/toolbar"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        android:paddingBottom="10dp"
+        android:layout_marginTop="15dp" />
+
     <!-- Horizontal LinearLayout for Image and Text Views -->
     <LinearLayout
         android:id="@+id/horizontal_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
-        android:padding="30sp"
+        android:layout_below="@id/title"
+        android:paddingStart="30sp"
+        android:paddingEnd="30sp"
+        android:paddingBottom="30sp"
         android:orientation="horizontal">
 
         <!-- Plant Image -->
@@ -51,7 +67,8 @@
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:src="@drawable/default_plant_image"
-            android:contentDescription="@string/todo" />
+            android:contentDescription="@string/todo"
+            android:layout_gravity="center_vertical" />
 
         <!-- Vertical LinearLayout for Text Views -->
         <LinearLayout
@@ -73,14 +90,15 @@
 
             <EditText
                 android:id="@+id/name"
-                android:fontFamily="@font/poppins_medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:padding="0sp"
+                android:fontFamily="@font/poppins_medium"
                 android:hint="@string/chosen_name"
-                android:paddingBottom="2dp" />
+                android:minHeight="48dp"
+                android:padding="0sp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
 
             <!-- Plant Species Section -->
             <TextView
@@ -94,14 +112,15 @@
 
             <EditText
                 android:id="@+id/species"
-                android:padding="0sp"
-                android:fontFamily="@font/poppins_medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="18sp"
+                android:fontFamily="@font/poppins_medium"
                 android:hint="@string/chosen_species"
-                android:paddingBottom="2dp" />
+                android:minHeight="48dp"
+                android:padding="0sp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
         </LinearLayout>
 
     </LinearLayout>
@@ -136,7 +155,9 @@
             app:thumbColor="@color/green"
             app:trackColorActive="@color/green"
             app:trackColorInactive="@color/light_gray"
-            app:values="@array/default_temperature_range" />
+            app:values="@array/default_temperature_range"
+
+            android:background="@drawable/round" />
 
         <!-- Display Temperature Limits -->
         <LinearLayout
@@ -197,7 +218,8 @@
             app:thumbColor="@color/green"
             app:trackColorActive="@color/green"
             app:trackColorInactive="@color/light_gray"
-            app:values="@array/default_humidity_range" />
+            app:values="@array/default_humidity_range"
+            android:background="@drawable/round" />
 
         <!-- Display Temperature Limits -->
         <LinearLayout
@@ -254,7 +276,7 @@
             android:inputType="textMultiLine"
             android:gravity="top|start"
             android:minLines="5"
-            android:padding="8dp"
+            android:padding="15dp"
             android:textSize="16sp"
             android:background="@drawable/round"
             android:autofillHints="" />

@@ -1,13 +1,16 @@
 package com.example.PlantsAndFriends;
 
 import android.app.Activity;
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,13 +27,20 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.slider.RangeSlider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +73,13 @@ public class PlantDetailsFragment extends Fragment {
 
     private StringBuilder consolidatedResultBuilder = new StringBuilder();
 
+    public static final String READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES";
+    public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
+
+    private static final int GALLERY_PERMISSION_REQUEST_CODE = 101;
+
+    StorageReference storageReference;
+
 
     @Nullable
     @Override
@@ -78,7 +95,6 @@ public class PlantDetailsFragment extends Fragment {
         plantImageView = view.findViewById(R.id.add_image);
 
         plantImageView.setOnClickListener(v -> {
-            // Handle the click event to open the image picker
             openGallery();
         });
 
@@ -131,13 +147,26 @@ public class PlantDetailsFragment extends Fragment {
             displayPlantFromLocalStorage(plantNumber);
         }
 
+
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.plant_details_menu);
+
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_save) {
                 if (getArguments() != null) {
                     String plantNumber = getArguments().getString("plantNumber");
                     if (plantNumber != null && !plantNumber.isEmpty()) {
+                        if (selectedImageUri != null) {
+                            uploadImage(selectedImageUri);
+                        }
+//                        else {
+//                            // get the imageUri from the local storage
+//                            executor.execute(() -> {
+//                                selectedImageUri = getImageUriFromLocalStorage(plantNumber);
+//                                uploadImage(selectedImageUri);
+//                            });
+//                        }
+
                         savePlantToLocalStorage(plantNumber, selectedImageUri);
                         if (isNetworkConnected()) {
                             backupPlantToFirestore(plantNumber, () -> {
@@ -152,6 +181,17 @@ public class PlantDetailsFragment extends Fragment {
                                 });
                             });
                         }
+//                            backupPlantToFirestore(plantNumber, () -> {
+//                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
+//                                mainHandler.post(() -> {
+//                                    // Only show the last message set to consolidatedResult
+//                                    String consolidatedMessage = consolidatedResultBuilder.toString();
+//                                    if (!consolidatedMessage.isEmpty()) {
+//                                        Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+//                                        consolidatedResultBuilder.setLength(0);
+//                                    }
+//                                });
+//                            });
                     }
                 }
                 return true;
@@ -173,13 +213,33 @@ public class PlantDetailsFragment extends Fragment {
             }
         });
 
+        storageReference = FirebaseStorage.getInstance().getReference();
+
+
         return view;
+    }
+
+
+    private boolean isGalleryPermissionGranted() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2) {
+            return requireContext().checkSelfPermission(READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        } else {
+            return requireContext().checkSelfPermission(READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED;
+        }
     }
 
     // Image Picker Gallery
     private void openGallery() {
         Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST);
+        if (!isGalleryPermissionGranted()) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2) {
+                ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{READ_EXTERNAL_STORAGE}, GALLERY_PERMISSION_REQUEST_CODE);
+            } else {
+                ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{READ_MEDIA_IMAGES}, GALLERY_PERMISSION_REQUEST_CODE);
+            }
+        } else {
+            startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST);
+        }
     }
 
     @Override
@@ -189,13 +249,52 @@ public class PlantDetailsFragment extends Fragment {
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_REQUEST && data != null) {
             // Handle the selected image URI
             selectedImageUri = data.getData();
+            // if permission to read the image is negative dont load it
             loadImage(selectedImageUri);
+
         }
     }
 
     private void loadImage(Uri imageUri) {
-        Glide.with(this).load(imageUri).into(plantImageView);
+        if (isGalleryPermissionGranted()) {
+            Glide.with(this).load(imageUri).into(plantImageView);
+        } else {
+            Toast.makeText(requireContext(), "Enable permission to show images", Toast.LENGTH_SHORT).show();
+        }
+
     }
+
+    private void uploadImage(Uri imageUri) {
+        Log.e(TAG, "uploadImage: " + imageUri);
+        if (imageUri == null || !isNetworkConnected()) {
+            Log.e(TAG, "uploadImage: " + "imageUri null or no internet connection");
+            return;
+        }
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+        String currentUserUid = currentUser.getUid();
+
+        assert getArguments() != null;
+        String plantNumber = getArguments().getString("plantNumber");
+        StorageReference ref = storageReference.child("images/" + currentUser + "/" + plantNumber);
+        Log.e(TAG, "uploadImage: " + ref);
+        ref.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
+            Log.e(TAG, "uploadImage sucesso");
+            if (isAdded()) {
+                mainHandler.post(() -> {
+                    Toast.makeText(requireContext(), "Image uploaded to Firestore bucket", Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "uploadImage sem sucesso");
+            mainHandler.post(() -> {
+                Toast.makeText(requireContext(), "Failed to upload to bucket: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+        });
+    }
+
 
     // update the TextViews with the current temperature and humidity values
     private void updateTemperatureRangeText(List<Float> values) {
@@ -284,6 +383,7 @@ public class PlantDetailsFragment extends Fragment {
             double plantMaxTemp = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_temp();
             double plantMinHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMin_humidity();
             double plantMaxHumidity = appDatabase.plantDao().getPlantByNumber(plantNumber).getMax_humidity();
+
             Uri imageUri = getImageUriFromLocalStorage(plantNumber);
             if (isAdded()) {
                 mainHandler.post(() -> {
@@ -302,7 +402,7 @@ public class PlantDetailsFragment extends Fragment {
 
     private Uri getImageUriFromLocalStorage(String plantNumber) {
         String imageUriString = appDatabase.plantDao().getPlantImageUri(plantNumber);
-        if (imageUriString != null) {
+        if (imageUriString != null && isGalleryPermissionGranted()) {
             return Uri.parse(imageUriString);
         }
         return null;
@@ -327,7 +427,7 @@ public class PlantDetailsFragment extends Fragment {
             appDatabase.plantDao().updatePlantMaxTemp(plantNumber, temperatureRangeSlider.getValues().get(1));
             appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
             appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
-            if (imageUri != null) {
+            if (imageUri != null && isGalleryPermissionGranted()) {
                 // check if the imageUri leads to a valid image on the phone and, if so, save it to the local storage
 //                try {
 //                    MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), imageUri);

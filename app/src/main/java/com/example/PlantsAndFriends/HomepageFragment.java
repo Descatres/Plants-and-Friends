@@ -1,28 +1,39 @@
 package com.example.PlantsAndFriends;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
+import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -31,11 +42,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,7 +74,20 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private AppDatabase appDatabase;
     private LiveData<List<PlantEntity>> localPlants;
+    public static final String READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES";
+    public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
+    public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
+    public static final String MANAGE_EXTERNAL_STORAGE = "android.permission.MANAGE_EXTERNAL_STORAGE";
+    StorageReference storageReference;
+    private ImageView searchIcon;
+    // Layout Changes
+    private SwitchMaterial switchButton;
+    private boolean isGridLayout = true;
 
+    private TextView temperatureTextView;
+    private TextView humidityTextView;
+
+    private Button addPlantButton;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -66,49 +95,75 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         recyclerView = view.findViewById(R.id.recyclerView);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference();
+        searchIcon = view.findViewById(R.id.searchIcon);
+
+        temperatureTextView = view.findViewById(R.id.temperatureTextView);
+        humidityTextView = view.findViewById(R.id.humidityTextView);
+
+        addPlantButton = view.findViewById(R.id.add_plant);
+
+        addPlantButton.setOnClickListener(v -> {
+            openEditPlant(String.valueOf(System.currentTimeMillis()));
+        });
 
         adapter = new PlantsGridAdapter(requireContext(), new ArrayList<>(), appDatabase);
         recyclerView.setAdapter(adapter);
 
         setHasOptionsMenu(true);
 
-        // Use GridLayoutManager with 3 columns
-        recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        //Switch Layout
+        switchButton = view.findViewById(R.id.switchButton);
 
-        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.horizontal_spacing);
-        recyclerView.addItemDecoration(new HorizontalSpaceItemDecoration(spacingInPixels));
+        switchButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (adapter != null) {
+                adapter.switchLayoutMode();
+                isGridLayout = !isChecked; // Toggle the layout mode
+                setLayoutManager(); // Set the appropriate layout manager
+            }
+        });
+        setLayoutManager();
+
 
         toolbar = view.findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.homepage_menu);
         toolbar.setOnMenuItemClickListener(this::onOptionsItemSelected);
 
+        //search
+        searchIcon.setOnClickListener(v -> showSearchDialog());
+
         // load the plants from local storage at startup
         loadPlantsFromLocalStorage();
 
-        if (!isNetworkConnected()) {
-            mainHandler.post(() -> {
-                Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
-            });
+//        if (!isNetworkConnected()) {
+//            mainHandler.post(() -> {
+//                Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
+//            });
+//        }
+
+        if (!isGalleryPermissionGranted()) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{READ_EXTERNAL_STORAGE}, 101);
+            } else {
+                ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{READ_MEDIA_IMAGES}, 101);
+            }
+        } else {
+            Log.d(TAG, "onCreateView: " + "Permission granted");
         }
+
+//        if (!isWriteExternalStoragePermissionGranted())
+//            requestWriteExternalStoragePermission();
 
         startMqttMonitorService();
         return view;
     }
 
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        appDatabase = AppDatabase.getInstance(requireContext());
-        localPlants = appDatabase.plantDao().getAllPlants();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (plantsListener != null) {
-            plantsListener.remove(); // prevent memory leaks
+    private void setLayoutManager() {
+        if (isGridLayout) {
+            recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        } else {
+            recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         }
     }
 
@@ -122,6 +177,21 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         @Override
         public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
             outRect.right = horizontalSpace;
+        }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        appDatabase = AppDatabase.getInstance(requireContext());
+        localPlants = appDatabase.plantDao().getAllPlants();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (plantsListener != null) {
+            plantsListener.remove(); // prevent memory leaks
         }
     }
 
@@ -200,6 +270,42 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         requireActivity().startService(serviceIntent);
     }
 
+    private boolean isGalleryPermissionGranted() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return requireContext().checkSelfPermission(READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        } else {
+            return requireContext().checkSelfPermission(READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED;
+        }
+    }
+
+    private boolean isWriteExternalStoragePermissionGranted() {
+        return requireContext().checkSelfPermission(WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean isManageExternalStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2) {
+            return Environment.isExternalStorageManager();
+        }
+        return true;
+    }
+
+    private void requestWriteExternalStoragePermission() {
+        if (!isWriteExternalStoragePermissionGranted()) {
+            ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{WRITE_EXTERNAL_STORAGE}, 102);
+        } else {
+            requestManageExternalStoragePermission();
+        }
+    }
+
+    private void requestManageExternalStoragePermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2 && !isManageExternalStoragePermissionGranted()) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+            startActivityForResult(intent, 103);
+        } else {
+            Log.d(TAG, "requestManageExternalStoragePermission: " + "Permission granted");
+        }
+    }
+
     private boolean isNetworkConnected() {
         ConnectivityManager connectivityManager = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -213,6 +319,33 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         return false;
     }
+
+    private void uploadImage(Uri imageUri, String plantNumber) {
+        Log.e(TAG, "uploadImage: " + imageUri);
+        if (imageUri == null || !isNetworkConnected()) {
+            Log.e(TAG, "uploadImage: " + "imageUri null or no internet connection");
+            return;
+        }
+
+        StorageReference ref = storageReference.child("images/" + plantNumber);
+
+        Log.e(TAG, "uploadImg Ref: " + ref);
+
+        ref.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
+            Log.e(TAG, "uploadImage sucesso");
+            if (isAdded()) {
+                mainHandler.post(() -> {
+                    Toast.makeText(requireContext(), "Image uploaded to Firestore bucket", Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "uploadImage sem sucesso");
+            mainHandler.post(() -> {
+                Toast.makeText(requireContext(), "Failed to upload to bucket: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+        });
+    }
+
 
     private void updateFirestore() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -244,6 +377,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                                         plant.put("description", localPlant.getDescription());
                                         plant.put("imgUri", localPlant.getImgUri());
 
+//                                        uploadImage(Uri.parse(localPlant.getImgUri()), localPlant.getNumber());
+
                                         // if plant exists in firestore but not locally to delete it else update it
                                         Log.d(TAG, "Plant does not exist locally, it will be deleted from Firestore");
                                         executor.execute(() -> {
@@ -252,7 +387,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                                                     .update(plant)
                                                     .addOnSuccessListener(aVoid -> {
                                                         Log.d(TAG, "Plant updated in Firestore");
-//                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant updated in Firestore", Toast.LENGTH_SHORT).show());
+                                                        // TODO - create a single toast message for all the plants
+                                                        mainHandler.post(() -> Toast.makeText(requireContext(), "Plant updated in Firestore", Toast.LENGTH_SHORT).show());
                                                     })
                                                     .addOnFailureListener(e -> {
                                                         Log.w(TAG, "Error updating plant in Firestore", e);
@@ -346,6 +482,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         });
     }
 
+    // TODO - create a method to load the plants images from firebase bucket to local storage
     private void loadFromFirestore() {
         // load the plants from firebase to local storage
         // clear the local storage and add the plants from firebase
@@ -402,6 +539,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         });
     }
 
+
     private void showUploadDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Save plants to Firestore?");
@@ -417,7 +555,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(Color.BLACK);
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
-            // set color to grey of buttons
             if (isNetworkConnected()) {
                 updateFirestore();
                 dialog.cancel();

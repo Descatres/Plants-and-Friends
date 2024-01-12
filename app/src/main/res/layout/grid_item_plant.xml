@@ -1,0 +1,67 @@
+<!-- grid_item_plant_title.xml -->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:background="@drawable/plant_stroke"
+    android:layout_marginBottom="4dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginHorizontal="6dp"
+>
+
+    <ImageView
+        android:id="@+id/plant_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:src="@drawable/plant_logo"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+       />
+
+    <TextView
+        android:id="@+id/plantNameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/plant_image_view"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:text="@string/plant_name"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:paddingBottom="2dp"
+
+        />
+
+    <TextView
+        android:layout_below="@+id/plantNameTextView"
+        android:id="@+id/plantSpecieTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/plant_species"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:paddingBottom="2dp"/>
+
+
+    <TextView
+        android:layout_below="@+id/plantSpecieTextView"
+        android:id="@+id/plantMinTempTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/min_temperature"
+        android:textSize="12sp"
+        android:textColor="@android:color/black"
+        android:paddingBottom="2dp"/>
+    <TextView
+        android:layout_below="@+id/plantMinTempTextView"
+        android:id="@+id/plantMinHumTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/min_temperature"
+        android:textSize="12sp"
+        android:textColor="@android:color/black"
+        android:paddingBottom="2dp"/>
+
+</RelativeLayout>

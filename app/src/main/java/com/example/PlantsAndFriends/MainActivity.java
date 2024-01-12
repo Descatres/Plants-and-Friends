@@ -1,6 +1,10 @@
 package com.example.PlantsAndFriends;
 
 import android.animation.AnimatorSet;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -13,11 +17,15 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import android.animation.ObjectAnimator;
+import android.os.Looper;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +61,9 @@ public class MainActivity extends AppCompatActivity {
 
         animatorSet.start();
 
-
+        if (!isNetworkConnected()) {
+            mainHandler.post(() -> Toast.makeText(getApplicationContext(), "No internet connection", Toast.LENGTH_SHORT).show());
+        }
         new Handler().postDelayed(() -> {
             // This method will be executed once the timer is over
             // Start your app main activity
@@ -108,6 +118,19 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new HomepageFragment(), "HomepageFragment")
                 .commit();
+    }
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (connectivityManager != null) {
+            Network network = connectivityManager.getActiveNetwork();
+            if (network != null) {
+                NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(network);
+                return networkCapabilities != null && (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
+            }
+        }
+        return false;
     }
 
 }
