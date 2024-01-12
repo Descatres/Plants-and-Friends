@@ -156,8 +156,17 @@ public class PlantDetailsFragment extends Fragment {
                 if (getArguments() != null) {
                     String plantNumber = getArguments().getString("plantNumber");
                     if (plantNumber != null && !plantNumber.isEmpty()) {
-                        uploadImage(selectedImageUri);
-                        savePlantToLocalStorage(plantNumber, null);
+                        if (selectedImageUri != null) {
+                            uploadImage(selectedImageUri);
+                        } else {
+                            // get the imageUri from the local storage
+                            executor.execute(() -> {
+                                selectedImageUri = getImageUriFromLocalStorage(plantNumber);
+                                uploadImage(selectedImageUri);
+                            });
+                        }
+
+                        savePlantToLocalStorage(plantNumber, selectedImageUri);
                         if (isNetworkConnected()) {
                             backupPlantToFirestore(plantNumber, () -> {
                                 Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
