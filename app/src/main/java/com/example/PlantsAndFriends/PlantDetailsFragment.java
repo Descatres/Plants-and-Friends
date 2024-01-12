@@ -156,35 +156,21 @@ public class PlantDetailsFragment extends Fragment {
                 if (getArguments() != null) {
                     String plantNumber = getArguments().getString("plantNumber");
                     if (plantNumber != null && !plantNumber.isEmpty()) {
-                        uploadImage(selectedImageUri, success -> {
-                            if (success) {
-                                savePlantToLocalStorage(plantNumber, selectedImageUri);
-                                backupPlantToFirestore(plantNumber, () -> {
-                                    Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
-                                    mainHandler.post(() -> {
-                                        // Only show the last message set to consolidatedResult
-                                        String consolidatedMessage = consolidatedResultBuilder.toString();
-                                        if (!consolidatedMessage.isEmpty()) {
-                                            Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
-                                            consolidatedResultBuilder.setLength(0);
-                                        }
-                                    });
+                        uploadImage(selectedImageUri);
+                        savePlantToLocalStorage(plantNumber, null);
+                        if (isNetworkConnected()) {
+                            backupPlantToFirestore(plantNumber, () -> {
+                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
+                                mainHandler.post(() -> {
+                                    // Only show the last message set to consolidatedResult
+                                    String consolidatedMessage = consolidatedResultBuilder.toString();
+                                    if (!consolidatedMessage.isEmpty()) {
+                                        Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+                                        consolidatedResultBuilder.setLength(0);
+                                    }
                                 });
-                            } else {
-                                savePlantToLocalStorage(plantNumber, null);
-                                backupPlantToFirestore(plantNumber, () -> {
-                                    Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
-                                    mainHandler.post(() -> {
-                                        // Only show the last message set to consolidatedResult
-                                        String consolidatedMessage = consolidatedResultBuilder.toString();
-                                        if (!consolidatedMessage.isEmpty()) {
-                                            Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
-                                            consolidatedResultBuilder.setLength(0);
-                                        }
-                                    });
-                                });
-                            }
-                        });
+                            });
+                        }
 //                            backupPlantToFirestore(plantNumber, () -> {
 //                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
 //                                mainHandler.post(() -> {
@@ -196,7 +182,6 @@ public class PlantDetailsFragment extends Fragment {
 //                                    }
 //                                });
 //                            });
-
                     }
                 }
                 return true;
@@ -269,10 +254,10 @@ public class PlantDetailsFragment extends Fragment {
 
     }
 
-    private void uploadImage(Uri imageUri, UploadCallback callback) {
+    private void uploadImage(Uri imageUri) {
         Log.e(TAG, "uploadImage: " + imageUri);
         if (imageUri == null || !isNetworkConnected()) {
-            callback.onSuccess(false);
+            Log.e(TAG, "uploadImage: " + "imageUri null or no internet connection");
             return;
         }
         assert getArguments() != null;
@@ -283,23 +268,20 @@ public class PlantDetailsFragment extends Fragment {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.e(TAG, "uploadImage sucesso");
-                mainHandler.post(() -> {
-                    Toast.makeText(requireContext(), "Image Uploaded!", Toast.LENGTH_SHORT).show();
-                });
-                callback.onSuccess(true);
+                if (isAdded()) {
+                    mainHandler.post(() -> {
+                        Toast.makeText(requireContext(), "Image uploaded to Firestore bucket", Toast.LENGTH_SHORT).show();
+                    });
+                }
             }
         }).addOnFailureListener(e -> {
             Log.e(TAG, "uploadImage sem sucesso");
             mainHandler.post(() -> {
-                Toast.makeText(requireContext(), "Failed!" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Failed to upload to bucket: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
-            callback.onSuccess(false);
         });
     }
 
-    interface UploadCallback {
-        void onSuccess(boolean success);
-    }
 
     // update the TextViews with the current temperature and humidity values
     private void updateTemperatureRangeText(List<Float> values) {
