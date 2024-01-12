@@ -51,6 +51,9 @@ public class MqttMonitorService extends Service {
     // Declare variables to store current temperature and humidity
     private float currentTemperature = Float.NaN;
     private float currentHumidity = Float.NaN;
+    private boolean notificationTemperatureSent = false;
+    private boolean notificationHumiditySent = false;
+
 
     @Override
     public void onCreate() {
@@ -154,8 +157,9 @@ public class MqttMonitorService extends Service {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                // Check MQTT values and send notifications
-//                checkAndSendNotifications();
+                notificationTemperatureSent = false; // Reset the flag
+                notificationHumiditySent = false; // Reset the flag
+                fetchAndVerifyThresholds();
 
                 handler.postDelayed(this, CHECK_INTERVAL);
             }
@@ -171,30 +175,31 @@ public class MqttMonitorService extends Service {
     }
 
     private void checkAndSendNotifications(Map<String, Object> thresholdsData) {
-        if (thresholdsData != null) {
-            if (thresholdsData.containsKey("minTemperature") && thresholdsData.containsKey("maxTemperature")) {
-                float minTemperature = parseFloatWithDefault(thresholdsData.get("minTemperature"));
-                float maxTemperature = parseFloatWithDefault(thresholdsData.get("maxTemperature"));
-                checkTemperatureInterval(minTemperature, maxTemperature);
-            }
 
-            if (thresholdsData.containsKey("minHumidity") && thresholdsData.containsKey("maxHumidity")) {
-                float minHumidity = parseFloatWithDefault(thresholdsData.get("minHumidity"));
-                float maxHumidity = parseFloatWithDefault(thresholdsData.get("maxHumidity"));
-                checkHumidityInterval(minHumidity, maxHumidity);
-            }
+        if (thresholdsData.containsKey("minTemperature") && thresholdsData.containsKey("maxTemperature") && !notificationTemperatureSent) {
+            float minTemperature = parseFloatWithDefault(thresholdsData.get("minTemperature"));
+            float maxTemperature = parseFloatWithDefault(thresholdsData.get("maxTemperature"));
+            checkTemperatureInterval(minTemperature, maxTemperature);
+        }
+
+        if (thresholdsData.containsKey("minHumidity") && thresholdsData.containsKey("maxHumidity") && !notificationHumiditySent) {
+            float minHumidity = parseFloatWithDefault(thresholdsData.get("minHumidity"));
+            float maxHumidity = parseFloatWithDefault(thresholdsData.get("maxHumidity"));
+            checkHumidityInterval(minHumidity, maxHumidity);
         }
     }
 
     private void checkTemperatureInterval(float minTemperature, float maxTemperature) {
         if (!Float.isNaN(currentTemperature) && (currentTemperature < minTemperature || currentTemperature > maxTemperature)) {
             showNotification("Temperature Alert", "Temperature value is outside the specified interval");
+            notificationTemperatureSent = true;
         }
     }
 
     private void checkHumidityInterval(float minHumidity, float maxHumidity) {
         if (!Float.isNaN(currentHumidity) && (currentHumidity < minHumidity || currentHumidity > maxHumidity)) {
             showNotification("Humidity Alert", "Humidity value is outside the specified interval");
+            notificationHumiditySent = true;
         }
     }
 
