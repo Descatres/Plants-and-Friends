@@ -274,15 +274,12 @@ public class PlantDetailsFragment extends Fragment {
         String plantNumber = getArguments().getString("plantNumber");
         StorageReference ref = storageReference.child("images/" + plantNumber);
         Log.e(TAG, "uploadImage: " + ref);
-        ref.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Log.e(TAG, "uploadImage sucesso");
-                if (isAdded()) {
-                    mainHandler.post(() -> {
-                        Toast.makeText(requireContext(), "Image uploaded to Firestore bucket", Toast.LENGTH_SHORT).show();
-                    });
-                }
+        ref.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
+            Log.e(TAG, "uploadImage sucesso");
+            if (isAdded()) {
+                mainHandler.post(() -> {
+                    Toast.makeText(requireContext(), "Image uploaded to Firestore bucket", Toast.LENGTH_SHORT).show();
+                });
             }
         }).addOnFailureListener(e -> {
             Log.e(TAG, "uploadImage sem sucesso");
