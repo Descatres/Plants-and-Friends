@@ -77,7 +77,7 @@ public class MqttMonitorService extends Service {
             @Override
             public void messageArrived(String topic, org.eclipse.paho.client.mqttv3.MqttMessage message) {
                 String payload = new String(message.getPayload());
-                Log.e(TAG, "Message arrived" + payload);
+//                Log.e(TAG, "Message arrived" + payload);
 
                 if (topic.equals(temperatureTopic)) {
                     currentTemperature = parseFloatWithDefault(payload);
