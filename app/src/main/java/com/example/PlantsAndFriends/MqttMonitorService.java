@@ -25,7 +25,6 @@ import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 
 import java.util.Map;
@@ -193,14 +192,14 @@ public class MqttMonitorService extends Service {
 
     private void checkRoomTemperatureInterval(float minRoomTemperature, float maxRoomTemperature) {
         if (!Float.isNaN(currentTemperature) && (currentTemperature < minRoomTemperature || currentTemperature > maxRoomTemperature)) {
-            showNotification("Temperature Alert", "Room temperature (" + currentTemperature + "ºC) is outside the specified interval");
+            showNotification("Temperature Alert", "Room temperature (" + currentTemperature + "ºC) is outside the specified interval", 1);
             notificationTemperatureSent = true;
         }
     }
 
     private void checkRoomHumidityInterval(float minRoomHumidity, float maxRoomHumidity) {
         if (!Float.isNaN(currentHumidity) && (currentHumidity < minRoomHumidity || currentHumidity > maxRoomHumidity)) {
-            showNotification("Humidity Alert", "Room humidity (" + currentHumidity + "%)  is outside the specified interval");
+            showNotification("Humidity Alert", "Room humidity (" + currentHumidity + "%)  is outside the specified interval", 1);
             notificationHumiditySent = true;
         }
     }
@@ -221,18 +220,27 @@ public class MqttMonitorService extends Service {
 
     private void checkPlantTemperatureInterval(float minTemperature, float maxTemperature, Map<String, Object> plantData) {
         if (!Float.isNaN(currentTemperature) && (currentTemperature < minTemperature || currentTemperature > maxTemperature)) {
-            showNotification("Temperature Alert", "(" + currentTemperature + "ºC) is outside the threshold for plant: " + getPlantName(plantData));
+            showNotification("Temperature Alert", "(" + currentTemperature + "ºC) is outside the threshold for plant: " + getPlantName(plantData), getPlantNumber(plantData));
         }
     }
 
     private void checkPlantHumidityInterval(float minHumidity, float maxHumidity, Map<String, Object> plantData) {
         if (!Float.isNaN(currentHumidity) && (currentHumidity < minHumidity || currentHumidity > maxHumidity)) {
-            showNotification("Humidity Alert", "(" + currentHumidity + "%) is outside the threshold for plant: " + getPlantName(plantData));
+            showNotification("Humidity Alert", "(" + currentHumidity + "%) is outside the threshold for plant: " + getPlantName(plantData), getPlantNumber(plantData));
         }
     }
 
     private String getPlantName(Map<String, Object> plantData) {
         return Objects.requireNonNull(plantData.get("name")).toString();
+    }
+
+    private int getPlantNumber(Map<String, Object> plantData) {
+        Object numberObject = plantData.get("number");
+        try {
+            return Integer.parseInt(String.valueOf(numberObject));
+        } catch (NumberFormatException e) {
+            return Integer.MIN_VALUE;
+        }
     }
 
     private void connectMQTT() {
@@ -305,7 +313,7 @@ public class MqttMonitorService extends Service {
         dataRepository.updateData(topic, payload);
     }
 
-    private void showNotification(String title, String message) {
+    private void showNotification(String title, String message, int notificationId) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(title)
@@ -318,9 +326,9 @@ public class MqttMonitorService extends Service {
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
         if (title.equals("Temperature Alert")) {
-            notificationManager.notify(1, builder.build());
+            notificationManager.notify(notificationId, builder.build());
         } else if (title.equals("Humidity Alert")) {
-            notificationManager.notify(2, builder.build());
+            notificationManager.notify(notificationId + 1, builder.build());
         }
     }
 
