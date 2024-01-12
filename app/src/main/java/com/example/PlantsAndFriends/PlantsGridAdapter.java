@@ -184,35 +184,36 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         });
     }
 
-    private void showRenamePlantDialog(Plant plant) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Enter a new title for your plant");
-
-        final EditText input = new EditText(context);
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-
-        builder.setPositiveButton("Rename", (dialog, which) -> {
-            String newTitle = input.getText().toString();
-            updatePlantName(plant, newTitle);
-            if (isNetworkConnected()) {
-                updatePlantNameFirestore(plant, newTitle);
-            }
-        });
-
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
-    }
+//    private void showRenamePlantDialog(Plant plant) {
+//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//        builder.setTitle("Enter a new title for your plant");
+//
+//        final EditText input = new EditText(context);
+//        input.setInputType(InputType.TYPE_CLASS_TEXT);
+//        builder.setView(input);
+//
+//        builder.setPositiveButton("Rename", (dialog, which) -> {
+//            String newTitle = input.getText().toString();
+//            updatePlantName(plant, newTitle);
+//            if (isNetworkConnected()) {
+//                updatePlantNameFirestore(plant, newTitle);
+//            }
+//        });
+//
+//        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+//
+//        AlertDialog dialog = builder.create();
+//        dialog.show();
+//        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
+//        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
+//    }
 
     private void showOptionsDialog(Plant plant, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Choose an action");
+        builder.setTitle("Delete plant?");
+        builder.setMessage("Are you sure you want to delete this plant? This will delete the plant from your local storage and from Firestore.");
 
-        builder.setPositiveButton("Rename plant", (dialog, which) -> showRenamePlantDialog(plant));
+//        builder.setPositiveButton("Rename plant", (dialog, which) -> showRenamePlantDialog(plant));
         builder.setNegativeButton("Delete plant", (dialog, which) -> deletePlantAndRefreshView(plant, position));
         builder.setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss());
 

@@ -92,11 +92,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         // load the plants from local storage at startup
         loadPlantsFromLocalStorage();
 
-        if (!isNetworkConnected()) {
-            mainHandler.post(() -> {
-                Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
-            });
-        }
+//        if (!isNetworkConnected()) {
+//            mainHandler.post(() -> {
+//                Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
+//            });
+//        }
 
         if (!isGalleryPermissionGranted()) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
