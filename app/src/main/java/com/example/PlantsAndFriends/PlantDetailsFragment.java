@@ -156,24 +156,47 @@ public class PlantDetailsFragment extends Fragment {
                 if (getArguments() != null) {
                     String plantNumber = getArguments().getString("plantNumber");
                     if (plantNumber != null && !plantNumber.isEmpty()) {
-                        if (isNetworkConnected()) {
-                            uploadImage(selectedImageUri);
-                        }
-                        savePlantToLocalStorage(plantNumber, selectedImageUri);
-                        if (isNetworkConnected()) {
-                            backupPlantToFirestore(plantNumber, () -> {
-                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
-                                mainHandler.post(() -> {
-                                    // Only show the last message set to consolidatedResult
-                                    String consolidatedMessage = consolidatedResultBuilder.toString();
-                                    if (!consolidatedMessage.isEmpty()) {
-                                        Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
-                                        consolidatedResultBuilder.setLength(0);
-                                    }
+                        uploadImage(selectedImageUri, success -> {
+                            if (success) {
+                                savePlantToLocalStorage(plantNumber, selectedImageUri);
+                                backupPlantToFirestore(plantNumber, () -> {
+                                    Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
+                                    mainHandler.post(() -> {
+                                        // Only show the last message set to consolidatedResult
+                                        String consolidatedMessage = consolidatedResultBuilder.toString();
+                                        if (!consolidatedMessage.isEmpty()) {
+                                            Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+                                            consolidatedResultBuilder.setLength(0);
+                                        }
+                                    });
                                 });
-                            });
+                            } else {
+                                savePlantToLocalStorage(plantNumber, null);
+                                backupPlantToFirestore(plantNumber, () -> {
+                                    Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
+                                    mainHandler.post(() -> {
+                                        // Only show the last message set to consolidatedResult
+                                        String consolidatedMessage = consolidatedResultBuilder.toString();
+                                        if (!consolidatedMessage.isEmpty()) {
+                                            Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+                                            consolidatedResultBuilder.setLength(0);
+                                        }
+                                    });
+                                });
+                            }
+                        });
+//                            backupPlantToFirestore(plantNumber, () -> {
+//                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
+//                                mainHandler.post(() -> {
+//                                    // Only show the last message set to consolidatedResult
+//                                    String consolidatedMessage = consolidatedResultBuilder.toString();
+//                                    if (!consolidatedMessage.isEmpty()) {
+//                                        Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+//                                        consolidatedResultBuilder.setLength(0);
+//                                    }
+//                                });
+//                            });
 
-                        }
                     }
                 }
                 return true;
@@ -246,28 +269,36 @@ public class PlantDetailsFragment extends Fragment {
 
     }
 
-    private void uploadImage(Uri imageUri) {
+    private void uploadImage(Uri imageUri, UploadCallback callback) {
         Log.e(TAG, "uploadImage: " + imageUri);
-        if (imageUri != null && isNetworkConnected()) {
-            assert getArguments() != null;
-            String plantNumber = getArguments().getString("plantNumber");
-            StorageReference ref = storageReference.child("images/" + plantNumber);
-            Log.e(TAG, "uploadImage: " + ref);
-            ref.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Log.e(TAG, "uploadImage sucesso");
-                    mainHandler.post(() -> {
-                        Toast.makeText(requireContext(), "Image Uploaded!", Toast.LENGTH_SHORT).show();
-                    });
-                }
-            }).addOnFailureListener(e -> {
+        if (imageUri == null || !isNetworkConnected()) {
+            callback.onSuccess(false);
+            return;
+        }
+        assert getArguments() != null;
+        String plantNumber = getArguments().getString("plantNumber");
+        StorageReference ref = storageReference.child("images/" + plantNumber);
+        Log.e(TAG, "uploadImage: " + ref);
+        ref.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.e(TAG, "uploadImage sucesso");
                 mainHandler.post(() -> {
-                    Toast.makeText(requireContext(), "Failed!" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Image Uploaded!", Toast.LENGTH_SHORT).show();
                 });
+                callback.onSuccess(true);
+            }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "uploadImage sem sucesso");
+            mainHandler.post(() -> {
+                Toast.makeText(requireContext(), "Failed!" + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
-        }
+            callback.onSuccess(false);
+        });
+    }
+
+    interface UploadCallback {
+        void onSuccess(boolean success);
     }
 
     // update the TextViews with the current temperature and humidity values
