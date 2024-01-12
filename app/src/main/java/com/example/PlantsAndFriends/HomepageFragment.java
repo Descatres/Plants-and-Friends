@@ -24,9 +24,12 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -40,6 +43,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -75,8 +79,15 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
     public static final String MANAGE_EXTERNAL_STORAGE = "android.permission.MANAGE_EXTERNAL_STORAGE";
     StorageReference storageReference;
+    private ImageView searchIcon;
+    // Layout Changes
+    private SwitchMaterial switchButton;
+    private boolean isGridLayout = true;
 
+    private TextView temperatureTextView;
+    private TextView humidityTextView;
 
+    private Button addPlantButton;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -85,16 +96,42 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storageReference = FirebaseStorage.getInstance().getReference();
+        searchIcon = view.findViewById(R.id.searchIcon);
+
+        temperatureTextView = view.findViewById(R.id.temperatureTextView);
+        humidityTextView = view.findViewById(R.id.humidityTextView);
+
+        addPlantButton = view.findViewById(R.id.add_plant);
+
+        addPlantButton.setOnClickListener(v -> {
+            openEditPlant(String.valueOf(System.currentTimeMillis()));
+        });
 
         adapter = new PlantsGridAdapter(requireContext(), new ArrayList<>(), appDatabase);
         recyclerView.setAdapter(adapter);
 
         setHasOptionsMenu(true);
 
+        //Switch Layout
+        switchButton = view.findViewById(R.id.switchButton);
+
+        switchButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (adapter != null) {
+                adapter.switchLayoutMode();
+                isGridLayout = !isChecked; // Toggle the layout mode
+                setLayoutManager(); // Set the appropriate layout manager
+            }
+        });
+        setLayoutManager();
+
+
         toolbar = view.findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.homepage_menu);
         toolbar.setOnMenuItemClickListener(this::onOptionsItemSelected);
+
+        //search
+        searchIcon.setOnClickListener(v -> showSearchDialog());
 
         // load the plants from local storage at startup
         loadPlantsFromLocalStorage();
@@ -122,6 +159,26 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         return view;
     }
 
+    private void setLayoutManager() {
+        if (isGridLayout) {
+            recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        } else {
+            recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        }
+    }
+
+    public class HorizontalSpaceItemDecoration extends RecyclerView.ItemDecoration {
+        private final int horizontalSpace;
+
+        public HorizontalSpaceItemDecoration(int horizontalSpace) {
+            this.horizontalSpace = horizontalSpace;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            outRect.right = horizontalSpace;
+        }
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {

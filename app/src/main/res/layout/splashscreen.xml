@@ -1,34 +1,22 @@
-<!-- res/layout/splash_screen.xml -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    tools:context=".MainActivity">
 
-    <ImageView
-        android:id="@+id/splash_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/primary_leaf_icon"
-        android:padding="20dp"
+    <!--  res/layout/splash_screen.xml  -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center" tools:context=".MainActivity" android:background="@drawable/plant_background">
+    <ImageView android:id="@+id/splash_image"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:src="@drawable/logo"
+        android:padding="0dp"
         tools:ignore="ImageContrastCheck"
-        android:contentDescription="@string/app_name" />
-
+        android:contentDescription="@string/app_name"/>
     <TextView
         android:id="@+id/splash_text"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:text="@string/app_name"
-        android:textColor="@color/black"
-        android:fontFamily="@font/poppins"
+        android:textColor="@color/white"
+        :fontFamily="@font/poppins"
         android:textSize="26sp"
         android:textStyle="bold"
         android:padding="20dp"/>
-
-
-
 </LinearLayout>

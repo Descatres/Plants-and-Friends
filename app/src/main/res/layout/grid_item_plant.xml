@@ -47,7 +47,7 @@
 
     <TextView
         android:layout_below="@+id/plantSpecieTextView"
-        android:id="@+id/plantTempTextView"
+        android:id="@+id/plantMinTempTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/min_temperature"
@@ -55,8 +55,8 @@
         android:textColor="@android:color/black"
         android:paddingBottom="2dp"/>
     <TextView
-        android:layout_below="@+id/plantTempTextView"
-        android:id="@+id/plantHumTextView"
+        android:layout_below="@+id/plantMinTempTextView"
+        android:id="@+id/plantMinHumTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/min_temperature"
