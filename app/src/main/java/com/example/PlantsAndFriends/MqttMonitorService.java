@@ -126,6 +126,7 @@ public class MqttMonitorService extends Service {
                         if (documentSnapshot.exists()) {
                             Map<String, Object> thresholdsData = documentSnapshot.getData();
                             if (thresholdsData != null) {
+                                // TODO - isolate humitidy and temperature separately for room and plants
                                 checkAndSendRoomNotifications(thresholdsData);
                             }
                         }
