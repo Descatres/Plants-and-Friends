@@ -64,8 +64,6 @@ public class MqttMonitorService extends Service {
         db = FirebaseFirestore.getInstance();
 
         dataRepository = DataRepository.getInstance();
-        MqttViewModel mqttViewModel = new ViewModelProvider((ViewModelStoreOwner) this).get(MqttViewModel.class);
-        mqttViewModel.setDataRepository(dataRepository);
 
         mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), serverUri, clientId);
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
