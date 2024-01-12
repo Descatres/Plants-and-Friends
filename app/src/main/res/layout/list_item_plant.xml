@@ -1,67 +1,67 @@
-<!-- grid_item_plant_title.xml -->
+<!-- list_item_plant_title.xml -->
 
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp"
+    android:padding="15dp"
     android:background="@drawable/plant_stroke"
-    android:layout_marginBottom="4dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginHorizontal="6dp"
->
+    android:layout_marginBottom="5dp">
 
     <ImageView
         android:id="@+id/plant_image_view"
-        android:layout_width="match_parent"
-        android:layout_height="90dp"
-        android:src="@drawable/plant_logo"
-        android:adjustViewBounds="true"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/logo"
         android:scaleType="centerCrop"
-       />
+        android:adjustViewBounds="true"
+        android:layout_marginEnd="20dp"/>
 
     <TextView
         android:id="@+id/plantNameTextView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/plant_image_view"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp"
-        android:text="@string/plant_name"
+        android:layout_toEndOf="@id/plant_image_view"
+        android:layout_marginStart="108dp"
+        android:text="Plant Name"
         android:textSize="16sp"
         android:gravity="center"
         android:paddingBottom="2dp"
-
-        />
+        android:textStyle="bold" />
 
     <TextView
-        android:layout_below="@+id/plantNameTextView"
         android:id="@+id/plantSpecieTextView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/plantNameTextView"
+        android:layout_toEndOf="@id/plant_image_view"
+        android:layout_marginStart="8dp"
         android:text="@string/plant_species"
         android:textSize="16sp"
         android:textColor="@android:color/black"
         android:paddingBottom="2dp"/>
 
-
     <TextView
-        android:layout_below="@+id/plantSpecieTextView"
         android:id="@+id/plantTempTextView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/min_temperature"
-        android:textSize="12sp"
-        android:textColor="@android:color/black"
-        android:paddingBottom="2dp"/>
-    <TextView
-        android:layout_below="@+id/plantTempTextView"
-        android:id="@+id/plantHumTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_below="@+id/plantSpecieTextView"
+        android:layout_toEndOf="@id/plant_image_view"
+        android:layout_marginStart="8dp"
         android:text="@string/min_temperature"
         android:textSize="12sp"
         android:textColor="@android:color/black"
         android:paddingBottom="2dp"/>
 
+    <TextView
+        android:id="@+id/plantHumTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/plantTempTextView"
+        android:layout_toEndOf="@id/plant_image_view"
+        android:layout_marginStart="8dp"
+        android:text="@string/min_temperature"
+        android:textSize="12sp"
+        android:textColor="@android:color/black"
+        android:paddingBottom="2dp"/>
 </RelativeLayout>
