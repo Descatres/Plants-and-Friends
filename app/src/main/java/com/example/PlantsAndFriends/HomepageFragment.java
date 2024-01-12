@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -38,11 +39,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,6 +74,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
     public static final String MANAGE_EXTERNAL_STORAGE = "android.permission.MANAGE_EXTERNAL_STORAGE";
+    StorageReference storageReference;
 
 
     @Nullable
@@ -78,6 +84,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         recyclerView = view.findViewById(R.id.recyclerView);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference();
 
         adapter = new PlantsGridAdapter(requireContext(), new ArrayList<>(), appDatabase);
         recyclerView.setAdapter(adapter);
@@ -256,6 +263,33 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         return false;
     }
 
+    private void uploadImage(Uri imageUri, String plantNumber) {
+        Log.e(TAG, "uploadImage: " + imageUri);
+        if (imageUri == null || !isNetworkConnected()) {
+            Log.e(TAG, "uploadImage: " + "imageUri null or no internet connection");
+            return;
+        }
+
+        StorageReference ref = storageReference.child("images/" + plantNumber);
+
+        Log.e(TAG, "uploadImg Ref: " + ref);
+
+        ref.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
+            Log.e(TAG, "uploadImage sucesso");
+            if (isAdded()) {
+                mainHandler.post(() -> {
+                    Toast.makeText(requireContext(), "Image uploaded to Firestore bucket", Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "uploadImage sem sucesso");
+            mainHandler.post(() -> {
+                Toast.makeText(requireContext(), "Failed to upload to bucket: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+        });
+    }
+
+
     private void updateFirestore() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
@@ -286,6 +320,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                                         plant.put("description", localPlant.getDescription());
                                         plant.put("imgUri", localPlant.getImgUri());
 
+//                                        uploadImage(Uri.parse(localPlant.getImgUri()), localPlant.getNumber());
+
                                         // if plant exists in firestore but not locally to delete it else update it
                                         Log.d(TAG, "Plant does not exist locally, it will be deleted from Firestore");
                                         executor.execute(() -> {
@@ -294,7 +330,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                                                     .update(plant)
                                                     .addOnSuccessListener(aVoid -> {
                                                         Log.d(TAG, "Plant updated in Firestore");
-//                                                mainHandler.post(() -> Toast.makeText(requireContext(), "Plant updated in Firestore", Toast.LENGTH_SHORT).show());
+                                                        // TODO - create a single toast message for all the plants
+                                                        mainHandler.post(() -> Toast.makeText(requireContext(), "Plant updated in Firestore", Toast.LENGTH_SHORT).show());
                                                     })
                                                     .addOnFailureListener(e -> {
                                                         Log.w(TAG, "Error updating plant in Firestore", e);
@@ -388,6 +425,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         });
     }
 
+    // TODO - create a method to load the plants images from firebase bucket to local storage
     private void loadFromFirestore() {
         // load the plants from firebase to local storage
         // clear the local storage and add the plants from firebase
@@ -444,6 +482,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         });
     }
 
+
     private void showUploadDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Save plants to Firestore?");
@@ -459,7 +498,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(Color.BLACK);
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
-            // set color to grey of buttons
             if (isNetworkConnected()) {
                 updateFirestore();
                 dialog.cancel();
