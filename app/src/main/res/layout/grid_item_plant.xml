@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:padding="8dp"
     android:background="@drawable/plant_stroke"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="4dp"
+    android:layout_marginTop="8dp"
     android:layout_marginHorizontal="6dp">
 
     <ImageView

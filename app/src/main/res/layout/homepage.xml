@@ -30,7 +30,7 @@
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/toolbar_icon"
             android:paddingStart="8dp"
-            android:paddingEnd="20dp"
+            android:paddingEnd="16dp"
             android:fontFamily="@font/poppins_medium"
             android:text="@string/app_name"
             android:textColor="#FFFFFF"
