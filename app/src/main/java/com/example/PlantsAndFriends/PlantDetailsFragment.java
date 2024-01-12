@@ -158,13 +158,14 @@ public class PlantDetailsFragment extends Fragment {
                     if (plantNumber != null && !plantNumber.isEmpty()) {
                         if (selectedImageUri != null) {
                             uploadImage(selectedImageUri);
-                        } else {
-                            // get the imageUri from the local storage
-                            executor.execute(() -> {
-                                selectedImageUri = getImageUriFromLocalStorage(plantNumber);
-                                uploadImage(selectedImageUri);
-                            });
                         }
+//                        else {
+//                            // get the imageUri from the local storage
+//                            executor.execute(() -> {
+//                                selectedImageUri = getImageUriFromLocalStorage(plantNumber);
+//                                uploadImage(selectedImageUri);
+//                            });
+//                        }
 
                         savePlantToLocalStorage(plantNumber, selectedImageUri);
                         if (isNetworkConnected()) {
