@@ -133,14 +133,18 @@ public class AlertsFragment extends Fragment {
                         .document("sensorThresholds")
                         .set(thresholds)
                         .addOnSuccessListener(aVoid -> {
-                            mainHandler.post(() -> {
-                                Toast.makeText(requireContext(), "Thresholds saved successfully", Toast.LENGTH_SHORT).show();
-                            });
+                            if (isAdded()) {
+                                mainHandler.post(() -> {
+                                    Toast.makeText(requireContext(), "Thresholds saved successfully", Toast.LENGTH_SHORT).show();
+                                });
+                            }
                         })
                         .addOnFailureListener(e -> {
-                            mainHandler.post(() -> {
-                                Toast.makeText(requireContext(), "Error: thresholds not saved", Toast.LENGTH_SHORT).show();
-                            });
+                            if (isAdded()) {
+                                mainHandler.post(() -> {
+                                    Toast.makeText(requireContext(), "Error: thresholds not saved", Toast.LENGTH_SHORT).show();
+                                });
+                            }
                         });
             });
         }

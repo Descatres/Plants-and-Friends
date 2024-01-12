@@ -29,6 +29,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -131,7 +132,7 @@ public class MqttMonitorService extends Service {
                         }
                     })
                     .addOnFailureListener(e -> {
-                        Log.e("AlertsFragment", "Error fetching thresholds from Firestore", e);
+                        Log.e(TAG, "Error fetching thresholds from Firestore", e);
                     });
 
             db.collection("users").document(currentUserUid).collection("plants")
@@ -141,13 +142,14 @@ public class MqttMonitorService extends Service {
                             for (DocumentSnapshot document : querySnapshot.getDocuments()) {
                                 Map<String, Object> plantData = document.getData();
                                 if (plantData != null) {
+//                                    Log.e(TAG, "Plant data: " + document.getData());
                                     checkAndSendPlantNotifications(plantData);
                                 }
                             }
                         }
                     })
                     .addOnFailureListener(e -> {
-                        Log.e("AlertsFragment", "Error fetching plant data from Firestore", e);
+                        Log.e(TAG, "Error fetching plant data from Firestore", e);
                     });
         }
     }
@@ -174,63 +176,63 @@ public class MqttMonitorService extends Service {
     }
 
     private void checkAndSendRoomNotifications(Map<String, Object> thresholdsData) {
-        if (thresholdsData.containsKey("minRoomTemperature") && thresholdsData.containsKey("maxRoomTemperature")
+        if (thresholdsData.containsKey("minTemperature") && thresholdsData.containsKey("maxTemperature")
                 && !notificationTemperatureSent) {
-            float minRoomTemperature = parseFloatWithDefault(thresholdsData.get("minRoomTemperature"));
-            float maxRoomTemperature = parseFloatWithDefault(thresholdsData.get("maxRoomTemperature"));
+            float minRoomTemperature = parseFloatWithDefault(thresholdsData.get("minTemperature"));
+            float maxRoomTemperature = parseFloatWithDefault(thresholdsData.get("maxTemperature"));
             checkRoomTemperatureInterval(minRoomTemperature, maxRoomTemperature);
         }
 
-        if (thresholdsData.containsKey("minRoomHumidity") && thresholdsData.containsKey("maxRoomHumidity")
+        if (thresholdsData.containsKey("minHumidity") && thresholdsData.containsKey("maxHumidity")
                 && !notificationHumiditySent) {
-            float minRoomHumidity = parseFloatWithDefault(thresholdsData.get("minRoomHumidity"));
-            float maxRoomHumidity = parseFloatWithDefault(thresholdsData.get("maxRoomHumidity"));
+            float minRoomHumidity = parseFloatWithDefault(thresholdsData.get("minHumidity"));
+            float maxRoomHumidity = parseFloatWithDefault(thresholdsData.get("maxHumidity"));
             checkRoomHumidityInterval(minRoomHumidity, maxRoomHumidity);
         }
     }
 
     private void checkRoomTemperatureInterval(float minRoomTemperature, float maxRoomTemperature) {
         if (!Float.isNaN(currentTemperature) && (currentTemperature < minRoomTemperature || currentTemperature > maxRoomTemperature)) {
-            showNotification("Temperature Alert", "Room temperature value is outside the specified interval");
+            showNotification("Temperature Alert", "Room temperature (" + currentTemperature + "ºC) is outside the specified interval");
             notificationTemperatureSent = true;
         }
     }
 
     private void checkRoomHumidityInterval(float minRoomHumidity, float maxRoomHumidity) {
         if (!Float.isNaN(currentHumidity) && (currentHumidity < minRoomHumidity || currentHumidity > maxRoomHumidity)) {
-            showNotification("Humidity Alert", "Room humidity value is outside the specified interval");
+            showNotification("Humidity Alert", "Room humidity (" + currentHumidity + "%)  is outside the specified interval");
             notificationHumiditySent = true;
         }
     }
 
     private void checkAndSendPlantNotifications(Map<String, Object> plantData) {
-        if (plantData.containsKey("minTemperature") && plantData.containsKey("maxTemperature")) {
-            float minTemperature = parseFloatWithDefault(plantData.get("minTemperature"));
-            float maxTemperature = parseFloatWithDefault(plantData.get("maxTemperature"));
+        if (plantData.containsKey("min_temp") && plantData.containsKey("max_temp")) {
+            float minTemperature = parseFloatWithDefault(plantData.get("min_temp"));
+            float maxTemperature = parseFloatWithDefault(plantData.get("max_temp"));
             checkPlantTemperatureInterval(minTemperature, maxTemperature, plantData);
         }
 
-        if (plantData.containsKey("minHumidity") && plantData.containsKey("maxHumidity")) {
-            float minHumidity = parseFloatWithDefault(plantData.get("minHumidity"));
-            float maxHumidity = parseFloatWithDefault(plantData.get("maxHumidity"));
+        if (plantData.containsKey("min_humidity") && plantData.containsKey("max_humidity")) {
+            float minHumidity = parseFloatWithDefault(plantData.get("min_humidity"));
+            float maxHumidity = parseFloatWithDefault(plantData.get("max_humidity"));
             checkPlantHumidityInterval(minHumidity, maxHumidity, plantData);
         }
     }
 
     private void checkPlantTemperatureInterval(float minTemperature, float maxTemperature, Map<String, Object> plantData) {
         if (!Float.isNaN(currentTemperature) && (currentTemperature < minTemperature || currentTemperature > maxTemperature)) {
-            showNotification("Temperature Alert", "Temperature value is outside the specified interval for plant: " + getPlantName(plantData));
+            showNotification("Temperature Alert", "(" + currentTemperature + "ºC) is outside the threshold for plant: " + getPlantName(plantData));
         }
     }
 
     private void checkPlantHumidityInterval(float minHumidity, float maxHumidity, Map<String, Object> plantData) {
         if (!Float.isNaN(currentHumidity) && (currentHumidity < minHumidity || currentHumidity > maxHumidity)) {
-            showNotification("Humidity Alert", "Humidity value is outside the specified interval for plant: " + getPlantName(plantData));
+            showNotification("Humidity Alert", "(" + currentHumidity + "%) is outside the threshold for plant: " + getPlantName(plantData));
         }
     }
 
     private String getPlantName(Map<String, Object> plantData) {
-        return plantData.get("plantName").toString();
+        return Objects.requireNonNull(plantData.get("name")).toString();
     }
 
     private void connectMQTT() {
