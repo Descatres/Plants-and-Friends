@@ -3,6 +3,7 @@ package com.example.PlantsAndFriends;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -18,6 +19,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.InputType;
@@ -58,6 +60,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -318,7 +321,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
     private void startMqttMonitorService() {
         // if api > 31 return
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S || !isNetworkConnected()) {
             return;
         }
         Intent serviceIntent = new Intent(getActivity(), MqttMonitorService.class);
@@ -532,8 +535,9 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Plant plant = convertToPlant(document.toObject(PlantEntity.class));
                         executor.execute(() -> {
+                            String imgUri = plant.getImgUri();
                             createNewPlantInLocalStorage(plant.getNumber(), plant.getName(), plant.getSpecies(), (float) plant.getMin_temp(), (float) plant.getMax_temp(),
-                                    (float) plant.getMin_humidity(), (float) plant.getMax_humidity(), plant.getDescription(), plant.getImgUri() == null ? null : plant.getImgUri().isEmpty() ? null : plant.getImgUri());
+                                    (float) plant.getMin_humidity(), (float) plant.getMax_humidity(), plant.getDescription(), imgUri == null ? null : imgUri.isEmpty() ? null : isValidUri(imgUri) ? imgUri : null);
                         });
                     }
                 } else {
@@ -543,6 +547,33 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         });
 
 
+    }
+
+    private boolean isValidUri(String uriString) {
+        try {
+            Uri uri = Uri.parse(uriString);
+
+            if ("content".equals(uri.getScheme())) {
+                ContentResolver contentResolver = requireContext().getContentResolver();
+
+                try {
+                    ParcelFileDescriptor parcelFileDescriptor = contentResolver.openFileDescriptor(uri, "r");
+                    if (parcelFileDescriptor != null) {
+                        parcelFileDescriptor.close();
+                        return true;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, "Error opening file descriptor for URI: " + uri, e);
+                }
+            } else {
+                Log.e(TAG, "Invalid URI scheme: " + uri.getScheme());
+            }
+        } catch (Exception e) {
+//            e.printStackTrace();
+            Log.i(TAG, "Error parsing URI: " + uriString);
+        }
+        return false;
     }
 
     private void deletePlantFromFirestore(Plant plant) {
@@ -717,8 +748,10 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
     private void loadPlantsFromLocalStorage() {
         localPlants = appDatabase.plantDao().getAllPlants();
+
         localPlants.observe(getViewLifecycleOwner(), plantEntities -> {
             Log.d(TAG, "loadPlantsFromLocalStorage: " + plantEntities);
+
             List<Plant> plants = convertToPlantList(plantEntities);
             // TODO - create the plant only if saved on PlantDetailsFragment to avoid rerendering the list
             adapter.updatePlants(plants);
@@ -726,7 +759,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
 
         List<Plant> plantsAux = convertToPlantList(localPlants.getValue());
-
         adapter = new PlantsGridAdapter(requireContext(), plantsAux, appDatabase);
         adapter.setOnPlantClickListener(HomepageFragment.this);
         recyclerView.setAdapter(adapter);

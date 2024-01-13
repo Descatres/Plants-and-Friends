@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,19 +44,24 @@ public class AlertsFragment extends Fragment {
     private TextView maxHumidityTextView;
     private String maxHumidity;
     TextView warningInternetUnavailable;
+    TextView warningAndroidVersion;
+
+    TextView comboWarning;
     private RangeSlider temperatureRangeSlider;
     private RangeSlider humidityRangeSlider;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private Button saveButton;
+    private View save_layout;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_alerts, container, false);
+        View view = inflater.inflate(R.layout.alerts, container, false);
         toolbar = view.findViewById(R.id.toolbar);
+
 
         minTemperatureTextView = view.findViewById(R.id.minTemperature);
         maxTemperatureTextView = view.findViewById(R.id.maxTemperature);
@@ -96,13 +102,16 @@ public class AlertsFragment extends Fragment {
 
         fetchAndDisplayThresholds();
 
+        saveButton = view.findViewById(R.id.save);
+
+        saveButton.setOnClickListener(v -> {
+            saveThresholdsFirestore();
+        });
+
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.plant_details_menu);
         toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_save) {
-                saveThresholdsFirestore();
-                return true;
-            } else if (item.getItemId() == R.id.action_back) {
+            if (item.getItemId() == R.id.action_back) {
                 navigateToHomepage();
                 return true;
             } else {
@@ -110,9 +119,25 @@ public class AlertsFragment extends Fragment {
             }
         });
 
-
         warningInternetUnavailable = view.findViewById(R.id.warning_text);
-        warningInternetUnavailable.setVisibility(isNetworkConnected() ? View.GONE : View.VISIBLE);
+        warningInternetUnavailable.setVisibility(View.GONE);
+        warningAndroidVersion = view.findViewById(R.id.warning_text1);
+        warningAndroidVersion.setVisibility(View.GONE);
+        comboWarning = view.findViewById(R.id.warning_text2);
+        comboWarning.setVisibility(View.GONE);
+
+//        save_layout = view.findViewById(R.id.save_layout);
+
+        if (!isNetworkConnected() && android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+            warningInternetUnavailable.setVisibility(View.VISIBLE);
+//            save_layout.setVisibility(View.GONE);
+        } else if (isNetworkConnected() && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            warningAndroidVersion.setVisibility(View.VISIBLE);
+//            save_layout.setVisibility(View.GONE);
+        } else if (!isNetworkConnected() && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            comboWarning.setVisibility(View.VISIBLE);
+//            save_layout.setVisibility(View.GONE);
+        }
 
 
         return view;
@@ -151,6 +176,11 @@ public class AlertsFragment extends Fragment {
     }
 
     private void fetchAndDisplayThresholds() {
+        if (!isNetworkConnected()) {
+            Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             String currentUserUid = currentUser.getUid();

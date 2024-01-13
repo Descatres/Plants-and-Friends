@@ -107,7 +107,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         if (plant.getImgUri() != null && !plant.getImgUri().isEmpty() && isNetworkConnected()) {
             Picasso.get().load(plant.getImgUri()).into(holder.plantImageView);
             loadImage(holder, Uri.parse(plant.getImgUri()));
-        } else if (!isNetworkConnected()) {
+        } else if (plant.getImgUri() != null && !plant.getImgUri().isEmpty() && !isNetworkConnected()) {
             loadImage(holder, Uri.parse(plant.getImgUri()));
         } else {
             // Set a placeholder image if the URI is null or empty
