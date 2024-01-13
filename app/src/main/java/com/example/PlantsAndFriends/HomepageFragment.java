@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -88,6 +89,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     private TextView humidityTextView;
 
     private Button addPlantButton;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -623,11 +625,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(view -> {
             input.setText("");
-//            if (isNetworkConnected()) {
-//                loadPlantsFromFirebase();
-//            } else {
-            loadPlantsFromLocalStorage();
-//            }
+            performSearch("");
         });
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(view -> dialog.cancel());
     }
