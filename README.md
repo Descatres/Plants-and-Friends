@@ -6,7 +6,6 @@
 - Image of the plants
 - Descriptions
 ## And able to track:
-- stock
 - temperature
 - humidity
 
