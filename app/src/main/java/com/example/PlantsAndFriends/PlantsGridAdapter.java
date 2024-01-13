@@ -107,7 +107,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         if (plant.getImgUri() != null && !plant.getImgUri().isEmpty() && isNetworkConnected()) {
             Picasso.get().load(plant.getImgUri()).into(holder.plantImageView);
             loadImage(holder, Uri.parse(plant.getImgUri()));
-        } else if (!isNetworkConnected()) {
+        } else if (plant.getImgUri() != null && !plant.getImgUri().isEmpty() && !isNetworkConnected()) {
             loadImage(holder, Uri.parse(plant.getImgUri()));
         } else {
             // Set a placeholder image if the URI is null or empty
@@ -206,6 +206,8 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     }
 
     private void deletePlantFromFirestore(Plant plant) {
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             return;
@@ -232,6 +234,8 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     }
 
     private void updatePlantNameFirestore(Plant plant, String newName) {
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             return;

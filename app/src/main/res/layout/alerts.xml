@@ -17,7 +17,7 @@
             android:layout_height="35sp"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
-            android:src="@drawable/negative_logo"
+            android:src="@drawable/white_logo"
             app:tint="#FFFFFF"
             android:contentDescription="@string/negative_logo" />
 
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/toolbar_icon"
-            android:paddingStart="8dp"
+            android:paddingStart="10dp"
             android:paddingEnd="16dp"
             android:fontFamily="@font/poppins_medium"
             android:text="@string/app_name"
@@ -40,25 +40,49 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
-        android:padding="30sp"
+        android:paddingHorizontal="30sp"
+        android:paddingVertical="20dp"
         android:orientation="vertical">
 
         <!-- Vertical LinearLayout for Text Views -->
         <!-- Plant Name Section -->
-        <TextView
-            android:id="@+id/alerts"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/alerts"
-            android:fontFamily="@font/poppins"
-            android:textColor="@color/black"
-            android:textSize="30sp" />
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/home" />
+
+            <TextView
+                android:id="@+id/alerts"
+                android:paddingStart="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/alerts"
+                android:layout_gravity="center_vertical"
+                android:fontFamily="@font/poppins"
+                android:textColor="@color/black"
+                android:textSize="28sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/alerts_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/alerts_text"
+            android:fontFamily="@font/poppins"
+            android:textColor="@color/gray"
+            android:justificationMode="inter_word"
+
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/notes_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/notes_text"
             android:fontFamily="@font/poppins"
             android:textColor="@color/gray"
             android:textSize="14sp" />
@@ -110,7 +134,7 @@
                 android:layout_weight="1"
                 android:text="@string/min_temperature"
                 android:textSize="12sp"
-                android:textColor="@color/black"
+                android:textColor="@color/blue_gray"
                 android:fontFamily="@font/poppins" />
 
             <TextView
@@ -122,7 +146,7 @@
                 android:textSize="12sp"
                 android:fontFamily="@font/poppins"
                 android:textAlignment="textEnd"
-                android:textColor="@color/black" />
+                android:textColor="@color/blue_gray" />
         </LinearLayout>
     </LinearLayout>
 
@@ -171,7 +195,7 @@
                 android:layout_weight="1"
                 android:text="@string/min_humidity"
                 android:textSize="12sp"
-                android:textColor="@color/black"
+                android:textColor="@color/blue_gray"
                 android:fontFamily="@font/poppins" />
 
             <TextView
@@ -183,7 +207,7 @@
                 android:textSize="12sp"
                 android:fontFamily="@font/poppins"
                 android:textAlignment="textEnd"
-                android:textColor="@color/black" />
+                android:textColor="@color/blue_gray" />
 
         </LinearLayout>
     </LinearLayout>
@@ -196,8 +220,6 @@
         android:padding="30sp"
         android:orientation="vertical">
 
-        <!-- Vertical LinearLayout for Text Views -->
-        <!-- Plant Name Section -->
         <TextView
             android:id="@+id/warning_text"
             android:layout_width="match_parent"
@@ -206,7 +228,56 @@
             android:text="@string/no_internet_connection_feature_unavailable"
             android:fontFamily="@font/poppins"
             android:textColor="@color/red"
-            android:textSize="20sp" />
+            android:textSize="17sp" />
+
+        <TextView
+            android:id="@+id/warning_text1"
+            android:layout_width="match_parent"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:text="@string/android_12_or_higher_not_supported"
+            android:fontFamily="@font/poppins"
+            android:textColor="@color/red"
+            android:textSize="17sp" />
+
+        <TextView
+            android:id="@+id/warning_text2"
+            android:layout_width="match_parent"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:text="@string/combo"
+            android:fontFamily="@font/poppins"
+            android:textColor="@color/red"
+            android:textSize="17sp" />
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/save_layout"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_alignParentBottom="true"
+        android:clickable="false"
+        android:paddingBottom="30dp">
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/round_button"
+            android:elevation="10dp"
+            android:paddingHorizontal="50dp"
+            android:gravity="center"
+            android:layout_alignParentBottom="true"
+            android:text="@string/save"
+            android:textAlignment="center"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+    </RelativeLayout>
 
 </RelativeLayout>

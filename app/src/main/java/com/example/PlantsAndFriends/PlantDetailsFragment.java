@@ -1,7 +1,6 @@
 package com.example.PlantsAndFriends;
 
 import android.app.Activity;
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,8 +18,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,27 +29,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.slider.RangeSlider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlantDetailsFragment extends Fragment {
     private Toolbar toolbar;
@@ -70,21 +65,17 @@ public class PlantDetailsFragment extends Fragment {
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri selectedImageUri;
     private static final String TAG = "PlantDetailsFragment";
-
     private StringBuilder consolidatedResultBuilder = new StringBuilder();
-
     public static final String READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES";
     public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
-
     private static final int GALLERY_PERMISSION_REQUEST_CODE = 101;
-
     StorageReference storageReference;
-
+    private Button saveButton;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.edit_plant, container, false);
+        View view = inflater.inflate(R.layout.plant_details, container, false);
         toolbar = view.findViewById(R.id.toolbar);
 
         //Plant Attributes
@@ -96,6 +87,34 @@ public class PlantDetailsFragment extends Fragment {
 
         plantImageView.setOnClickListener(v -> {
             openGallery();
+        });
+
+
+        saveButton = view.findViewById(R.id.save);
+
+        saveButton.setOnClickListener(v -> {
+            if (getArguments() != null) {
+                String plantNumber = getArguments().getString("plantNumber");
+                if (plantNumber != null && !plantNumber.isEmpty()) {
+                    if (selectedImageUri != null) {
+                        uploadImage(selectedImageUri);
+                    }
+                    savePlantToLocalStorage(plantNumber, selectedImageUri);
+                    if (isNetworkConnected()) {
+                        backupPlantToFirestore(plantNumber, () -> {
+                            Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
+                            mainHandler.post(() -> {
+                                // Only show the last message set to consolidatedResult
+                                String consolidatedMessage = consolidatedResultBuilder.toString();
+                                if (!consolidatedMessage.isEmpty()) {
+                                    Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+                                    consolidatedResultBuilder.setLength(0);
+                                }
+                            });
+                        });
+                    }
+                }
+            }
         });
 
         minTemperatureTextView = view.findViewById(R.id.minTemperature);
@@ -152,35 +171,23 @@ public class PlantDetailsFragment extends Fragment {
         toolbar.inflateMenu(R.menu.plant_details_menu);
 
         toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_save) {
-                if (getArguments() != null) {
-                    String plantNumber = getArguments().getString("plantNumber");
-                    if (plantNumber != null && !plantNumber.isEmpty()) {
-                        if (selectedImageUri != null) {
-                            uploadImage(selectedImageUri);
-                        }
-//                        else {
-//                            // get the imageUri from the local storage
-//                            executor.execute(() -> {
-//                                selectedImageUri = getImageUriFromLocalStorage(plantNumber);
-//                                uploadImage(selectedImageUri);
-//                            });
+//            if (item.getItemId() == R.id.action_save) {
+//                if (getArguments() != null) {
+//                    String plantNumber = getArguments().getString("plantNumber");
+//                    if (plantNumber != null && !plantNumber.isEmpty()) {
+//                        if (selectedImageUri != null) {
+//                            uploadImage(selectedImageUri);
 //                        }
-
-                        savePlantToLocalStorage(plantNumber, selectedImageUri);
-                        if (isNetworkConnected()) {
-                            backupPlantToFirestore(plantNumber, () -> {
-                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
-                                mainHandler.post(() -> {
-                                    // Only show the last message set to consolidatedResult
-                                    String consolidatedMessage = consolidatedResultBuilder.toString();
-                                    if (!consolidatedMessage.isEmpty()) {
-                                        Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
-                                        consolidatedResultBuilder.setLength(0);
-                                    }
-                                });
-                            });
-                        }
+////                        else {
+////                            // get the imageUri from the local storage
+////                            executor.execute(() -> {
+////                                selectedImageUri = getImageUriFromLocalStorage(plantNumber);
+////                                uploadImage(selectedImageUri);
+////                            });
+////                        }
+//
+//                        savePlantToLocalStorage(plantNumber, selectedImageUri);
+//                        if (isNetworkConnected()) {
 //                            backupPlantToFirestore(plantNumber, () -> {
 //                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
 //                                mainHandler.post(() -> {
@@ -192,13 +199,23 @@ public class PlantDetailsFragment extends Fragment {
 //                                    }
 //                                });
 //                            });
-                    }
-                }
-                return true;
-            } else if (item.getItemId() == R.id.action_back) {
-                // TODO verify if there is a selected image or not (otherwise, if it is only saved the name and image and the name is deleted, the plant will not be deleted entirely, as opposed to the other fields
-                //  check for (selectedImageUri == null or empty) won't work;
-                //  something like (getImageUriFromLocalStorage(getArguments().getString("plantNumber")) == null) would but it locks the main thread
+//                        }
+////                            backupPlantToFirestore(plantNumber, () -> {
+////                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
+////                                mainHandler.post(() -> {
+////                                    // Only show the last message set to consolidatedResult
+////                                    String consolidatedMessage = consolidatedResultBuilder.toString();
+////                                    if (!consolidatedMessage.isEmpty()) {
+////                                        Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+////                                        consolidatedResultBuilder.setLength(0);
+////                                    }
+////                                });
+////                            });
+//                    }
+//                }
+//                return true;
+//            } else
+            if (item.getItemId() == R.id.action_back) {
                 if (nameEditText.getText().toString().isEmpty() && speciesEditText.getText().toString().isEmpty() && plantDescriptionEditText.getText().toString().isEmpty()
                         && temperatureRangeSlider.getValues().get(0) == -40 && temperatureRangeSlider.getValues().get(1) == 80
                         && humidityRangeSlider.getValues().get(0) == 0 && humidityRangeSlider.getValues().get(1) == 100) {
@@ -230,7 +247,7 @@ public class PlantDetailsFragment extends Fragment {
 
     // Image Picker Gallery
     private void openGallery() {
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
         if (!isGalleryPermissionGranted()) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2) {
                 ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{READ_EXTERNAL_STORAGE}, GALLERY_PERMISSION_REQUEST_CODE);
@@ -238,6 +255,7 @@ public class PlantDetailsFragment extends Fragment {
                 ActivityCompat.requestPermissions((Activity) requireContext(), new String[]{READ_MEDIA_IMAGES}, GALLERY_PERMISSION_REQUEST_CODE);
             }
         } else {
+            Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST);
         }
     }
