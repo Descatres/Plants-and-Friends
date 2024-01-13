@@ -95,6 +95,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
     private Button addPlantButton;
     private MqttViewModel mqttViewModel;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -140,22 +141,18 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         searchIcon.setOnClickListener(v -> showSearchDialog());
 
         // MQTT ViewModel
-        // Ensure that the ViewModel is initialized only once, possibly in onCreate or onCreateView
         mqttViewModel = new ViewModelProvider(this).get(MqttViewModel.class);
         mqttViewModel.setDataRepository(DataRepository.getInstance());
 
         mqttViewModel.getFormattedTemperature().observe(getViewLifecycleOwner(), temperature -> {
             Log.d(TAG, "Formatted Temperature: " + temperature);
-            // Update your UI element (currentTempTextView) with the formatted temperature
             currentTempTextView.setText(temperature);
         });
 
         mqttViewModel.getFormattedHumidity().observe(getViewLifecycleOwner(), humidity -> {
             Log.d(TAG, "Formatted Humidity: " + humidity);
-            // Update your UI element (currentHimTextView) with the formatted humidity
             currentHumTextView.setText(humidity);
         });
-
 
 
         // load the plants from local storage at startup
@@ -183,6 +180,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         startMqttMonitorService();
         return view;
     }
+
     private BroadcastReceiver mqttUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -196,20 +194,26 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
             }
         }
     };
+
     @Override
     public void onResume() {
-        super.onResume();
         // Register the receiver
-        LocalBroadcastManager.getInstance(requireContext())
-                .registerReceiver(mqttUpdateReceiver, new IntentFilter("mqtt_update"));
+        if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.S && isNetworkConnected()) {
+            LocalBroadcastManager.getInstance(requireContext())
+                    .registerReceiver(mqttUpdateReceiver, new IntentFilter("mqtt_update"));
+        }
+        super.onResume();
     }
 
     @Override
     public void onPause() {
         // Unregister the receiver to avoid memory leaks
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mqttUpdateReceiver);
+        if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.S && isNetworkConnected()) {
+            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mqttUpdateReceiver);
+        }
         super.onPause();
     }
+
     private void setLayoutManager() {
         if (isGridLayout) {
             recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
