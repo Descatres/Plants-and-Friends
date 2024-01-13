@@ -16,7 +16,7 @@
 
 ---
 
-Check the mockups [here](https://www.figma.com/file/R5EZiiwMCeeSawiDweYcR1/Plants%26Friends?type=design&node-id=0%3A1&mode=design&t=IOr0niK1qOHFxdOd-1)
+- You can check the mockups [here](https://www.figma.com/file/R5EZiiwMCeeSawiDweYcR1/Plants%26Friends?type=design&node-id=0%3A1&mode=design&t=IOr0niK1qOHFxdOd-1)
 
 ---
 Made, with love, for Android, with Java
