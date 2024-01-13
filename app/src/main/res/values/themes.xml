@@ -1,10 +1,11 @@
 <resources>    <!-- Base application theme. -->
-<style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
-    <!-- Customize your theme here. -->
-    <item name="colorPrimary">@color/blue_gray</item>
-    <item name="colorSecondary">@color/blue_gray</item>
-    <item name="colorAccent">@color/white</item>
-</style>
+    <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
+        <!--force light mode-->
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="colorPrimary">@color/blue_gray</item>
+        <item name="colorSecondary">@color/blue_gray</item>
+        <item name="colorAccent">@color/white</item>
+    </style>
 
 
 </resources>
