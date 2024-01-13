@@ -9,8 +9,7 @@ public class DataRepository {
     private static DataRepository instance;
     private final MutableLiveData<String> temperatureData = new MutableLiveData<>();
     private final MutableLiveData<String> humidityData = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> lightState = new MutableLiveData<>();
-
+;
 
     private DataRepository() {
     }
@@ -30,23 +29,26 @@ public class DataRepository {
         return humidityData;
     }
 
-    public LiveData<Boolean> getLightState() {
-        return lightState;
-    }
-
     public void updateData(String topic, String payload) {
         // update LiveData based on the received MQTT data
         String temperatureTopic = "plants_and_friends_temperature_topic";
         String humidityTopic = "plants_and_friends_humidity_topic";
-//        Log.e("DataRepository", "Received data on topic: " + topic + ", payload: " + payload);
+        // Log.e("DataRepository", "Received data on topic: " + topic + ", payload: " + payload);
         if (temperatureTopic.equals(topic)) {
-            temperatureData.postValue(payload);
+            float temperatureValue = parseFloatWithDefault(payload);
+            temperatureData.postValue(String.valueOf(temperatureValue));
         } else if (humidityTopic.equals(topic)) {
-            humidityData.postValue(payload);
+            float humidityValue = parseFloatWithDefault(payload);
+            humidityData.postValue(String.valueOf(humidityValue));
         }
     }
 
-    public void setLightState(boolean isLightOn) {
-        lightState.setValue(isLightOn);
+
+    private float parseFloatWithDefault(String value) {
+        try {
+            return Float.parseFloat(value);
+        } catch (NumberFormatException e) {
+            return Float.NaN;
+        }
     }
 }

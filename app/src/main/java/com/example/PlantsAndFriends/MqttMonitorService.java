@@ -12,6 +12,7 @@ import android.util.Log;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -73,10 +74,8 @@ public class MqttMonitorService extends Service {
                 updateMqttData(temperatureTopic, "Connection Lost");
             }
 
-            @Override
             public void messageArrived(String topic, org.eclipse.paho.client.mqttv3.MqttMessage message) {
                 String payload = new String(message.getPayload());
-//                Log.e(TAG, "Message arrived" + payload);
 
                 if (topic.equals(temperatureTopic)) {
                     currentTemperature = parseFloatWithDefault(payload);
@@ -84,8 +83,12 @@ public class MqttMonitorService extends Service {
                     currentHumidity = parseFloatWithDefault(payload);
                 }
 
+                // Send broadcast to update UI in HomepageFragment
+                sendUpdateBroadcast();
+
                 fetchAndVerifyThresholds();
             }
+
 
             @Override
             public void deliveryComplete(IMqttDeliveryToken token) {
@@ -193,6 +196,7 @@ public class MqttMonitorService extends Service {
     private void checkRoomTemperatureInterval(float minRoomTemperature, float maxRoomTemperature) {
         if (!Float.isNaN(currentTemperature) && (currentTemperature < minRoomTemperature || currentTemperature > maxRoomTemperature)) {
             showNotification("Temperature Alert", "Room temperature (" + currentTemperature + "ºC) is outside the specified interval", 1);
+            Log.d(TAG, "Temperature received: " + currentTemperature);
             notificationTemperatureSent = true;
         }
     }
@@ -200,6 +204,7 @@ public class MqttMonitorService extends Service {
     private void checkRoomHumidityInterval(float minRoomHumidity, float maxRoomHumidity) {
         if (!Float.isNaN(currentHumidity) && (currentHumidity < minRoomHumidity || currentHumidity > maxRoomHumidity)) {
             showNotification("Humidity Alert", "Room humidity (" + currentHumidity + "%)  is outside the specified interval", 1);
+            Log.d(TAG, "Humidity received: " + currentHumidity);
             notificationHumiditySent = true;
         }
     }
@@ -229,7 +234,12 @@ public class MqttMonitorService extends Service {
             showNotification("Humidity Alert", "(" + currentHumidity + "%) is outside the threshold for plant: " + getPlantName(plantData), getPlantNumber(plantData));
         }
     }
-
+    private void sendUpdateBroadcast() {
+        Intent intent = new Intent("mqtt_update");
+        intent.putExtra("temperature", currentTemperature);
+        intent.putExtra("humidity", currentHumidity);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+    }
     private String getPlantName(Map<String, Object> plantData) {
         return Objects.requireNonNull(plantData.get("name")).toString();
     }

@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/green"
-        android:titleTextColor="#FFFFFF">
+        android:titleTextColor="#FFFFFF"
+        android:layout_marginBottom="10dp">
 
         <ImageView
             android:id="@+id/toolbar_icon"
@@ -17,7 +18,7 @@
             android:layout_height="35sp"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
-            android:src="@drawable/negative_logo"
+            android:src="@drawable/white_logo"
             app:tint="#FFFFFF"
             android:contentDescription="@string/negative_logo" />
 
@@ -27,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/toolbar_icon"
-            android:paddingStart="8dp"
+            android:paddingStart="10dp"
             android:paddingEnd="16dp"
             android:fontFamily="@font/poppins_medium"
             android:text="@string/app_name"
@@ -35,26 +36,14 @@
             android:textSize="20sp" />
     </androidx.appcompat.widget.Toolbar>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/poppins_medium"
-        android:text="Your Plant"
-        android:id="@+id/title"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:layout_below="@+id/toolbar"
-        android:paddingStart="30dp"
-        android:paddingEnd="30dp"
-        android:paddingBottom="10dp"
-        android:layout_marginTop="15dp" />
+
 
     <!-- Horizontal LinearLayout for Image and Text Views -->
     <LinearLayout
         android:id="@+id/horizontal_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/title"
+        android:layout_below="@id/toolbar"
         android:paddingStart="30sp"
         android:paddingEnd="30sp"
         android:paddingBottom="30sp"
@@ -76,7 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16sp">
 
             <!-- Plant Name Section -->
             <TextView
@@ -90,7 +79,7 @@
 
             <EditText
                 android:id="@+id/name"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/poppins_medium"
                 android:hint="@string/chosen_name"
@@ -98,7 +87,7 @@
                 android:padding="0sp"
                 android:paddingBottom="2dp"
                 android:textColor="@color/black"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <!-- Plant Species Section -->
             <TextView
@@ -112,7 +101,7 @@
 
             <EditText
                 android:id="@+id/species"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/poppins_medium"
                 android:hint="@string/chosen_species"
@@ -120,7 +109,7 @@
                 android:padding="0sp"
                 android:paddingBottom="2dp"
                 android:textColor="@color/black"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
         </LinearLayout>
 
     </LinearLayout>
@@ -141,7 +130,7 @@
             android:fontFamily="@font/poppins_medium"
             android:text="@string/ideal_temperature"
             android:textColor="@color/black"
-            android:textSize="17sp" />
+            android:textSize="16sp" />
 
         <!-- Material Components Range Slider -->
         <com.google.android.material.slider.RangeSlider
@@ -172,7 +161,7 @@
                 android:layout_weight="1"
                 android:text="@string/min_temperature"
                 android:textSize="12sp"
-                android:textColor="@color/black"
+                android:textColor="@color/blue_gray"
                 android:fontFamily="@font/poppins" />
 
             <TextView
@@ -184,7 +173,7 @@
                 android:textSize="12sp"
                 android:fontFamily="@font/poppins"
                 android:textAlignment="textEnd"
-                android:textColor="@color/black" />
+                android:textColor="@color/blue_gray"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -204,7 +193,7 @@
             android:fontFamily="@font/poppins_medium"
             android:text="@string/ideal_humidity"
             android:textColor="@color/black"
-            android:textSize="17sp" />
+            android:textSize="16sp" />
 
         <!-- Material Components Range Slider -->
         <com.google.android.material.slider.RangeSlider
@@ -234,7 +223,7 @@
                 android:layout_weight="1"
                 android:text="@string/min_humidity"
                 android:textSize="12sp"
-                android:textColor="@color/black"
+                android:textColor="@color/blue_gray"
                 android:fontFamily="@font/poppins" />
 
             <TextView
@@ -246,7 +235,7 @@
                 android:textSize="12sp"
                 android:fontFamily="@font/poppins"
                 android:textAlignment="textEnd"
-                android:textColor="@color/black" />
+                android:textColor="@color/blue_gray" />
         </LinearLayout>
     </LinearLayout>
 
@@ -266,7 +255,7 @@
             android:fontFamily="@font/poppins_medium"
             android:text="@string/description"
             android:textColor="@color/black"
-            android:textSize="17sp" />
+            android:textSize="16sp" />
 
         <EditText
             android:id="@+id/plantsEditText"

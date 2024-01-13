@@ -2,8 +2,10 @@ package com.example.PlantsAndFriends;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -30,6 +32,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -70,6 +74,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     private static final String TAG = "HomepageFragment";
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private DataRepository dataRepository;
     private ListenerRegistration plantsListener;
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -85,11 +90,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     private SwitchMaterial switchButton;
     private boolean isGridLayout = true;
 
-    private TextView temperatureTextView;
-    private TextView humidityTextView;
+    private TextView currentTempTextView;
+    private TextView currentHumTextView;
 
     private Button addPlantButton;
-
+    private MqttViewModel mqttViewModel;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -100,8 +105,8 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         storageReference = FirebaseStorage.getInstance().getReference();
         searchIcon = view.findViewById(R.id.searchIcon);
 
-        temperatureTextView = view.findViewById(R.id.temperatureTextView);
-        humidityTextView = view.findViewById(R.id.humidityTextView);
+        currentTempTextView = view.findViewById(R.id.temperatureTextView);
+        currentHumTextView = view.findViewById(R.id.humidityTextView);
 
         addPlantButton = view.findViewById(R.id.add_plant);
 
@@ -126,7 +131,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         });
         setLayoutManager();
 
-
         toolbar = view.findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.homepage_menu);
@@ -134,6 +138,25 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         //search
         searchIcon.setOnClickListener(v -> showSearchDialog());
+
+        // MQTT ViewModel
+        // Ensure that the ViewModel is initialized only once, possibly in onCreate or onCreateView
+        mqttViewModel = new ViewModelProvider(this).get(MqttViewModel.class);
+        mqttViewModel.setDataRepository(DataRepository.getInstance());
+
+        mqttViewModel.getFormattedTemperature().observe(getViewLifecycleOwner(), temperature -> {
+            Log.d(TAG, "Formatted Temperature: " + temperature);
+            // Update your UI element (currentTempTextView) with the formatted temperature
+            currentTempTextView.setText(temperature);
+        });
+
+        mqttViewModel.getFormattedHumidity().observe(getViewLifecycleOwner(), humidity -> {
+            Log.d(TAG, "Formatted Humidity: " + humidity);
+            // Update your UI element (currentHimTextView) with the formatted humidity
+            currentHumTextView.setText(humidity);
+        });
+
+
 
         // load the plants from local storage at startup
         loadPlantsFromLocalStorage();
@@ -160,7 +183,33 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         startMqttMonitorService();
         return view;
     }
+    private BroadcastReceiver mqttUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction() != null && intent.getAction().equals("mqtt_update")) {
+                float temperature = intent.getFloatExtra("temperature", Float.NaN);
+                float humidity = intent.getFloatExtra("humidity", Float.NaN);
 
+                // Update your UI elements with temperature and humidity
+                currentTempTextView.setText(String.format("%.2f°C", temperature));
+                currentHumTextView.setText(String.format("%.2f%%", humidity));
+            }
+        }
+    };
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Register the receiver
+        LocalBroadcastManager.getInstance(requireContext())
+                .registerReceiver(mqttUpdateReceiver, new IntentFilter("mqtt_update"));
+    }
+
+    @Override
+    public void onPause() {
+        // Unregister the receiver to avoid memory leaks
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mqttUpdateReceiver);
+        super.onPause();
+    }
     private void setLayoutManager() {
         if (isGridLayout) {
             recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
@@ -321,33 +370,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
         return false;
     }
-
-    private void uploadImage(Uri imageUri, String plantNumber) {
-        Log.e(TAG, "uploadImage: " + imageUri);
-        if (imageUri == null || !isNetworkConnected()) {
-            Log.e(TAG, "uploadImage: " + "imageUri null or no internet connection");
-            return;
-        }
-
-        StorageReference ref = storageReference.child("images/" + plantNumber);
-
-        Log.e(TAG, "uploadImg Ref: " + ref);
-
-        ref.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
-            Log.e(TAG, "uploadImage sucesso");
-            if (isAdded()) {
-                mainHandler.post(() -> {
-                    Toast.makeText(requireContext(), "Image uploaded to Firestore bucket", Toast.LENGTH_SHORT).show();
-                });
-            }
-        }).addOnFailureListener(e -> {
-            Log.e(TAG, "uploadImage sem sucesso");
-            mainHandler.post(() -> {
-                Toast.makeText(requireContext(), "Failed to upload to bucket: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            });
-        });
-    }
-
 
     private void updateFirestore() {
         FirebaseUser currentUser = mAuth.getCurrentUser();

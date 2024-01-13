@@ -2,14 +2,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/save_plants_to_firestore"
-        android:icon="@drawable/bakcup_icon"
+        android:icon="@drawable/cloud_icon"
         android:title="@string/save_plants_to_firestore"
         app:showAsAction="ifRoom"
 
         />
     <item
         android:id="@+id/menu_more"
-        android:icon="@drawable/round_menu_24"
+        android:icon="@drawable/menu_icon"
         android:title="@string/app_title"
         app:showAsAction="always">
         <menu>

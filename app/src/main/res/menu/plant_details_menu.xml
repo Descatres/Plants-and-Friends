@@ -5,12 +5,12 @@
         android:id="@+id/action_save"
         android:title="@string/save"
         app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_save" />
+        android:icon="@drawable/round_save_alt_24" />
 
     <item
         android:id="@+id/action_back"
         android:title="@string/back"
         app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_back" />
+        android:icon="@drawable/round_arrow_back_24" />
 
 </menu>
