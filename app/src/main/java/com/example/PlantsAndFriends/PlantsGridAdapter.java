@@ -58,13 +58,16 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         Log.d("PlantsGridAdapter", "Switching layout mode to Grid: " + isGridMode);
         notifyLayoutChanged();
     }
+
     private void notifyLayoutChanged() {
-        notifyDataSetChanged();
+        notifyItemRangeChanged(0, plantsList.size());
     }
+
     @Override
     public int getItemViewType(int position) {
         return isGridMode ? VIEW_TYPE_GRID : VIEW_TYPE_LIST;
     }
+
     public interface OnPlantClickListener {
         void onPlantClick(Plant plant);
     }
@@ -94,6 +97,11 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Plant plant = plantsList.get(position);
+
+        holder.itemView.setOnLongClickListener(v -> {
+            showOptionsDialog(plant, position);
+            return true;
+        });
 
         // Image
         if (plant.getImgUri() != null && !plant.getImgUri().isEmpty() && isNetworkConnected()) {
@@ -160,6 +168,7 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
         TextView plantMaxTempTextView;
         TextView plantMinTempTextView;
         ImageView plantImageView;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             plantImageView = itemView.findViewById(R.id.plant_image_view);
