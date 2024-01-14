@@ -95,11 +95,12 @@ public class PlantDetailsFragment extends Fragment {
         saveButton.setOnClickListener(v -> {
             if (getArguments() != null) {
                 String plantNumber = getArguments().getString("plantNumber");
+                boolean isCreate = getArguments().getBoolean("isCreate");
                 if (plantNumber != null && !plantNumber.isEmpty()) {
                     if (selectedImageUri != null) {
                         uploadImage(selectedImageUri);
                     }
-                    savePlantToLocalStorage(plantNumber, selectedImageUri, true);
+                    savePlantToLocalStorage(plantNumber, selectedImageUri, isCreate);
                     if (isNetworkConnected()) {
                         backupPlantToFirestore(plantNumber, () -> {
                             Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
@@ -112,6 +113,7 @@ public class PlantDetailsFragment extends Fragment {
                             });
                         });
                     }
+                    navigateToHomepage();
                 }
             }
         });
@@ -157,12 +159,13 @@ public class PlantDetailsFragment extends Fragment {
 
         if (getArguments() != null) {
             String plantNumber = getArguments().getString("plantNumber");
-            Log.d("GetArguments", "GetArguments: " + plantNumber);
+            boolean isCreate = getArguments().getBoolean("isCreate");
 
-            if (plantNumber != null && !plantNumber.isEmpty() && nameEditText.getText().toString().isEmpty() && speciesEditText.getText().toString().isEmpty() && plantDescriptionEditText.getText().toString().isEmpty()) {
-                createNewPlantInLocalStorage(getArguments().getString("plantNumber"));
+            if (!isCreate) {
+                if (plantNumber != null && !plantNumber.isEmpty()) {
+                    displayPlantFromLocalStorage(plantNumber);
+                }
             }
-            displayPlantFromLocalStorage(plantNumber);
         }
 
 
@@ -170,23 +173,36 @@ public class PlantDetailsFragment extends Fragment {
         toolbar.inflateMenu(R.menu.plant_details_menu);
 
         toolbar.setOnMenuItemClickListener(item -> {
-//            if (item.getItemId() == R.id.action_save) {
-//                if (getArguments() != null) {
-//                    String plantNumber = getArguments().getString("plantNumber");
-//                    if (plantNumber != null && !plantNumber.isEmpty()) {
-//                        if (selectedImageUri != null) {
-//                            uploadImage(selectedImageUri);
+            if (item.getItemId() == R.id.action_save) {
+                if (getArguments() != null) {
+                    String plantNumber = getArguments().getString("plantNumber");
+                    boolean isCreate = getArguments().getBoolean("isCreate");
+                    if (plantNumber != null && !plantNumber.isEmpty()) {
+                        if (selectedImageUri != null) {
+                            uploadImage(selectedImageUri);
+                        }
+//                        else {
+//                            // get the imageUri from the local storage
+//                            executor.execute(() -> {
+//                                selectedImageUri = getImageUriFromLocalStorage(plantNumber);
+//                                uploadImage(selectedImageUri);
+//                            });
 //                        }
-////                        else {
-////                            // get the imageUri from the local storage
-////                            executor.execute(() -> {
-////                                selectedImageUri = getImageUriFromLocalStorage(plantNumber);
-////                                uploadImage(selectedImageUri);
-////                            });
-////                        }
-//
-//                        savePlantToLocalStorage(plantNumber, selectedImageUri);
-//                        if (isNetworkConnected()) {
+
+                        savePlantToLocalStorage(plantNumber, selectedImageUri, isCreate);
+                        if (isNetworkConnected()) {
+                            backupPlantToFirestore(plantNumber, () -> {
+                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
+                                mainHandler.post(() -> {
+                                    // Only show the last message set to consolidatedResult
+                                    String consolidatedMessage = consolidatedResultBuilder.toString();
+                                    if (!consolidatedMessage.isEmpty()) {
+                                        Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
+                                        consolidatedResultBuilder.setLength(0);
+                                    }
+                                });
+                            });
+                        }
 //                            backupPlantToFirestore(plantNumber, () -> {
 //                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
 //                                mainHandler.post(() -> {
@@ -198,38 +214,10 @@ public class PlantDetailsFragment extends Fragment {
 //                                    }
 //                                });
 //                            });
-//                        }
-////                            backupPlantToFirestore(plantNumber, () -> {
-////                                Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
-////                                mainHandler.post(() -> {
-////                                    // Only show the last message set to consolidatedResult
-////                                    String consolidatedMessage = consolidatedResultBuilder.toString();
-////                                    if (!consolidatedMessage.isEmpty()) {
-////                                        Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
-////                                        consolidatedResultBuilder.setLength(0);
-////                                    }
-////                                });
-////                            });
-//                    }
-//                }
-//                return true;
-//            } else
-
-
-            if (item.getItemId() == R.id.action_back) {
-                if (getArguments() != null) {
-                    String plantNumber = getArguments().getString("plantNumber");
-                    if (plantNumber != null && !plantNumber.isEmpty()) {
-                        savePlantToLocalStorage(plantNumber, selectedImageUri, false);
                     }
                 }
-                if (nameEditText.getText().toString().isEmpty() && speciesEditText.getText().toString().isEmpty() && plantDescriptionEditText.getText().toString().isEmpty()
-                        && temperatureRangeSlider.getValues().get(0) == -40 && temperatureRangeSlider.getValues().get(1) == 80
-                        && humidityRangeSlider.getValues().get(0) == 0 && humidityRangeSlider.getValues().get(1) == 100) {
-                    executor.execute(() -> {
-                        appDatabase.plantDao().deletePlantByNumber(getArguments().getString("plantNumber"));
-                    });
-                }
+                return true;
+            } else if (item.getItemId() == R.id.action_back) {
                 navigateToHomepage();
                 return true;
             } else {
@@ -395,7 +383,7 @@ public class PlantDetailsFragment extends Fragment {
         appDatabase = AppDatabase.getInstance(requireContext());
     }
 
-    private void createNewPlantInLocalStorage(String plantNumber) {
+    private void createNewPlantInLocalStorage(String plantNumber, Runnable callback) {
         executor.execute(() -> {
             if (appDatabase.plantDao().getPlantByNumber(plantNumber) != null) {
                 Log.d(TAG, "createNewPlantInLocalStorage: " + "Plant already exists");
@@ -414,6 +402,8 @@ public class PlantDetailsFragment extends Fragment {
                 plantEntity.setDescription("");
                 appDatabase.plantDao().insert(plantEntity);
 
+                // Execute the callback after successful completion
+                callback.run();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -459,27 +449,28 @@ public class PlantDetailsFragment extends Fragment {
         return null;
     }
 
-    private void savePlantToLocalStorage(String plantNumber, Uri imageUri, boolean showToast) {
+    private void savePlantToLocalStorage(String plantNumber, Uri imageUri, boolean isCreate) {
         executor.execute(() -> {
-            if (nameEditText.getText().toString().isEmpty()) {
-                if (isAdded() && showToast) {
-                    mainHandler.post(() -> {
-                        Toast.makeText(requireContext(), "Plant not saved. Name of plant required", Toast.LENGTH_SHORT).show();
-                    });
-                    Log.d("PlantDetailsFragment", "Plant not saved. Name of plant required");
+            Runnable afterCreateCallback = () -> {
+                if (nameEditText.getText().toString().isEmpty()) {
+                    if (isAdded()) {
+                        mainHandler.post(() -> {
+                            Toast.makeText(requireContext(), "Plant not saved. Name of plant required", Toast.LENGTH_SHORT).show();
+                            Log.d("PlantDetailsFragment", "Plant not saved. Name of plant required");
+                        });
+                    }
+                    return;
                 }
-                return;
-            }
-            Log.e("PlantDetailsFragment", "savePlantToLocalStorage: " + plantNumber);
-            appDatabase.plantDao().updatePlantName(plantNumber, nameEditText.getText().toString());
-            appDatabase.plantDao().updatePlantSpecies(plantNumber, speciesEditText.getText().toString());
-            appDatabase.plantDao().updatePlantDescription(plantNumber, plantDescriptionEditText.getText().toString());
-            appDatabase.plantDao().updatePlantMinTemp(plantNumber, temperatureRangeSlider.getValues().get(0));
-            appDatabase.plantDao().updatePlantMaxTemp(plantNumber, temperatureRangeSlider.getValues().get(1));
-            appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
-            appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
-            if (imageUri != null && isGalleryPermissionGranted()) {
-                // check if the imageUri leads to a valid image on the phone and, if so, save it to the local storage
+                Log.e("PlantDetailsFragment", "savePlantToLocalStorage: " + plantNumber);
+                appDatabase.plantDao().updatePlantName(plantNumber, nameEditText.getText().toString());
+                appDatabase.plantDao().updatePlantSpecies(plantNumber, speciesEditText.getText().toString());
+                appDatabase.plantDao().updatePlantDescription(plantNumber, plantDescriptionEditText.getText().toString());
+                appDatabase.plantDao().updatePlantMinTemp(plantNumber, temperatureRangeSlider.getValues().get(0));
+                appDatabase.plantDao().updatePlantMaxTemp(plantNumber, temperatureRangeSlider.getValues().get(1));
+                appDatabase.plantDao().updatePlantMinHumidity(plantNumber, humidityRangeSlider.getValues().get(0));
+                appDatabase.plantDao().updatePlantMaxHumidity(plantNumber, humidityRangeSlider.getValues().get(1));
+                if (imageUri != null && isGalleryPermissionGranted()) {
+                    // check if the imageUri leads to a valid image on the phone and, if so, save it to the local storage
 //                try {
 //                    MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), imageUri);
 //                } catch (Exception e) {
@@ -493,17 +484,22 @@ public class PlantDetailsFragment extends Fragment {
 //                }
 //                    return;
 //                }
-                appDatabase.plantDao().updatePlantImageUri(plantNumber, String.valueOf(imageUri));
-            }
-            // check if the plant name is set
-
-            if (!isNetworkConnected()) {
-                if (isAdded()) {
-                    mainHandler.post(() -> {
-                        Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore (No internet connection)", Toast.LENGTH_SHORT).show();
-                    });
-                    Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (No internet connection)");
+                    appDatabase.plantDao().updatePlantImageUri(plantNumber, String.valueOf(imageUri));
                 }
+
+                if (!isNetworkConnected()) {
+                    if (isAdded()) {
+                        mainHandler.post(() -> {
+                            Toast.makeText(requireContext(), "Plant saved but failed to backup to Firestore (No internet connection)", Toast.LENGTH_SHORT).show();
+                            Log.d("PlantDetailsFragment", "Plant saved but failed to backup to Firestore (No internet connection)");
+                        });
+                    }
+                }
+            };
+            if (isCreate && !nameEditText.getText().toString().isEmpty()) {
+                createNewPlantInLocalStorage(plantNumber, afterCreateCallback);
+            } else {
+                afterCreateCallback.run();
             }
         });
     }

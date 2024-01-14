@@ -115,7 +115,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         addPlantButton = view.findViewById(R.id.add_plant);
 
         addPlantButton.setOnClickListener(v -> {
-            openEditPlant(String.valueOf(System.currentTimeMillis()));
+            openEditPlant(String.valueOf(System.currentTimeMillis()), true);
         });
 
         adapter = new PlantsGridAdapter(requireContext(), new ArrayList<>(), appDatabase);
@@ -254,7 +254,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 
     @Override
     public void onPlantClick(Plant plant) {
-        openEditPlant(plant.getNumber());
+        openEditPlant(plant.getNumber(), false);
     }
 
     @Override
@@ -262,7 +262,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         int id = item.getItemId();
 
         if (id == R.id.action_add_plant) {
-            openEditPlant(String.valueOf(System.currentTimeMillis()));
+            openEditPlant(String.valueOf(System.currentTimeMillis()), true);
             return true;
         }
 
@@ -708,10 +708,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
 //        }
     }
 
-    private void openEditPlant(String plantNumber) {
+    private void openEditPlant(String plantNumber, boolean isCreate) {
         PlantDetailsFragment EditPlantFragment = new PlantDetailsFragment();
         Bundle args = new Bundle();
         args.putString("plantNumber", plantNumber);
+        args.putBoolean("isCreate", isCreate);
         EditPlantFragment.setArguments(args);
 
         requireActivity().getSupportFragmentManager()
