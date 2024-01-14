@@ -113,7 +113,6 @@ public class PlantDetailsFragment extends Fragment {
                             });
                         });
                     }
-                    navigateToHomepage();
                 }
             }
         });

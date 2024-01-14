@@ -109,7 +109,10 @@ public class AlertsFragment extends Fragment {
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.inflateMenu(R.menu.plant_details_menu);
         toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_back) {
+            if (item.getItemId() == R.id.action_save) {
+                saveThresholdsFirestore();
+                return true;
+            } else if (item.getItemId() == R.id.action_back) {
                 navigateToHomepage();
                 return true;
             } else {
@@ -124,17 +127,13 @@ public class AlertsFragment extends Fragment {
         comboWarning = view.findViewById(R.id.warning_text2);
         comboWarning.setVisibility(View.GONE);
 
-//        save_layout = view.findViewById(R.id.save_layout);
 
         if (!isNetworkConnected() && android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
             warningInternetUnavailable.setVisibility(View.VISIBLE);
-//            save_layout.setVisibility(View.GONE);
         } else if (isNetworkConnected() && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             warningAndroidVersion.setVisibility(View.VISIBLE);
-//            save_layout.setVisibility(View.GONE);
         } else if (!isNetworkConnected() && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             comboWarning.setVisibility(View.VISIBLE);
-//            save_layout.setVisibility(View.GONE);
         }
 
 
