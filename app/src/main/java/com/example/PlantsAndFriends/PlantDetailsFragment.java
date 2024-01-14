@@ -237,6 +237,31 @@ public class PlantDetailsFragment extends Fragment {
     }
 
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (nameEditText.getText().toString().isEmpty() && speciesEditText.getText().toString().isEmpty() && plantDescriptionEditText.getText().toString().isEmpty()
+                && temperatureRangeSlider.getValues().get(0) == -40 && temperatureRangeSlider.getValues().get(1) == 80
+                && humidityRangeSlider.getValues().get(0) == 0 && humidityRangeSlider.getValues().get(1) == 100) {
+            executor.execute(() -> {
+                appDatabase.plantDao().deletePlantByNumber(getArguments().getString("plantNumber"));
+            });
+        }
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (nameEditText.getText().toString().isEmpty() && speciesEditText.getText().toString().isEmpty() && plantDescriptionEditText.getText().toString().isEmpty()
+                && temperatureRangeSlider.getValues().get(0) == -40 && temperatureRangeSlider.getValues().get(1) == 80
+                && humidityRangeSlider.getValues().get(0) == 0 && humidityRangeSlider.getValues().get(1) == 100) {
+            executor.execute(() -> {
+                appDatabase.plantDao().deletePlantByNumber(getArguments().getString("plantNumber"));
+            });
+        }
+    }
+
     private boolean isGalleryPermissionGranted() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2) {
             return requireContext().checkSelfPermission(READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
