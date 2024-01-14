@@ -99,7 +99,7 @@ public class PlantDetailsFragment extends Fragment {
                     if (selectedImageUri != null) {
                         uploadImage(selectedImageUri);
                     }
-                    savePlantToLocalStorage(plantNumber, selectedImageUri);
+                    savePlantToLocalStorage(plantNumber, selectedImageUri, true);
                     if (isNetworkConnected()) {
                         backupPlantToFirestore(plantNumber, () -> {
                             Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
@@ -215,7 +215,15 @@ public class PlantDetailsFragment extends Fragment {
 //                }
 //                return true;
 //            } else
+
+
             if (item.getItemId() == R.id.action_back) {
+                if (getArguments() != null) {
+                    String plantNumber = getArguments().getString("plantNumber");
+                    if (plantNumber != null && !plantNumber.isEmpty()) {
+                        savePlantToLocalStorage(plantNumber, selectedImageUri, false);
+                    }
+                }
                 if (nameEditText.getText().toString().isEmpty() && speciesEditText.getText().toString().isEmpty() && plantDescriptionEditText.getText().toString().isEmpty()
                         && temperatureRangeSlider.getValues().get(0) == -40 && temperatureRangeSlider.getValues().get(1) == 80
                         && humidityRangeSlider.getValues().get(0) == 0 && humidityRangeSlider.getValues().get(1) == 100) {
@@ -244,6 +252,7 @@ public class PlantDetailsFragment extends Fragment {
                 && temperatureRangeSlider.getValues().get(0) == -40 && temperatureRangeSlider.getValues().get(1) == 80
                 && humidityRangeSlider.getValues().get(0) == 0 && humidityRangeSlider.getValues().get(1) == 100) {
             executor.execute(() -> {
+                assert getArguments() != null;
                 appDatabase.plantDao().deletePlantByNumber(getArguments().getString("plantNumber"));
             });
         }
@@ -257,9 +266,11 @@ public class PlantDetailsFragment extends Fragment {
                 && temperatureRangeSlider.getValues().get(0) == -40 && temperatureRangeSlider.getValues().get(1) == 80
                 && humidityRangeSlider.getValues().get(0) == 0 && humidityRangeSlider.getValues().get(1) == 100) {
             executor.execute(() -> {
+                assert getArguments() != null;
                 appDatabase.plantDao().deletePlantByNumber(getArguments().getString("plantNumber"));
             });
         }
+
     }
 
     private boolean isGalleryPermissionGranted() {
@@ -451,10 +462,10 @@ public class PlantDetailsFragment extends Fragment {
         return null;
     }
 
-    private void savePlantToLocalStorage(String plantNumber, Uri imageUri) {
+    private void savePlantToLocalStorage(String plantNumber, Uri imageUri, boolean showToast) {
         executor.execute(() -> {
             if (nameEditText.getText().toString().isEmpty()) {
-                if (isAdded()) {
+                if (isAdded() && showToast) {
                     mainHandler.post(() -> {
                         Toast.makeText(requireContext(), "Plant not saved. Name of plant required", Toast.LENGTH_SHORT).show();
                     });
