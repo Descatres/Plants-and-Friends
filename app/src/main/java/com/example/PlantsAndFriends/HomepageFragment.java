@@ -191,7 +191,6 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
                 float temperature = intent.getFloatExtra("temperature", Float.NaN);
                 float humidity = intent.getFloatExtra("humidity", Float.NaN);
 
-                // Update your UI elements with temperature and humidity
                 currentTempTextView.setText(String.format("%.2f°C", temperature));
                 currentHumTextView.setText(String.format("%.2f%%", humidity));
             }
@@ -278,17 +277,11 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
         }
 
         if (id == R.id.load_plants_from_firestore) {
-            // Create a load button to load the plants from firebase to local storage
-            // Create a warning message to warn the user that the plants on local storage will be overwritten and
-            // select ok or cancel
             showDownloadDialog();
             return true;
         }
 
         if (id == R.id.save_plants_to_firestore) {
-            // Create here a save button to save the plants from local storage to firebase
-            // Create a warning message to warn the user that the plants on firestore will be overwritten and
-            // select ok or cancel
             showUploadDialog();
         }
 
@@ -320,7 +313,7 @@ public class HomepageFragment extends Fragment implements PlantsGridAdapter.OnPl
     }
 
     private void startMqttMonitorService() {
-        // if api > 31 return
+        // if api >= 31 return
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S || !isNetworkConnected()) {
             return;
         }

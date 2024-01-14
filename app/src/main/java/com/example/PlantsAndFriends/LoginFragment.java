@@ -155,13 +155,10 @@ public class LoginFragment extends Fragment {
         auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        // Login successful, proceed to app's main functionality or user dashboard
                         Toast.makeText(requireContext(), "Login Successful", Toast.LENGTH_SHORT).show();
 
-                        // Navigate to the user's dashboard or main activity here
                         openUserDashboard();
                     } else {
-                        // Login failed, handle the error by displaying an error message
                         String errorMessage = Objects.requireNonNull(task.getException()).getMessage();
                         Toast.makeText(requireContext(), "Login Failed: " + errorMessage, Toast.LENGTH_SHORT).show();
                     }

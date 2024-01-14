@@ -65,10 +65,7 @@ public class MainActivity extends AppCompatActivity {
             mainHandler.post(() -> Toast.makeText(getApplicationContext(), "No internet connection", Toast.LENGTH_SHORT).show());
         }
         new Handler().postDelayed(() -> {
-            // This method will be executed once the timer is over
-            // Start your app main activity
             setContentView(R.layout.activity_main);
-            // Load the LoginFragment initially
             if (savedInstanceState == null) {
                 checkUser();
             }
@@ -93,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
     private void checkUser() {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null) {
-            //User is logged in already. You can proceed with your next screen
             openHomepage();
         } else {
             GoogleSignInOptions gso = new GoogleSignInOptions.
@@ -103,10 +99,8 @@ public class MainActivity extends AppCompatActivity {
             GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, gso);
             googleSignInClient.silentSignIn().addOnCompleteListener(this, task -> {
                 if (task.isSuccessful()) {
-                    // User is logged in with Google. You can proceed with your next screen
                     openHomepage();
                 } else {
-                    // User is not logged in. You can show the login fragment here
                     loadLoginFragment();
                 }
             });

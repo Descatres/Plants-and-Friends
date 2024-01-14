@@ -81,7 +81,6 @@ public class AlertsFragment extends Fragment {
 //                Log.d("From", values.get(0).toString());
 //                Log.d("To", values.get(1).toString());
 
-                // Call your method to update humidity range text
                 updateTemperatureRangeText(values);
             }
         });
@@ -92,7 +91,6 @@ public class AlertsFragment extends Fragment {
 //                Log.d("From", values.get(0).toString());
 //                Log.d("To", values.get(1).toString());
 
-                // Call your method to update humidity range text
                 updateHumidityRangeText(values);
             }
         });
@@ -198,7 +196,6 @@ public class AlertsFragment extends Fragment {
                         }
                     })
                     .addOnFailureListener(e -> {
-                        // Handle failure
                         Log.e("AlertsFragment", "Error fetching thresholds from Firestore", e);
                     });
         }
@@ -237,7 +234,6 @@ public class AlertsFragment extends Fragment {
             minTemperatureTextView.setText(minRangeText);
             maxTemperatureTextView.setText(maxRangeText);
         } else {
-            // Handle the case where there are not enough values in the list
             minTemperatureTextView.setText("");
             maxTemperatureTextView.setText("");
         }
@@ -257,7 +253,6 @@ public class AlertsFragment extends Fragment {
             minHumidityTextView.setText(minRangeText);
             maxHumidityTextView.setText(maxRangeText);
         } else {
-            // Handle the case where there are not enough values in the list
             minHumidityTextView.setText("");
             maxHumidityTextView.setText("");
         }

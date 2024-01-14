@@ -1,13 +1,14 @@
 package com.example.PlantsAndFriends;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
+
 public class MqttViewModel extends ViewModel {
     private final MutableLiveData<String> temperatureLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> humidityLiveData = new MutableLiveData<>();
 
-    // Add the following LiveData objects
     private LiveData<String> formattedTemperature;
     private LiveData<String> formattedHumidity;
 
@@ -15,12 +16,10 @@ public class MqttViewModel extends ViewModel {
 
         // Initialize formattedTemperature and formattedHumidity LiveData
         formattedTemperature = Transformations.map(temperatureLiveData, temperature -> {
-            // Perform any formatting logic here
             return String.format("%.2f°C", temperature);
         });
 
         formattedHumidity = Transformations.map(humidityLiveData, humidity -> {
-            // Perform any formatting logic here
             return String.format("%.2f%%", humidity);
         });
     }

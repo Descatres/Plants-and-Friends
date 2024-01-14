@@ -173,11 +173,11 @@ public class PlantsGridAdapter extends RecyclerView.Adapter<PlantsGridAdapter.Vi
             super(itemView);
             plantImageView = itemView.findViewById(R.id.plant_image_view);
             plantNameTextView = itemView.findViewById(R.id.plantNameTextView);
-            plantTitleSpecieView = itemView.findViewById(R.id.plantSpecieTextView); // Add this line
-            plantMaxHumidityTextView = itemView.findViewById(R.id.plantMaxHumTextView); // Add this line
-            plantMinHumidityTextView = itemView.findViewById(R.id.plantMinHumTextView); // Add this line
-            plantMaxTempTextView = itemView.findViewById(R.id.plantMaxTempTextView); // Add this line
-            plantMinTempTextView = itemView.findViewById(R.id.plantMinTempTextView); // Add this line
+            plantTitleSpecieView = itemView.findViewById(R.id.plantSpecieTextView);
+            plantMaxHumidityTextView = itemView.findViewById(R.id.plantMaxHumTextView);
+            plantMinHumidityTextView = itemView.findViewById(R.id.plantMinHumTextView);
+            plantMaxTempTextView = itemView.findViewById(R.id.plantMaxTempTextView);
+            plantMinTempTextView = itemView.findViewById(R.id.plantMinTempTextView);
         }
     }
 

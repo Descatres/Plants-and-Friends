@@ -104,7 +104,6 @@ public class PlantDetailsFragment extends Fragment {
                         backupPlantToFirestore(plantNumber, () -> {
                             Log.d(TAG, "onMenuItemClick: " + consolidatedResultBuilder.toString());
                             mainHandler.post(() -> {
-                                // Only show the last message set to consolidatedResult
                                 String consolidatedMessage = consolidatedResultBuilder.toString();
                                 if (!consolidatedMessage.isEmpty()) {
                                     Toast.makeText(requireContext(), consolidatedMessage, Toast.LENGTH_SHORT).show();
@@ -365,7 +364,6 @@ public class PlantDetailsFragment extends Fragment {
             minTemperatureTextView.setText(minRangeText);
             maxTemperatureTextView.setText(maxRangeText);
         } else {
-            // Handle the case where there are not enough values in the list
             minTemperatureTextView.setText("");
             maxTemperatureTextView.setText("");
         }
@@ -385,7 +383,6 @@ public class PlantDetailsFragment extends Fragment {
             minHumidityTextView.setText(minRangeText);
             maxHumidityTextView.setText(maxRangeText);
         } else {
-            // Handle the case where there are not enough values in the list
             minHumidityTextView.setText("");
             maxHumidityTextView.setText("");
         }
