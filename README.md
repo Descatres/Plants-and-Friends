@@ -22,8 +22,8 @@
 ---
 
 ## How to run
-- Fork the repo and run it on Android Studio;
-- The app can be run by changing the Firestore account with [this tutorial](https://firebase.google.com/docs/firestore/quickstart#:~:text=If%20you%20haven%27t%20already%2C%20create%20a%20Firebase%20project%3A%20In%20the%20Firebase%20console%2C%20click%20Add%20project%2C%20then%20follow%20the%20on%2Dscreen%20instructions%20to%20create%20a%20Firebase%20project%20or%20to%20add%20Firebase%20services%20to%20an%20existing%20GCP%20project.);
+- Fork the repo and run it on Android Studio
+- The app can be run by changing the Firestore account with [this tutorial](https://firebase.google.com/docs/firestore/quickstart#:~:text=If%20you%20haven%27t%20already%2C%20create%20a%20Firebase%20project%3A%20In%20the%20Firebase%20console%2C%20click%20Add%20project%2C%20then%20follow%20the%20on%2Dscreen%20instructions%20to%20create%20a%20Firebase%20project%20or%20to%20add%20Firebase%20services%20to%20an%20existing%20GCP%20project.)
 - You can run [this script](https://wokwi.com/projects/385292642174231553) to simulate the Arduino with the sensors emitting data to your device through MQTT
 
 ---
