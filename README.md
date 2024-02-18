@@ -50,9 +50,9 @@
 
 ### Notes
 - All the data received from the sensors is sent through MQTT
-- The sensors feature only works until Android 12.
-- The images are being backed up to Firestore but it is not possible, yet, to download them.
-- _This project was made for a university assignment (the final project of that class) and the grade was 9.3/10. Some things might be missing due to the orientations given and/or time restrictions._
+- The sensors feature only works until Android 12
+- The images are being backed up to Firestore but it is not possible, yet, to download them (Check [this issue](https://github.com/Descatres/Plants-and-Friends/issues/7))
+- _This project was made for a university assignment (the final project of that class) and the grade was 9.3/10. Some things might be missing due to the orientations given and/or time restrictions_
 
 ---
 
