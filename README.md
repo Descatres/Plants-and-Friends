@@ -1,50 +1,6 @@
-# React + TypeScript + Vite
+# PlantsPantry
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## API Used
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+-   [Trefle API](https://docs.trefle.io/docs/guides/getting-started)
+-   [Limit usage](<https://docs.trefle.io/docs/guides/getting-started#:~:text=In%20order%20to%20allow%20all%20users%20to%20use%20the%20API%20in%20good%20conditions%2C%20a%20limit%20of%20120%20requests%20per%20minute%20is%20applied.%20If%20this%20limit%20is%20a%20limiting%20factor%20for%20your%20application%20(and%20you%20have%20valid%20reasons)%2C%20feel%20free%20to%20contact%20us.>)
