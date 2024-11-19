@@ -1,0 +1,23 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+  width: calc(100% - 4rem);
+  padding: 1rem 2rem;
+  background-color: #78d43c;
+  z-index: 10;
+}
+
+.navbar h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+}
+
+.navbar .logoTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: calc(55%);
+}

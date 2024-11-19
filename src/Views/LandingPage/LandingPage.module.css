@@ -1,0 +1,83 @@
+.background {
+  width: 100%;
+  height: 100vh;
+  background-image: url("../../assets/Rectangle.png");
+  background-size: cover;
+  background-position: center;
+  z-index: -1000;
+  padding: 0 0rem 0rem 0rem;
+  flex-wrap: wrap;
+}
+
+.contentContainer {
+  height: 100%;
+  width: calc(100% - 20rem);
+  padding: 0 0 0 10rem;
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 10%;
+  align-items: center;
+  /* flex-wrap: wrap; */
+}
+
+.treeContainer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  height: 100%;
+  width: 100%;
+}
+
+.tree {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  height: 90%;
+}
+
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  gap: 2rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  gap: 2rem;
+}
+
+.formContainer h1 {
+  font-size: 3rem;
+  font-weight: 600;
+  font-family: "Syne", sans-serif;
+  color: #466060;
+  margin: 0;
+}
+
+.formContainer p {
+  font-size: 1rem;
+  font-weight: 500;
+  /* font-family: "Syne", sans-serif; */
+  color: black;
+  margin-left: 30px;
+  text-align: right;
+}
+
+.buttonsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  width: 100%;
+}
