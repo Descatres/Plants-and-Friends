@@ -13,7 +13,7 @@ import Navbar from "./Components/Navbar/Navbar";
 import LandingPage from "./Views/LandingPage/LandingPage";
 
 function App() {
-  const [isLogged, setIsLogged] = useState(false);
+  const [isLogged, setIsLogged] = useState(true);
 
   useEffect(
     // if path is "/" and isLogged is true, redirect to "/home"
@@ -28,20 +28,22 @@ function App() {
   return (
     <Router>
       <Navbar />
-      <Routes>
-        {isLogged ? (
-          <>
-            <Route path="/home" element={<Home />} />
-            <Route path="/plant-information:id" element={<Plant />} />
-          </>
-        ) : (
-          <>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-          </>
-        )}
-      </Routes>
+      <div style={{ padding: "2rem 0" }}>
+        <Routes>
+          {isLogged ? (
+            <>
+              <Route path="/home" element={<Home />} />
+              <Route path="/plant-information:id" element={<Plant />} />
+            </>
+          ) : (
+            <>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </>
+          )}
+        </Routes>
+      </div>
     </Router>
   );
 }

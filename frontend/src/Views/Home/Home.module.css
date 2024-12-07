@@ -1,0 +1,13 @@
+.mainContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: calc(100vh - 10rem);
+  overflow: auto;
+  width: calc(100% - 2rem);
+  /* padding: 1rem 2rem; */
+  padding: 0 2rem;
+  /* background-color: red; */
+  flex-wrap: wrap;
+}
