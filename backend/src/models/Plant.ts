@@ -10,7 +10,7 @@ export interface IPlant extends Document {
 	maxHumidity?: number;
 	image: string;
 	lastUpdate: string; // ISO string for consistency
-  ownerId: string;
+  	ownerId: string;
 }
 
 const PlantSchema: Schema = new Schema({
@@ -25,5 +25,7 @@ const PlantSchema: Schema = new Schema({
 	lastUpdate: { type: String, required: true }, // Store date as ISO string
 	ownerId: { type: Schema.Types.ObjectId, ref: "User" }, // Reference to User
 });
+
+PlantSchema.index({ ownerId: 1 });
 
 export default mongoose.model<IPlant>('Plant', PlantSchema, 'plants');
