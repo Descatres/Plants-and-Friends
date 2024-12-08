@@ -6,5 +6,4 @@ export interface User {
   email: string;
   password: string;
   isLogged: boolean;
-  plants: Plant[];
 }

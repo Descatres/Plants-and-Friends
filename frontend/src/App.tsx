@@ -33,6 +33,7 @@ function App() {
           {isLogged ? (
             <>
               <Route path="/home" element={<Home />} />
+              <Route path="/login" element={<Login />} /> {/* Adicionei isto aqui para testar o login, depois é preciso remover e dar fix do login no frontend */}
               <Route path="/plant-information:id" element={<Plant />} />
             </>
           ) : (

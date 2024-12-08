@@ -8,6 +8,7 @@ type PlantCardProps = {
   species: string;
   temperature: { min: number; max: number };
   humidity: { min: number; max: number };
+  onwerId: string;
   isList?: boolean;
 };
 
@@ -18,6 +19,7 @@ function PlantCard({
   species,
   temperature,
   humidity,
+  onwerId,
   isList = false,
 }: PlantCardProps) {
   return (
