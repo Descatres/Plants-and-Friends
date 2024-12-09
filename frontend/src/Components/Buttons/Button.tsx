@@ -1,10 +1,10 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import classes from "./Button.module.css";
 
 interface ButtonProps {
   variant?: "primary" | "secondary";
   onClick?: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function Button({ variant = "primary", onClick, children }: ButtonProps) {

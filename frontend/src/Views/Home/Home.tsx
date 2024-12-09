@@ -29,23 +29,50 @@ function Home() {
   if (error) {
     return <div>Error: {error}</div>;
   }
-  
+
+  const plantDataMock = [
+    {
+      id: 1,
+      name: "Plant 1",
+      species: "Specie 1",
+      temperature: { min: 20, max: 25 },
+      humidity: { min: 40, max: 60 },
+    },
+    {
+      id: 2,
+      name: "Plant 1",
+      species: "Specie 1",
+      temperature: { min: 20, max: 25 },
+      humidity: { min: 40, max: 60 },
+    },
+    {
+      id: 3,
+      name: "Plant 1",
+      species: "Specie 1",
+      temperature: { min: 20, max: 25 },
+      humidity: { min: 40, max: 60 },
+    },
+  ];
+
   return (
     <div className={classes.mainContainer}>
-      <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+      <div className={classes.plantsContainer}>
         {plantData.map((plant, index) => (
-          <>
+          <div className={classes.plant}>
             <PlantCard
               key={index}
               id={plant.id}
               name={plant.name}
               species={plant.species}
-              temperature={{ min: plant.minTemperature, max: plant.maxTemperature }}
+              temperature={{
+                min: plant.minTemperature,
+                max: plant.maxTemperature,
+              }}
               humidity={{ min: plant.minHumidity, max: plant.maxHumidity }}
               onwerId={plant.onwerId}
               isList
             />
-          </>
+          </div>
         ))}
       </div>
     </div>

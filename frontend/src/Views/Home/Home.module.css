@@ -5,9 +5,27 @@
   justify-content: flex-start;
   height: calc(100vh - 10rem);
   overflow: auto;
-  width: calc(100% - 2rem);
-  /* padding: 1rem 2rem; */
-  padding: 0 2rem;
-  /* background-color: red; */
+  width: calc(100% - 4rem);
+  padding: 3rem 3rem;
+  /* background-color: green; */
   flex-wrap: wrap;
+}
+
+.plantsContainer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 1rem;
+  flex-direction: row;
+  /* background-color: red; */
+}
+@media (max-width: 907) {
+  .plantsContainer {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 1rem;
+  }
 }

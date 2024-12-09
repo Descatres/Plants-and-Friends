@@ -11,38 +11,39 @@ import Register from "./Views/Register/Register";
 import Plant from "./Views/Plant/Plant";
 import Navbar from "./Components/Navbar/Navbar";
 import LandingPage from "./Views/LandingPage/LandingPage";
+import LoggedOutWrapper from "./utils/wrappers/LoggedOutWrapper";
 
 function App() {
-  const [isLogged, setIsLogged] = useState(true);
+  const [isLogged, setIsLogged] = useState(false);
 
-  useEffect(
-    // if path is "/" and isLogged is true, redirect to "/home"
-    () => {
-      if (window.location.pathname === "/" && isLogged) {
-        window.location.pathname = "/home";
-      }
-    },
-    [isLogged]
-  );
+  // useEffect(
+  //   () => {
+  //     if (window.location.pathname === "/" && isLogged) {
+  //       window.location.pathname = "/home";
+  //     }
+  //   },
+  //   [isLogged]
+  // );
 
   return (
     <Router>
       <Navbar />
-      <div style={{ padding: "2rem 0" }}>
+      <div>
         <Routes>
-          {isLogged ? (
-            <>
-              <Route path="/home" element={<Home />} />
-              <Route path="/login" element={<Login />} /> {/* Adicionei isto aqui para testar o login, depois é preciso remover e dar fix do login no frontend */}
-              <Route path="/plant-information:id" element={<Plant />} />
-            </>
-          ) : (
-            <>
+          {/* {isLogged ? ( */}
+          <>
+            <Route path="/home" element={<Home />} />
+            <Route path="/plant-information:id" element={<Plant />} />
+          </>
+          {/* ) : ( */}
+          <>
+            <Route path="/" element={<LoggedOutWrapper />}>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-            </>
-          )}
+            </Route>
+          </>
+          {/* )} */}
         </Routes>
       </div>
     </Router>
