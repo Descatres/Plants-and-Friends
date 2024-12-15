@@ -26,14 +26,19 @@ export function useAuthentication() {
         if (token) {
           dispatch(setToken(token));
           navigate("/home");
-          // const decodedToken: any = jwtDecode(token);
         }
       })
       .catch((error: any) => {
         const errors = error.response?.data?.errors || [
           "O email ou senha estão incorrectos",
         ];
+
         console.log("error", errors);
+        // toaster.create({
+        //   type: "error",
+        //   title: "Login error",
+        //   description: "Email or password is incorrect",
+        // });
       })
       .finally(() => {
         setIsLoading(false);

@@ -4,22 +4,24 @@ import defaultPlantImage from "../../assets/defaultPlantImage.svg";
 type PlantCardProps = {
   id: number;
   name: string;
-  image?: string;
-  species: string;
-  temperature: { min: number; max: number };
-  humidity: { min: number; max: number };
-  onwerId: string;
+  species?: string;
+  minTemperature?: number;
+  maxTemperature?: number;
+  minHumidity?: number;
+  maxHumidity?: number;
+  imageUrl?: string;
   isList?: boolean;
 };
 
 function PlantCard({
   id,
   name,
-  image,
   species,
-  temperature,
-  humidity,
-  onwerId,
+  minTemperature,
+  maxTemperature,
+  minHumidity,
+  maxHumidity,
+  imageUrl,
   isList = false,
 }: PlantCardProps) {
   return (
@@ -28,7 +30,7 @@ function PlantCard({
       className={`${classes.plantCard} ${isList ? classes.list : classes.grid}`}
     >
       <div className={classes.plantCardImage}>
-        <img src={image ? image : defaultPlantImage} alt={name} />
+        <img src={imageUrl ? imageUrl : defaultPlantImage} alt={name} />
       </div>
       <div className={classes.plantCardDetails}>
         {isList && <h2>{name}</h2>}
@@ -37,10 +39,10 @@ function PlantCard({
           <div className={classes.plantCardExtra}>
             <p>{species}</p>
             <p>
-              Temperature: {temperature?.min}°C - {temperature?.max}°C
+              Temperature: {minTemperature ?? "-"}°C - {maxTemperature ?? "-"}°C
             </p>
             <p>
-              Humidity: {humidity?.min}% - {humidity?.max}%
+              Humidity: {minHumidity ?? "-"}% - {maxHumidity ?? "-"}%
             </p>
           </div>
         )}

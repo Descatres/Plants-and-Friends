@@ -7,7 +7,7 @@ export interface Plant {
   maxTemperature?: number;
   minHumidity?: number;
   maxHumidity?: number;
-  image?: string;
+  imageUrl?: string;
   lastUpdate: string; // dd/mm/yy, hh:mm
   ownerId: string;
 }

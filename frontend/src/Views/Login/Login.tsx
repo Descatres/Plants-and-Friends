@@ -1,17 +1,15 @@
 import { FormEvent, useState } from "react";
 import classes from "./Login.module.css";
 import Input from "../../Components/InputFields/Input";
-import { removeToken, setToken } from "../../store/slices/tokenSlice";
 import { useAuthentication } from "../../hooks/useAuthentication";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
   const { login, isLoading } = useAuthentication();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     const data = { email, password };
     login(data);
@@ -41,8 +39,6 @@ function Login() {
             {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
-        {error && <div className={classes.error}>{error}</div>}
-        {/* {success && <div className={classes.success}>{success}</div>} */}
       </div>
     </div>
   );

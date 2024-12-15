@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useApi } from "./useApi";
 // import { toaster } from "components/ui/toaster";
 import { Plant } from "../types/Plant";
@@ -18,16 +18,16 @@ export function useFetchPlants() {
     api
       .get(PLANTS_URL)
       .then((response: any) => {
-        setPlants(response.data.result);
+        setPlants(response.data);
         setTotalPlants(response.data.totalItems);
       })
       .catch((error: any) => {
-        if (error.code === "ERR_CANCELED") return;
+        if (error.code) return;
 
         // toaster.create({
         //   type: "error",
-        //   title: "Erro",
-        //   description: "Ocorreu um erro ao buscar os dados",
+        //   title: "Error",
+        //   description: "An error as occurred getting the plants",
         // });
         console.log("API Error:", error);
         setErrorFindingData(true);
