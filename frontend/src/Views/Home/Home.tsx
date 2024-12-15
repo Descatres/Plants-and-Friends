@@ -25,7 +25,6 @@ function Home() {
         return response.json();
       })
       .then((data) => {
-        console.log(data);
         setPlantData(data);
       })
       .catch((error) => setError(error.message));
