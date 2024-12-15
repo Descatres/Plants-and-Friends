@@ -1,5 +1,5 @@
 export interface Plant {
-  id: string;
+  id: number;
   name: string;
   species?: string;
   description?: string;
@@ -7,7 +7,7 @@ export interface Plant {
   maxTemperature?: number;
   minHumidity?: number;
   maxHumidity?: number;
-  image: string;
+  image?: string;
   lastUpdate: string; // dd/mm/yy, hh:mm
   ownerId: string;
 }

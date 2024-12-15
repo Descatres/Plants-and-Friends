@@ -1,12 +1,9 @@
-import jwtDecode from "jwt-decode";
-import { LOGIN_URL } from "../../utils/endpoints";
-import { useApi } from "../api/useApi";
+import { LOGIN_URL } from "../utils/routesAndEndpoints/routesAndEndpoints";
+import { useApi } from "../hooks/useApi";
 import { useDispatch } from "react-redux";
 import { removeToken, setToken } from "../store/slices/tokenSlice";
-import { removeUser, setUser } from "../slices/userSlice";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User } from "../types/User";
 
 export function useAuthentication() {
   const dispatch = useDispatch();
@@ -28,17 +25,8 @@ export function useAuthentication() {
 
         if (token) {
           dispatch(setToken(token));
-
-          const decodedToken: any = jwtDecode(token);
-
-          const user: User = {
-            id: decodedToken.id,
-            name: decodedToken.name,
-            email: decodedToken.email,
-            // isLogged: boolean;
-          };
-
-          dispatch(setUser(user));
+          navigate("/home");
+          // const decodedToken: any = jwtDecode(token);
         }
       })
       .catch((error: any) => {
@@ -54,7 +42,6 @@ export function useAuthentication() {
 
   const logout = () => {
     dispatch(removeToken(null));
-    dispatch(removeUser(null));
     navigate("/");
   };
 

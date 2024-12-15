@@ -24,6 +24,7 @@ function PlantCard({
 }: PlantCardProps) {
   return (
     <div
+      key={id}
       className={`${classes.plantCard} ${isList ? classes.list : classes.grid}`}
     >
       <div className={classes.plantCardImage}>
