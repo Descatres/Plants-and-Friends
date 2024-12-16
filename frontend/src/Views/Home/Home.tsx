@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import classes from "./Home.module.css";
 import PlantCard from "../../Components/PlantCard/PlantCard";
+import Spinner from "../../Components/Spinner/Spinner";
+import Error from "../../Components/Errors/Errors";
 import { useFetchPlants } from "../../hooks/useFetchPlants";
 
 function Home() {
@@ -10,8 +12,6 @@ function Home() {
   useEffect(() => {
     getAllPlants();
   }, []);
-
-  // TODO - create Suspense fallback for when plants are loading
 
   return (
     <div className={classes.mainContainer}>
@@ -34,11 +34,8 @@ function Home() {
               </div>
             </div>
           ))}
-        {errorFindingData && (
-          <div>
-            <h1>Error. Try reloading the page</h1>
-          </div>
-        )}
+        {errorFindingData && <Error />}
+        {isLoadingPlants && <Spinner />}
       </div>
     </div>
   );

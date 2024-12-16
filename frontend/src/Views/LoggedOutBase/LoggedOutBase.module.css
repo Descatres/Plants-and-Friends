@@ -11,8 +11,7 @@
 
 .contentContainer {
   height: 100%;
-  width: calc(100% - 20rem);
-  padding: 0 0 0 10rem;
+  width: 100%;
   flex: 1;
   display: flex;
   flex-direction: row;
@@ -27,7 +26,9 @@
   justify-content: flex-end;
   align-items: flex-start;
   height: 100%;
-  width: 100%;
+  width: calc(100% - 20rem);
+  margin: 0 0 0 20rem;
+  z-index: 1;
 }
 
 .tree {
@@ -36,6 +37,7 @@
   align-items: flex-start;
   width: 100%;
   height: 90%;
+  z-index: 1;
 }
 
 .formContainer {
@@ -43,41 +45,10 @@
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  width: 100%;
   height: 100%;
+  width: calc(100% - 20rem);
+  min-width: 30rem;
+  margin: 0 0rem 20rem 0rem;
   gap: 2rem;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  width: 100%;
-  gap: 2rem;
-}
-
-.formContainer h1 {
-  font-size: 3rem;
-  font-weight: 600;
-  font-family: "Syne", sans-serif;
-  color: #466060;
-  margin: 0;
-}
-
-.formContainer p {
-  font-size: 1rem;
-  font-weight: 500;
-  /* font-family: "Syne", sans-serif; */
-  color: black;
-  margin-left: 30px;
-  text-align: right;
-}
-
-.buttonsContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  width: 100%;
+  z-index: -10;
 }

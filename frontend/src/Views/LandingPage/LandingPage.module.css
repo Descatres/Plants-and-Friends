@@ -1,43 +1,3 @@
-.background {
-  width: 100%;
-  height: 100vh;
-  background-image: url("../../assets/Rectangle.png");
-  background-size: cover;
-  background-position: center;
-  z-index: -1000;
-  padding: 0 0rem 0rem 0rem;
-  flex-wrap: wrap;
-}
-
-.contentContainer {
-  height: 100%;
-  width: calc(100% - 20rem);
-  padding: 0 0 0 10rem;
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  gap: 10%;
-  align-items: center;
-  /* flex-wrap: wrap; */
-}
-
-.treeContainer {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  height: 100%;
-  width: 100%;
-}
-
-.tree {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  width: 100%;
-  height: 90%;
-}
-
 .formContainer {
   display: flex;
   flex-direction: column;
@@ -46,6 +6,9 @@
   width: 100%;
   height: 100%;
   gap: 2rem;
+  /* background-color: rgba(255, 255, 255, 0.1); */
+  border-radius: 20px;
+  /* padding: 2rem; */
 }
 
 .form {

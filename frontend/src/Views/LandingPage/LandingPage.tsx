@@ -27,7 +27,9 @@ function LandingPage() {
               Login
             </Button>
             <p>or</p>
-            <p onClick={handleNavigateRegister}>Register</p>
+            <p style={{ cursor: "pointer" }} onClick={handleNavigateRegister}>
+              Register
+            </p>
           </>
         </div>
       </div>

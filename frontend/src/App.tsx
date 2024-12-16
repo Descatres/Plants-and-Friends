@@ -20,15 +20,24 @@ import { removeToken } from "./store/slices/tokenSlice";
 
 function App() {
   const token = useSelector((state: RootState) => state.token.value);
-  // const dispatch = useDispatch();
-  // dispatch(removeToken(null));
+  const dispatch = useDispatch();
+  dispatch(removeToken(null));
 
   useEffect(() => {
     if (
-      (window.location.pathname === "/" || window.location.pathname === "") &&
+      (window.location.pathname === "" || window.location.pathname === "/") &&
       token
     ) {
       window.location.pathname = "/home";
+    }
+
+    if (
+      window.location.pathname !== "/" &&
+      window.location.pathname != "/login" &&
+      window.location.pathname !== "/register" &&
+      !token
+    ) {
+      window.location.pathname = "/";
     }
   }, [token, window.location.pathname]);
 

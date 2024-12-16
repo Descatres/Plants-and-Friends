@@ -2,10 +2,14 @@ import { FormEvent, useState } from "react";
 import classes from "./Login.module.css";
 import Input from "../../Components/InputFields/Input";
 import { useAuthentication } from "../../hooks/useAuthentication";
+import Spinner from "../../Components/Spinner/Spinner";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const { login, isLoading } = useAuthentication();
 
@@ -13,6 +17,14 @@ function Login() {
     e.preventDefault();
     const data = { email, password };
     login(data);
+  };
+
+  const handleNavigateToRegister = () => {
+    navigate("/register");
+  };
+
+  const handleResetPassword = () => {
+    console.log("Reset password");
   };
 
   return (
@@ -27,17 +39,33 @@ function Login() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <Input
-            label="Password"
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button type="submit" className={classes.loginButton}>
-            {isLoading ? "Logging in..." : "Login"}
-          </button>
+          <div>
+            <Input
+              label="Password"
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <p
+              style={{ cursor: "pointer", alignSelf: "center" }}
+              onClick={handleResetPassword}
+            >
+              Reset password
+            </p>
+          </div>
+          <div className={classes.buttonContainer}>
+            <button type="submit" className={classes.loginButton}>
+              {isLoading ? <Spinner /> : "Login"}
+            </button>
+            <p
+              style={{ cursor: "pointer", alignSelf: "center" }}
+              onClick={handleNavigateToRegister}
+            >
+              or create your account
+            </p>
+          </div>
         </form>
       </div>
     </div>
