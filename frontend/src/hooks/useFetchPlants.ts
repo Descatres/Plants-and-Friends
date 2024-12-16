@@ -22,15 +22,14 @@ export function useFetchPlants() {
         setTotalPlants(response.data.totalItems);
       })
       .catch((error: any) => {
-        if (error.code) return;
-
         // toaster.create({
         //   type: "error",
         //   title: "Error",
         //   description: "An error as occurred getting the plants",
         // });
-        console.log("API Error:", error);
         setErrorFindingData(true);
+        console.log(error);
+        if (error.code) return;
       })
       .finally(() => {
         setIsLoadingPlants(false);
