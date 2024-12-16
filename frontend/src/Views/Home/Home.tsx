@@ -24,10 +24,10 @@ function Home() {
                   id={plant.id}
                   name={plant.name}
                   species={plant.species ?? ""}
-                  minTemperature={plant.minTemperature ?? 0}
-                  maxTemperature={plant.maxTemperature ?? 0}
-                  minHumidity={plant.minHumidity ?? 0}
-                  maxHumidity={plant.maxHumidity ?? 0}
+                  minTemperature={plant.minTemperature ?? undefined}
+                  maxTemperature={plant.maxTemperature ?? undefined}
+                  minHumidity={plant.minHumidity ?? undefined}
+                  maxHumidity={plant.maxHumidity ?? undefined}
                   imageUrl={plant.imageUrl ?? ""}
                   isList
                 />
