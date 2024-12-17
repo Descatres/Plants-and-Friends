@@ -40,6 +40,7 @@ function Navbar() {
     navigate(LANDING_PAGE_ROUTE);
   };
 
+  // TODO - get notifications from API
   const mockNotifications = [
     { id: 1, name: "Notification 1", onClick: () => {} },
     { id: 2, name: "Notification 2", onClick: () => {} },
@@ -52,6 +53,7 @@ function Navbar() {
       notifications.filter((notification) => notification.id !== id)
     );
     if (notifications.length === 1) {
+      // TODO - An uprade could be made to show the notification history on another page
       setNotifications([
         { id: 0, name: "No notifications", onClick: () => {} },
       ]);
