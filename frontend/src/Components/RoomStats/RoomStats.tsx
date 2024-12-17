@@ -1,13 +1,24 @@
 import classes from "./RoomStats.module.css";
 import humidityIcon from "../../assets/humidity.svg";
 import temperatureIcon from "../../assets/temperature.svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useFetchRoomStats } from "../../hooks/useFetchRoomStats";
 
 function RoomStats() {
-  const [temperature, setTemperature] = useState<number | null>(null);
-  const [humidity, setHumidity] = useState<number | null>(null);
+  const { temperature, humidity, getTemperature, getHumidity } =
+    useFetchRoomStats();
 
-  // TODO fetch temperature and humidity from the backend
+  // useEffect(() => {
+  //   getTemperature();
+  //   getHumidity();
+
+  //   const interval = setInterval(() => {
+  //     getTemperature();
+  //     getHumidity();
+  //   }, 300000);
+
+  //   return () => clearInterval(interval);
+  // }, [getTemperature, getHumidity]);
 
   return (
     <div className={classes.mainContainer}>
