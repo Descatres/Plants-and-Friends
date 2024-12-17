@@ -11,7 +11,7 @@ export const NOT_FOUND_ROUTE = "/notfound";
 
 // Endpoints
 export const LOGIN_URL = "/auth";
-export const REGISTER_URL = "/register";
+export const REGISTER_URL = "/auth/register";
 export const PLANTS_URL = "/";
 
 // Special endpoints
