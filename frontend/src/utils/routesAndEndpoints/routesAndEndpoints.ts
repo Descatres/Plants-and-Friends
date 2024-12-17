@@ -13,8 +13,8 @@ export const NOT_FOUND_ROUTE = "/notfound";
 export const LOGIN_URL = "/auth";
 export const REGISTER_URL = "/auth/register";
 export const PLANTS_URL = "/";
+export const TEMPERATURE_URL = "/temperature";
+export const HUMIDITY_URL = "/humidity";
 
 // Special endpoints
 export const REFRESH_TOKEN = "/refresh";
-
-// TODO - Separate into 2 different files

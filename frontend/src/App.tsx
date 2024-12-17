@@ -13,10 +13,13 @@ import {
   LOGIN_ROUTE,
   REGISTER_ROUTE,
   LANDING_PAGE_ROUTE,
+  ROOM_ALERTS_ROUTE,
 } from "./utils/routesAndEndpoints/routesAndEndpoints";
 import { useSelector } from "react-redux";
 import { RootState } from "./store/store";
 import { ToastContainer } from "react-toastify";
+import ErrorPage from "./errorPages/ErrorPage";
+import RoomAlerts from "./Views/RoomAlerts/RoomAlerts";
 
 function App() {
   const token = useSelector((state: RootState) => state.token.value);
@@ -43,13 +46,18 @@ function App() {
   return (
     <Router>
       <Navbar />
-      <ToastContainer position="top-right" autoClose={2000} />
+      <ToastContainer
+        position="top-right"
+        autoClose={1500}
+        style={{ marginTop: "5rem" }}
+      />
       <div>
         <Routes>
           {token ? (
             <>
               <Route path={HOME_ROUTE} element={<Home />} />
               <Route path={PLANT_ROUTE} element={<Plant />} />
+              <Route path={ROOM_ALERTS_ROUTE} element={<RoomAlerts />} />
             </>
           ) : (
             <>
@@ -60,6 +68,8 @@ function App() {
               </Route>
             </>
           )}
+          {/* TODO - Detect the proper error (404, 500, etc) and send it to the component */}
+          <Route path="*" element={<ErrorPage />} />
         </Routes>
       </div>
     </Router>
