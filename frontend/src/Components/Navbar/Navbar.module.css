@@ -28,3 +28,18 @@
   justify-content: center;
   gap: 2rem;
 }
+
+.buttonWrapper {
+  cursor: "pointer";
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.buttonWrapper:hover {
+  transform: scale(1.05);
+}
+
+.buttonWrapper:active {
+  transform: scale(0.95);
+}

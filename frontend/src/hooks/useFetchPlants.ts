@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { useApi } from "./useApi";
-// import { toaster } from "components/ui/toaster";
 import { Plant } from "../types/Plant";
 import { PLANTS_URL } from "../utils/routesAndEndpoints/routesAndEndpoints";
+import { toast } from "react-toastify";
 
 export function useFetchPlants() {
   const { api } = useApi();
@@ -22,11 +22,7 @@ export function useFetchPlants() {
         setTotalPlants(response.data.totalItems);
       })
       .catch((error: any) => {
-        // toaster.create({
-        //   type: "error",
-        //   title: "Error",
-        //   description: "An error as occurred getting the plants",
-        // });
+        toast.error("An error as occurred getting the plants");
         setErrorFindingData(true);
         console.log(error);
         if (error.code) return;

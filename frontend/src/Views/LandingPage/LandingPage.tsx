@@ -2,15 +2,19 @@ import { useNavigate } from "react-router-dom";
 
 import classes from "./LandingPage.module.css";
 import Button from "../../Components/Buttons/Button";
+import {
+  LOGIN_ROUTE,
+  REGISTER_ROUTE,
+} from "../../utils/routesAndEndpoints/routesAndEndpoints";
 
 function LandingPage() {
   const navigate = useNavigate();
 
   const handleNavigateLogin = () => {
-    navigate("/login");
+    navigate(LOGIN_ROUTE);
   };
   const handleNavigateRegister = () => {
-    navigate("/register");
+    navigate(REGISTER_ROUTE);
   };
 
   return (

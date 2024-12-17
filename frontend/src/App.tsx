@@ -14,36 +14,35 @@ import {
   REGISTER_ROUTE,
   LANDING_PAGE_ROUTE,
 } from "./utils/routesAndEndpoints/routesAndEndpoints";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "./store/store";
-import { removeToken } from "./store/slices/tokenSlice";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const token = useSelector((state: RootState) => state.token.value);
-  const dispatch = useDispatch();
-  dispatch(removeToken(null));
 
   useEffect(() => {
     if (
       (window.location.pathname === "" || window.location.pathname === "/") &&
       token
     ) {
-      window.location.pathname = "/home";
+      window.location.pathname = HOME_ROUTE;
     }
 
     if (
-      window.location.pathname !== "/" &&
-      window.location.pathname != "/login" &&
-      window.location.pathname !== "/register" &&
+      window.location.pathname !== LANDING_PAGE_ROUTE &&
+      window.location.pathname != LOGIN_ROUTE &&
+      window.location.pathname !== REGISTER_ROUTE &&
       !token
     ) {
-      window.location.pathname = "/";
+      window.location.pathname = LANDING_PAGE_ROUTE;
     }
   }, [token, window.location.pathname]);
 
   return (
     <Router>
       <Navbar />
+      <ToastContainer position="top-right" autoClose={2000} />
       <div>
         <Routes>
           {token ? (

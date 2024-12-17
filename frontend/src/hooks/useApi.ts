@@ -4,12 +4,12 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { removeToken, setToken } from "../store/slices/tokenSlice";
 import { useNavigate } from "react-router-dom";
-// import { toaster } from "components/ui/toaster";
 import {
   REFRESH_TOKEN,
   FORBIDDEN_ROUTE,
   INTERNAL_ERROR_ROUTE,
 } from "../utils/routesAndEndpoints/routesAndEndpoints";
+import { toast } from "react-toastify";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -55,11 +55,7 @@ export function useApi() {
             if (!newToken) throw new Error();
             else dispatch(setToken(newToken));
           } catch (error: any) {
-            // toaster.create({
-            //   type: "info",
-            //   title: "Informação",
-            //   description: "A sua sessão expirou",
-            // });
+            toast.error("A sua sessão expirou");
             console.error(error);
             dispatch(removeToken(null));
             controller.abort();

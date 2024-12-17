@@ -8,12 +8,19 @@ import { useNavigate } from "react-router-dom";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   const { login, isLoading } = useAuthentication();
 
-  const handleLogin = async (e: FormEvent) => {
+  const handleRegister = async (e: FormEvent) => {
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
     e.preventDefault();
     const data = { email, password };
     login(data);
@@ -26,7 +33,7 @@ function Login() {
   return (
     <div className={classes.formContainer}>
       <div className={classes.form}>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleRegister}>
           <Input
             label="Email"
             type="email"
@@ -47,8 +54,8 @@ function Login() {
             label="Confirm your password"
             type="password"
             id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
           <div className={classes.buttonContainer}>

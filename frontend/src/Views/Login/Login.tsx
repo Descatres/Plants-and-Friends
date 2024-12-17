@@ -4,6 +4,7 @@ import Input from "../../Components/InputFields/Input";
 import { useAuthentication } from "../../hooks/useAuthentication";
 import Spinner from "../../Components/Spinner/Spinner";
 import { useNavigate } from "react-router-dom";
+import { REGISTER_ROUTE } from "../../utils/routesAndEndpoints/routesAndEndpoints";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ function Login() {
   };
 
   const handleNavigateToRegister = () => {
-    navigate("/register");
+    navigate(REGISTER_ROUTE);
   };
 
   const handleResetPassword = () => {
