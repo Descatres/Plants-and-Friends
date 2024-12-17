@@ -1,4 +1,7 @@
 import {
+  HOME_ROUTE,
+  LANDING_PAGE_ROUTE,
+  LOGIN_ROUTE,
   LOGIN_URL,
   REGISTER_URL,
 } from "../utils/routesAndEndpoints/routesAndEndpoints";
@@ -31,7 +34,7 @@ export function useAuthentication() {
           console.log("token", token);
           toast.success("Welcome!");
           dispatch(setToken(token));
-          navigate("/home");
+          navigate(HOME_ROUTE);
         }
       })
       .catch((error: any) => {
@@ -41,7 +44,7 @@ export function useAuthentication() {
 
         console.log("error", errors);
         toast.error("Email or password is incorrect");
-        navigate("/login");
+        navigate(LOGIN_ROUTE);
       })
       .finally(() => {
         setIsLoading(false);
@@ -58,7 +61,7 @@ export function useAuthentication() {
       })
       .then(() => {
         toast.success("Account created successfully");
-        navigate("/login");
+        navigate(LOGIN_ROUTE);
       })
       .catch((error: any) => {
         const errors = error.response?.data?.errors || [
@@ -75,11 +78,12 @@ export function useAuthentication() {
 
   const logout = () => {
     dispatch(removeToken(null));
-    navigate("/");
+    navigate(LANDING_PAGE_ROUTE);
   };
 
   return {
     login,
+    register,
     logout,
     isLoading,
   };

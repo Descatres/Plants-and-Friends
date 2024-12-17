@@ -23,7 +23,8 @@ function App() {
 
   useEffect(() => {
     if (
-      (window.location.pathname === "" || window.location.pathname === "/") &&
+      (window.location.pathname === "" ||
+        window.location.pathname === LANDING_PAGE_ROUTE) &&
       token
     ) {
       window.location.pathname = HOME_ROUTE;

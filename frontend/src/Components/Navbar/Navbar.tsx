@@ -1,4 +1,3 @@
-import { useState } from "react";
 import classes from "./Navbar.module.css";
 import Button from "../Buttons/Button";
 import bell from "../../assets/bell.svg";
@@ -16,6 +15,7 @@ import {
   REGISTER_ROUTE,
   ROOM_ALERTS_ROUTE,
 } from "../../utils/routesAndEndpoints/routesAndEndpoints";
+import { useState } from "react";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ function Navbar() {
   const handleLogout = () => {
     toast.success("See ya later!");
     dispatch(removeToken(null));
-    navigate("/");
+    navigate(LANDING_PAGE_ROUTE);
   };
 
   const mockNotifications = [
@@ -45,9 +45,17 @@ function Navbar() {
     { id: 2, name: "Notification 2", onClick: () => {} },
     { id: 3, name: "Notification 3", onClick: () => {} },
   ];
+  const [notifications, setNotifications] = useState(mockNotifications);
 
   const removeNotification = (id: number) => {
-    mockNotifications.filter((notification) => notification.id !== id);
+    setNotifications((notifications) =>
+      notifications.filter((notification) => notification.id !== id)
+    );
+    if (notifications.length === 1) {
+      setNotifications([
+        { id: 0, name: "No notifications", onClick: () => {} },
+      ]);
+    }
   };
 
   return (
@@ -76,23 +84,10 @@ function Navbar() {
                 unselectable="on"
               />
             }
-            options={[
-              {
-                id: 1,
-                name: "Notification 1",
-                onClick: () => removeNotification(1),
-              },
-              {
-                id: 2,
-                name: "Notification 2",
-                onClick: () => removeNotification(2),
-              },
-              {
-                id: 3,
-                name: "Notification 3",
-                onClick: () => removeNotification(3),
-              },
-            ]}
+            options={notifications.map((notification) => ({
+              ...notification,
+              onClick: () => removeNotification(notification.id),
+            }))}
           />
           <DropdownMenu
             button={
@@ -117,12 +112,12 @@ function Navbar() {
       ) : (
         <Button
           onClick={
-            window.location.pathname !== "/login"
+            window.location.pathname !== LOGIN_ROUTE
               ? handleNavigateLogin
               : handleNavigateRegister
           }
         >
-          {window.location.pathname !== "/login" ? "Login" : "Register"}
+          {window.location.pathname !== LOGIN_ROUTE ? "Login" : "Register"}
         </Button>
       )}
     </div>

@@ -4,8 +4,9 @@ import Input from "../../Components/InputFields/Input";
 import { useAuthentication } from "../../hooks/useAuthentication";
 import Spinner from "../../Components/Spinner/Spinner";
 import { useNavigate } from "react-router-dom";
+import { LOGIN_ROUTE } from "../../utils/routesAndEndpoints/routesAndEndpoints";
 
-function Login() {
+function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -14,7 +15,7 @@ function Login() {
 
   const navigate = useNavigate();
 
-  const { login, isLoading } = useAuthentication();
+  const { register, isLoading } = useAuthentication();
 
   const handleRegister = async (e: FormEvent) => {
     if (password !== confirmPassword) {
@@ -23,11 +24,11 @@ function Login() {
     }
     e.preventDefault();
     const data = { email, password };
-    login(data);
+    register(data);
   };
 
   const handleNavigateToLogin = () => {
-    navigate("/login");
+    navigate(LOGIN_ROUTE);
   };
 
   return (
@@ -75,4 +76,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;

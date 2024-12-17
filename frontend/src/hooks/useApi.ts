@@ -8,6 +8,7 @@ import {
   REFRESH_TOKEN,
   FORBIDDEN_ROUTE,
   INTERNAL_ERROR_ROUTE,
+  LANDING_PAGE_ROUTE,
 } from "../utils/routesAndEndpoints/routesAndEndpoints";
 import { toast } from "react-toastify";
 
@@ -83,7 +84,7 @@ export function useApi() {
       const status = error.response ? error.response.status : null;
       if (status === 401) {
         dispatch(removeToken(null));
-        navigate("/");
+        navigate(LANDING_PAGE_ROUTE);
       } else if (status === 403) {
         navigate(FORBIDDEN_ROUTE);
       } else if ([500, 502, 503].includes(status)) {
