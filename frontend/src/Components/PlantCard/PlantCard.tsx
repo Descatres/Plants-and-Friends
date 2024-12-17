@@ -1,8 +1,10 @@
 import classes from "./PlantCard.module.css";
 import defaultPlantImage from "../../assets/defaultPlantImage.svg";
+import { useNavigate } from "react-router-dom";
+import { PLANT_ROUTE } from "../../utils/routesAndEndpoints/routesAndEndpoints";
 
 type PlantCardProps = {
-  id: number;
+  id: string;
   name: string;
   species?: string;
   minTemperature?: number;
@@ -24,10 +26,17 @@ function PlantCard({
   imageUrl,
   isList = false,
 }: PlantCardProps) {
+  const navigate = useNavigate();
+  const handleNavigatePlant = () => {
+    // navigate(PLANT_ROUTE + `:${id}`);
+    navigate(PLANT_ROUTE);
+  };
+  console.log(id);
   return (
     <div
       key={id}
       className={`${classes.plantCard} ${isList ? classes.list : classes.grid}`}
+      onClick={handleNavigatePlant}
     >
       <div className={classes.plantCardImage}>
         <img src={imageUrl ? imageUrl : defaultPlantImage} alt={name} />

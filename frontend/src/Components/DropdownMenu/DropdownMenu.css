@@ -2,20 +2,30 @@
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 10px;
+  padding: 10px 0;
   min-width: 8rem;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
   margin-top: 0.3rem;
-  margin-right: 0.3rem;
 }
 
 .dropdownItem {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
+  padding: 10px 0;
   cursor: pointer;
   transition: background-color 0.3s;
   cursor: "pointer";
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.dropdownItem:hover {
+  background-color: #f3f3f3;
+}
+
+.dropdownItem:active {
+  background-color: #eaeaea;
 }
