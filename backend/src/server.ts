@@ -5,6 +5,7 @@ import { errorHandler } from "./middleware/errorMiddleware";
 import passport from "./config/passport";
 import cookieParser from "cookie-parser";
 import { mqttClient } from "./config/mqtt";
+import sensorRoutes from "./routes/sensorRoutes";
 
 const express = require("express");
 const cors = require("cors");
@@ -15,16 +16,17 @@ const app = express();
 
 function main() {
 	dotenv.config();
-	
+
 	mqttClient.on("connect", () => {
-		console.log("MQTT connected, starting Express server...");
-		startServer();
+		console.log("MQTT client is connected and listening for data.");
+		app.use("/api/", sensorRoutes);
 	});
 
-	mqttClient.on("error", (err) => {
-		console.error("MQTT connection error:", err);
-		process.exit(1);
+	mqttClient.on("error", (err: { message: any; }) => {
+		console.error("MQTT connection error:", err.message);
 	});
+	
+	startServer();
 }
 
 function startServer() {
