@@ -63,13 +63,9 @@ async function createPlants(userId: any) {
 }
 
 async function createUser() {
-  const hashedPassword = await bcrypt.hash("securepassword", 10);
-
   const user = await User.create({
-    name: "user",
-    email: "user@example.com",
-    password: hashedPassword,
-    isLogged: false,
+		email: "user@example.com",
+		password: "securepassword",
   });
 
   console.log("User created with plants");

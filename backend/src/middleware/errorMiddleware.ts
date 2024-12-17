@@ -5,6 +5,6 @@ export function errorHandler(err: Error | CustomError, req: Request, res: Respon
 	const status = err instanceof CustomError ? err.status : 500;
 	const message = err.message || "Internal Server Error";
 
-	console.error(`[${status}] ${message}`);
+	console.error(`[Error Handler] Status: ${status}, Message: ${message}`);
 	res.status(status).json({ error: message });
 }
