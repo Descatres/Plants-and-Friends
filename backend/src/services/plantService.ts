@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Plant from "../models/Plant";
 import { CustomError } from "../utils/CustomError";
 
@@ -12,7 +13,7 @@ async function getAllPlants(userId: string, page: number, limit: number) {
 	return plants;
 }
 
-async function getPlantById(id: string, userId: string) {
+async function getPlantById(id: string, userId: string, page: number, limit: number) {
 	const plant = await Plant.findById(id);
 
 	if (!plant) {
@@ -23,7 +24,50 @@ async function getPlantById(id: string, userId: string) {
 		throw new CustomError("Unauthorized access to this plant", 403);
 	}
 
-	return plant;
+	const skip = (page - 1) * limit;
+
+	const aggregation = [
+		{
+			$match: {
+				ownerId: new mongoose.Types.ObjectId(userId),
+				species: plant.species,
+				_id: { $ne: new mongoose.Types.ObjectId(id) },
+			},
+		},
+		{
+			$skip: skip,
+		},
+		{
+			$limit: limit,
+		},
+		{
+			$project: {
+				_id: 1,
+				name: 1,
+				species: 1,
+				minTemperature: 1,
+				maxTemperature: 1,
+				minHumidity: 1,
+				maxHumidity: 1,
+				createdAt: 1,
+			},
+		},
+	];
+
+	const relatedPlants = await Plant.aggregate(aggregation);
+
+	const totalRelated = await Plant.countDocuments({
+		ownerId: userId,
+		species: plant.species,
+		_id: { $ne: id },
+	});
+
+	return {
+		plant,
+		relatedPlants,
+		currentPage: page,
+		totalPages: Math.ceil(totalRelated / limit),
+	};
 }
 
 async function createPlant(plantData: any, userId: string) {
