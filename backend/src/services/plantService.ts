@@ -76,11 +76,7 @@ async function createPlant(plantData: any, userId: string) {
 		ownerId: userId,
 	});
 
-	try {
-		return await plant.save();
-	} catch (error) {
-		throw new CustomError("Error saving the plant", 500);
-	}
+	return await plant.save();
 }
 
 async function updatePlant(id: string, userId: string, updateData: Partial<any>) {
@@ -95,6 +91,7 @@ async function updatePlant(id: string, userId: string, updateData: Partial<any>)
 	}
 
 	Object.assign(plant, updateData);
+	plant.lastUpdate = new Date().toISOString();
 
 	return await plant.save();
 }

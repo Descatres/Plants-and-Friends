@@ -21,7 +21,7 @@ const PlantSchema: Schema = new Schema({
 	maxTemperature: { type: Number },
 	minHumidity: { type: Number },
 	maxHumidity: { type: Number },
-	image: { type: String, required: true },
+	image: { type: String },
 	lastUpdate: { type: String, required: true }, // Store date as ISO string
 	ownerId: { type: Schema.Types.ObjectId, ref: "User" }, // Reference to User
 });
