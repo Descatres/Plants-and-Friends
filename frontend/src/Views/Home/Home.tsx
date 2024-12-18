@@ -65,6 +65,10 @@ function Home() {
       return 0;
     });
 
+  if (errorFindingData) {
+    return <ErrorPage />;
+  }
+
   return (
     <div className={classes.mainContainer}>
       <div className={classes.content}>
@@ -115,26 +119,28 @@ function Home() {
         </div>
         <div className={classes.plantsContainer}>
           <div className={isList ? classes.plantRowList : classes.plantRowGrid}>
-            {filteredPlants && filteredPlants.length > 0
-              ? filteredPlants.map((plant, index) => (
-                  <div key={index}>
-                    <div key={plant.id} className={classes.plant}>
-                      <PlantCard
-                        id={plant.name}
-                        name={plant.name}
-                        species={plant.species ?? ""}
-                        minTemperature={plant.minTemperature ?? undefined}
-                        maxTemperature={plant.maxTemperature ?? undefined}
-                        minHumidity={plant.minHumidity ?? undefined}
-                        maxHumidity={plant.maxHumidity ?? undefined}
-                        imageUrl={plant.imageUrl ?? ""}
-                        isList={isList}
-                      />
-                    </div>
+            {filteredPlants && filteredPlants.length > 0 ? (
+              filteredPlants.map((plant, index) => (
+                <div key={index}>
+                  <div key={plant._id} className={classes.plant}>
+                    <PlantCard
+                      id={plant._id}
+                      name={plant.name}
+                      species={plant.species ?? ""}
+                      minTemperature={plant.minTemperature ?? undefined}
+                      maxTemperature={plant.maxTemperature ?? undefined}
+                      minHumidity={plant.minHumidity ?? undefined}
+                      maxHumidity={plant.maxHumidity ?? undefined}
+                      imageUrl={plant.imageUrl ?? ""}
+                      isList={isList}
+                    />
                   </div>
-                ))
-              : !errorFindingData && <p>No plants match your search.</p>}
-            {errorFindingData && createPortal(<ErrorPage />, document.body)}
+                </div>
+              ))
+            ) : (
+              <p>No plants match your search.</p>
+            )}
+
             {isLoadingPlants && <Spinner />}
           </div>
         </div>

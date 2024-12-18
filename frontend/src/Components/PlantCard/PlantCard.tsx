@@ -28,10 +28,8 @@ function PlantCard({
 }: PlantCardProps) {
   const navigate = useNavigate();
   const handleNavigatePlant = () => {
-    // navigate(PLANT_ROUTE + `:${id}`);
-    navigate(PLANT_ROUTE);
+    navigate(PLANT_ROUTE, { state: { id } });
   };
-  console.log(id);
   return (
     <div
       key={id}

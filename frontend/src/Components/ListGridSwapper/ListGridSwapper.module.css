@@ -10,6 +10,9 @@
   width: 2rem;
   height: 2rem;
   cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
   padding: 0.3rem 0.6rem;
 }
 

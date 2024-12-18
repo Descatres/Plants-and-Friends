@@ -22,7 +22,7 @@ export function useFetchPlants() {
         setTotalPlants(response.data.totalItems);
       })
       .catch((error: any) => {
-        toast.error("An error as occurred getting the plants");
+        toast.error("An error has occurred getting the plants!");
         setErrorFindingData(true);
         console.log(error);
         if (error.code) return;

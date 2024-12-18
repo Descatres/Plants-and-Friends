@@ -13,7 +13,7 @@ export const NOT_FOUND_ROUTE = "/notfound";
 export const LOGIN_URL = "/auth";
 export const REGISTER_URL = "/auth/register";
 export const PLANTS_URL = "/";
-export const PLANT_URL = "/plant-information";
+export const PLANT_URL = "/:id";
 export const TEMPERATURE_URL = "/temperature";
 export const HUMIDITY_URL = "/humidity";
 
