@@ -6,6 +6,7 @@ import passport from "./config/passport";
 import cookieParser from "cookie-parser";
 import { mqttClient } from "./config/mqtt";
 import sensorRoutes from "./routes/sensorRoutes";
+import notificationRoutes from "./routes/notificationRoutes";
 
 const express = require("express");
 const cors = require("cors");
@@ -54,6 +55,7 @@ function startServer() {
 
 	app.use("/", plantRoutes);
 	app.use("/", authRoutes);
+	app.use("/", notificationRoutes);
 
 	app.use(errorHandler);
 

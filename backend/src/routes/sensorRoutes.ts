@@ -1,5 +1,6 @@
-import express from "express";
 import { sendSensorData } from "../controllers/sensorController";
+
+const express = require("express");
 
 const router = express.Router();
 
