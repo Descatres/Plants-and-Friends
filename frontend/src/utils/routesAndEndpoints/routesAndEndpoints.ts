@@ -14,7 +14,9 @@ export const LOGIN_URL = "/auth";
 export const REGISTER_URL = "/auth/register";
 export const PLANTS_URL = "/";
 export const PLANT_URL = "/:id";
-export const SENSOR_DATA_URL = "http://localhost:5001/api/sensor-data";
+export const SENSOR_DATA_URL = "/api/sensor-data";
+export const NOTIFICATIONS_URL = "/notifications";
+export const DELETE_NOTIFICATION_URL = "/notifications/";
 
 // Special endpoints
 export const REFRESH_TOKEN = "/refresh";
