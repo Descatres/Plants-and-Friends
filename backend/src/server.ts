@@ -7,7 +7,6 @@ import cookieParser from "cookie-parser";
 import { mqttClient } from "./config/mqtt";
 import sensorRoutes from "./routes/sensorRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
-import { Worker } from "worker_threads";
 
 const express = require("express");
 const cors = require("cors");
@@ -16,24 +15,19 @@ const dotenv = require("dotenv");
 const session = require("express-session");
 const app = express();
 
-function startWorker() {
-	const worker = new Worker("./workers/worker.ts");
+function main() {
+	dotenv.config();
 
-	worker.on("message", (message) => {
-		console.log("Received from worker:", message);
+	mqttClient.on("connect", () => {
+		console.log("MQTT client is connected and listening for data.");
+		app.use("/api/", sensorRoutes);
 	});
 
-	worker.on("error", (error) => {
-		console.error("Worker error:", error);
+	mqttClient.on("error", (err: { message: any; }) => {
+		console.error("MQTT connection error:", err.message);
 	});
-
-	worker.on("exit", (code) => {
-		if (code !== 0) {
-			console.error(`Worker stopped with exit code ${code}`);
-		} else {
-			console.log("Worker finished successfully");
-		}
-	});
+	
+	startServer();
 }
 
 function startServer() {
@@ -62,7 +56,6 @@ function startServer() {
 	app.use("/", plantRoutes);
 	app.use("/", authRoutes);
 	app.use("/", notificationRoutes);
-	app.use("/api/", sensorRoutes);
 
 	app.use(errorHandler);
 
@@ -72,13 +65,6 @@ function startServer() {
 	app.listen(PORT, () => {
 		console.log(`Server running on http://localhost:${PORT}`);
 	});
-}
-
-function main() {
-	dotenv.config();
-
-	startWorker();
-	startServer();
 }
 
 main();
