@@ -48,23 +48,25 @@ function Navbar() {
   const { clearNotifications } = useClearNotifications();
 
   useEffect(() => {
-    getNotifications();
-    if (notifications.length === 0) {
-      setNotifications([
-        {
-          name: "No notifications",
-        },
-      ]);
-    }
-    if (notifications.length >= 2) {
-      setNotifications(
-        notifications.concat([
+    if (token) {
+      getNotifications();
+      if (notifications.length === 0) {
+        setNotifications([
           {
-            name: "Delete Notifications",
-            onClick: clearNotifications,
+            name: "No notifications",
           },
-        ])
-      );
+        ]);
+      }
+      if (notifications.length >= 2) {
+        setNotifications(
+          notifications.concat([
+            {
+              name: "Delete Notifications",
+              onClick: clearNotifications,
+            },
+          ])
+        );
+      }
     }
   }, [notifications]);
 
