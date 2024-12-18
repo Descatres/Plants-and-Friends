@@ -9,10 +9,9 @@ type ErrorPageProps = {
 };
 
 function ErrorPage({ error, message }: ErrorPageProps) {
-  const navigate = useNavigate();
-
   const handleGoHome = () => {
-    navigate(HOME_ROUTE);
+    // refresh and go home
+    window.location.href = HOME_ROUTE;
   };
 
   return (

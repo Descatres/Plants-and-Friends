@@ -66,10 +66,6 @@ function Home() {
       return 0;
     });
 
-  if (errorFindingData) {
-    return <ErrorPage />;
-  }
-
   return (
     <div className={classes.mainContainer}>
       <div className={classes.homeContainer}>
@@ -125,7 +121,8 @@ function Home() {
             <div
               className={isList ? classes.plantRowList : classes.plantRowGrid}
             >
-              {filteredPlants && filteredPlants.length > 0 ? (
+              {filteredPlants &&
+                filteredPlants.length > 0 &&
                 filteredPlants.map((plant, index) => (
                   <div key={index}>
                     <div key={plant._id} className={classes.plant}>
@@ -142,13 +139,12 @@ function Home() {
                       />
                     </div>
                   </div>
-                ))
-              ) : (
-                <p>No plants match your search.</p>
-              )}
-
-              {isLoadingPlants && <Spinner />}
+                ))}
             </div>
+            {filteredPlants &&
+              filteredPlants.length === 0 &&
+              !isLoadingPlants && <p>No plants to show!</p>}
+            {isLoadingPlants && <Spinner />}
           </div>
         </div>
         <div className={classes.footerContainer}>
