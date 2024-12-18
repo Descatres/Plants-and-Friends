@@ -1,12 +1,16 @@
 import { useCallback, useState } from "react";
 import { SENSOR_DATA_URL } from "../utils/routesAndEndpoints/routesAndEndpoints";
+import { useApi } from "./useApi";
 
 export function useFetchRoomStats() {
+  const { api } = useApi();
   const [temperature, setTemperature] = useState<number | null>(null);
   const [humidity, setHumidity] = useState<number | null>(null);
 
   const getRoomSensorData = useCallback(() => {
-    const eventSource = new EventSource(SENSOR_DATA_URL);
+    const eventSource = new EventSource(
+      `${api.defaults.baseURL}${SENSOR_DATA_URL}`
+    );
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
