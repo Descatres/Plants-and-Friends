@@ -22,6 +22,7 @@ function PineModel() {
       model.rotation.y += 0.001;
     }
   });
+  // check if it is a mobile device ande remove the model
 
   return model ? <primitive object={model} scale={3} /> : null;
 }

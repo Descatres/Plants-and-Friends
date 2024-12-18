@@ -6,6 +6,7 @@
   background-position: center;
   z-index: -1000;
   flex-wrap: wrap;
+  overflow: hidden;
 }
 
 .contentContainer {
@@ -51,14 +52,11 @@
   align-items: flex-start;
   height: 100%;
   width: calc(130% - 20rem);
-  /* width: 130%; */
   z-index: 1;
 }
 
 .tree {
   display: flex;
-  /* justify-content: flex-end; */
-  /* align-items: flex-end; */
   width: calc(100% - 10rem);
   min-width: 30rem;
   height: 90%;

@@ -31,7 +31,6 @@ function LandingPage() {
           </p>
         </div>
         <div className={classes.buttonsContainer}>
-          {/* <> */}
           <Button variant="secondary" onClick={handleNavigateLogin}>
             Login
           </Button>
@@ -39,7 +38,6 @@ function LandingPage() {
           <p style={{ cursor: "pointer" }} onClick={handleNavigateRegister}>
             Register
           </p>
-          {/* </> */}
         </div>
       </div>
     </div>

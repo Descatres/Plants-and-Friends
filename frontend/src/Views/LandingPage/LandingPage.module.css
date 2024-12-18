@@ -43,6 +43,7 @@
   flex-direction: row;
   width: 100%;
   gap: 1.5rem;
+  flex-wrap: wrap;
 }
 /* 500px */
 @media (max-width: 1201) {
