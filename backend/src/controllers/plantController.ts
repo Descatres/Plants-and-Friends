@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { getAllPlants, getPlantById, createPlant } from "../services/plantService";
+import { getAllPlants, getPlantById, createPlant, updatePlant } from "../services/plantService";
 import { CustomRequest } from "../types/CustomRequest";
 
 async function getPlants(req: CustomRequest, res: Response) {
@@ -24,4 +24,12 @@ async function postPlant(req: CustomRequest, res: Response) {
 	res.status(201).json(savedPlant);
 }
 
-export { getPlants, getPlant, postPlant };
+async function patchPlant(req: CustomRequest, res: Response) {
+	const { id } = req.params;
+	const userId = req.user?.id;
+
+	const updatedPlant = await updatePlant(id, userId!, req.body);
+	res.json(updatedPlant);
+}
+
+export { getPlants, getPlant, postPlant, patchPlant };

@@ -83,4 +83,20 @@ async function createPlant(plantData: any, userId: string) {
 	}
 }
 
-export { getAllPlants, getPlantById, createPlant };
+async function updatePlant(id: string, userId: string, updateData: Partial<any>) {
+	const plant = await Plant.findById(id);
+
+	if (!plant) {
+		throw new CustomError(`Plant with ID ${id} not found`, 404);
+	}
+
+	if (plant.ownerId.toString() !== userId) {
+		throw new CustomError("Unauthorized access to update this plant", 403);
+	}
+
+	Object.assign(plant, updateData);
+
+	return await plant.save();
+}
+
+export { getAllPlants, getPlantById, createPlant, updatePlant };
