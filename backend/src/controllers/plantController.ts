@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { getAllPlants, getPlantById, createPlant, updatePlant } from "../services/plantService";
+import { getAllPlants, getPlantById, createPlant, updatePlant, deletePlant } from "../services/plantService";
 import { CustomRequest } from "../types/CustomRequest";
 
 async function getPlants(req: CustomRequest, res: Response) {
@@ -32,4 +32,12 @@ async function patchPlant(req: CustomRequest, res: Response) {
 	res.json(updatedPlant);
 }
 
-export { getPlants, getPlant, postPlant, patchPlant };
+async function removePlant(req: CustomRequest, res: Response) {
+	const { id } = req.params;
+	const userId = req.user?.id;
+
+	await deletePlant(id, userId!);
+	res.json({ message: "Plant deleted successfully" });
+}
+
+export { getPlants, getPlant, postPlant, patchPlant, removePlant };

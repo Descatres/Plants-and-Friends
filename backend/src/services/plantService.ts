@@ -96,4 +96,18 @@ async function updatePlant(id: string, userId: string, updateData: Partial<any>)
 	return await plant.save();
 }
 
-export { getAllPlants, getPlantById, createPlant, updatePlant };
+async function deletePlant(id: string, userId: string) {
+	const plant = await Plant.findById(id);
+
+	if (!plant) {
+		throw new CustomError(`Plant with ID ${id} not found`, 404);
+	}
+
+	if (plant.ownerId.toString() !== userId) {
+		throw new CustomError("Unauthorized access to delete this plant", 403);
+	}
+
+	return await plant.deleteOne();
+}
+
+export { getAllPlants, getPlantById, createPlant, updatePlant, deletePlant };
