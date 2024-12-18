@@ -1,30 +1,25 @@
 import { Request, Response } from "express";
 import Notification from "../models/Notification";
 import Plant from "../models/Plant";
-import { mqttClient, MQTT_TOPIC_TEMPERATURE, MQTT_TOPIC_HUMIDITY } from "../config/mqtt";
 import { CustomRequest } from "../types/CustomRequest";
+import { mqttClient, MQTT_TOPIC_TEMPERATURE, MQTT_TOPIC_HUMIDITY } from "../workers/worker";
 
 let latestSensorData: { temperature?: number; humidity?: number } = {};
 const NOTIFICATION_TIME_WINDOW = 60000;
-const SENSOR_TIME_WINDOW = 5000;
+const SENSOR_TIME_WINDOW = 30000;
 
 mqttClient.on("message", (topic, message) => {
 	const payload = parseFloat(message.toString());
-
 	if (topic === MQTT_TOPIC_TEMPERATURE) {
 		latestSensorData.temperature = payload;
 	} else if (topic === MQTT_TOPIC_HUMIDITY) {
 		latestSensorData.humidity = payload;
-	} else {
-		console.log(`[MQTT Error]: Unexpected message - ${payload}`);
 	}
 });
 
 async function checkAndCreateNotifications() {
 	console.log(`[Sensor Check] Triggered at: ${new Date().toISOString()}`);
 	const { temperature, humidity } = latestSensorData;
-
-	console.log(`[Sensor Data] Temperature: ${temperature}, Humidity: ${humidity}`);
 
 	if (!temperature || !humidity) {
 		console.log("[Sensor Check] No valid sensor data received.");
@@ -48,7 +43,7 @@ async function checkAndCreateNotifications() {
 		if (notificationMessage) {
 			console.log(`[Notification] ${notificationMessage}`);
 
-            const existingNotification = await Notification.findOne({
+			const existingNotification = await Notification.findOne({
 				message: notificationMessage.trim(),
 				plantId: plant._id,
 				createdAt: {

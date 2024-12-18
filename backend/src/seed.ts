@@ -20,7 +20,7 @@ async function clearDatabase() {
 }
 
 async function createPlants(userId: any) {
-  const plant1 = await Plant.create({
+  await Plant.create({
     name: "Aloe Vera",
     species: "Aloe",
     description: "A succulent plant species.",
@@ -33,7 +33,7 @@ async function createPlants(userId: any) {
     ownerId: userId,
   });
 
-  const plant2 = await Plant.create({
+  await Plant.create({
     name: "Basil",
     species: "Ocimum basilicum",
     description: "A culinary herb.",
@@ -46,7 +46,7 @@ async function createPlants(userId: any) {
     ownerId: userId,
   });
 
-  const plant3 = await Plant.create({
+  await Plant.create({
     name: "Plant",
     species: "test",
     description: "A culinary herb.",
@@ -57,6 +57,19 @@ async function createPlants(userId: any) {
     image: "basil.jpg",
     lastUpdate: new Date().toISOString(),
     ownerId: userId,
+  });
+
+  await Plant.create({
+		name: "Plant 2",
+		species: "test",
+		description: "A culinary herb test.",
+		minTemperature: 5,
+		maxTemperature: 50,
+		minHumidity: 50,
+		maxHumidity: 90,
+		image: "basil.jpg",
+		lastUpdate: new Date().toISOString(),
+		ownerId: userId,
   });
 
   console.log("Plants created");

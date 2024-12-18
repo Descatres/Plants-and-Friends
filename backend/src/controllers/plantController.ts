@@ -11,9 +11,11 @@ async function getPlants(req: CustomRequest, res: Response) {
 
 async function getPlant(req: CustomRequest, res: Response) {
 	const { id } = req.params;
+	const { page = 1, limit = 10 } = req.query;
 	const userId = req.user?.id;
-	const plant = await getPlantById(id, userId!);
-	res.json(plant);
+
+	const result = await getPlantById(id, userId!, Number(page), Number(limit));
+	res.json(result);
 }
 
 async function postPlant(req: CustomRequest, res: Response) {

@@ -26,6 +26,6 @@ const PlantSchema: Schema = new Schema({
 	ownerId: { type: Schema.Types.ObjectId, ref: "User" }, // Reference to User
 });
 
-PlantSchema.index({ ownerId: 1 });
+PlantSchema.index({ ownerId: 1, species: 1 });
 
 export default mongoose.model<IPlant>('Plant', PlantSchema, 'plants');
