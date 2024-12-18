@@ -2,21 +2,21 @@ import Plant from "./models/Plant";
 import User from "./models/User";
 import connectDB from "./config/db";
 
-const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 
 async function seedDatabase() {
-	await clearDatabase();
+	const usersExist = await User.exists({});
+	const plantsExist = await Plant.exists({});
+
+	if (usersExist && plantsExist) {
+		console.log("Users and plants already exist, skipping seeding.");
+		process.exit(0);
+	}
+
 	const user = await createUser();
 	await createPlants(user.id);
 	console.log("Database seeded successfully!");
 	process.exit(0);
-}
-
-async function clearDatabase() {
-	await Plant.deleteMany({});
-	await User.deleteMany({});
-	console.log("Database cleared");
 }
 
 async function createPlants(userId: any) {
@@ -32,6 +32,12 @@ async function createPlants(userId: any) {
 		{ name: "Snake Plant", species: "Sansevieria", description: "A hardy indoor plant.", minTemperature: 10, maxTemperature: 30, minHumidity: 30, maxHumidity: 50, image: "snake_plant.jpg" },
 		{ name: "Peace Lily", species: "Spathiphyllum", description: "A popular indoor flowering plant.", minTemperature: 15, maxTemperature: 25, minHumidity: 50, maxHumidity: 80, image: "peace_lily.jpg" },
 	];
+
+	const existingPlants = await Plant.find({});
+	if (existingPlants.length > 0) {
+		console.log("Plants already exist, skipping creation.");
+		return;
+	}
 
 	const plants = [];
 	for (let i = 0; i < 30; i++) {
@@ -55,11 +61,18 @@ async function createPlants(userId: any) {
 }
 
 async function createUser() {
-	const user = await User.create({
+	const existingUsers = await User.find({});
+	if (existingUsers.length > 0) {
+		console.log("Users already exist, skipping creation.");
+		return existingUsers[0];
+	}
+
+	const user = new User({
 		email: "user@example.com",
 		password: "securepassword",
 	});
 
+	await user.save();
 	console.log("User created with plants");
 	return user;
 }
