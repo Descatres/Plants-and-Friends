@@ -14,8 +14,7 @@ export const LOGIN_URL = "/auth";
 export const REGISTER_URL = "/auth/register";
 export const PLANTS_URL = "/";
 export const PLANT_URL = "/:id";
-export const TEMPERATURE_URL = "/temperature";
-export const HUMIDITY_URL = "/humidity";
+export const SENSOR_DATA_URL = "http://localhost:5001/api/sensor-data";
 
 // Special endpoints
 export const REFRESH_TOKEN = "/refresh";

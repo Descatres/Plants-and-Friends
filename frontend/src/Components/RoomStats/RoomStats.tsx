@@ -5,34 +5,11 @@ import { useEffect, useState } from "react";
 import { useFetchRoomStats } from "../../hooks/useFetchRoomStats";
 
 function RoomStats() {
-  const { temperature, humidity, getTemperature, getHumidity } =
-    useFetchRoomStats();
+  const { getRoomSensorData, temperature, humidity } = useFetchRoomStats();
 
-  // useEffect(() => {
-  //   getTemperature();
-  //   getHumidity();
-
-  //   const interval = setInterval(() => {
-  //     getTemperature();
-  //     getHumidity();
-  //   }, 300000);
-
-  //   return () => clearInterval(interval);
-  // }, [getTemperature, getHumidity]);
-
-  const eventSource = new EventSource(
-    "http://localhost:5001/api/sensor-stream"
-  );
-
-  eventSource.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    console.log("Received Sensor Data:", data);
-  };
-
-  eventSource.onerror = (error) => {
-    console.error("Error with SSE:", error);
-    eventSource.close();
-  };
+  useEffect(() => {
+    getRoomSensorData();
+  }, []);
 
   return (
     <div className={classes.mainContainer}>
