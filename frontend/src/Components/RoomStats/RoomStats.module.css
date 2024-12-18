@@ -11,6 +11,9 @@
   padding: 0.25rem 2rem;
   height: 2rem;
   min-width: 8rem;
+  /* -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none; */
 }
 
 .statsContainer {
