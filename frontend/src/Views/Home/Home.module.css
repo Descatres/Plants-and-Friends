@@ -30,6 +30,45 @@
   flex-wrap: wrap;
 }
 
+.tweaksContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.listGridSwapperContainer {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  flex: 1;
+}
+
+.roomStatsContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.searchContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  flex: 1;
+}
+
+@media (max-width: 624px) {
+  .searchContainer {
+    justify-content: center;
+  }
+}
+
 .filtersContainer {
   display: flex;
   flex-direction: row;
@@ -92,45 +131,6 @@
 
 .filterCard:active {
   transform: scale(0.97);
-}
-
-.tweaksContainer {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  flex-wrap: wrap;
-}
-
-.listGridSwapperContainer {
-  display: flex;
-  justify-content: flex-start;
-  gap: 1rem;
-  flex: 1;
-}
-
-.roomStatsContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  flex: 1;
-}
-
-.searchContainer {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 1rem;
-  flex: 1;
-}
-
-@media (max-width: 624px) {
-  .searchContainer {
-    justify-content: center;
-  }
 }
 
 .plantsContainer {
