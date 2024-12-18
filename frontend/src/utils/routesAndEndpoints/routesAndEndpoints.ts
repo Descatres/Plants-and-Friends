@@ -3,6 +3,7 @@ export const HOME_ROUTE = "/home";
 export const LOGIN_ROUTE = "/login";
 export const REGISTER_ROUTE = "/register";
 export const PLANT_ROUTE = "/plant-information";
+export const NEW_PLANT_ROUTE = "/new-plant";
 export const LANDING_PAGE_ROUTE = "/";
 export const ROOM_ALERTS_ROUTE = "/room-alerts";
 export const FORBIDDEN_ROUTE = "/forbidden";

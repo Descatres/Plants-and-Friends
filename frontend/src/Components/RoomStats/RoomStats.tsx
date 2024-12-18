@@ -7,9 +7,15 @@ import { useFetchRoomStats } from "../../hooks/useFetchRoomStats";
 function RoomStats() {
   const { getRoomSensorData, temperature, humidity } = useFetchRoomStats();
 
-  useEffect(() => {
-    // getRoomSensorData();
-  }, []);
+  // useEffect(() => {
+  //   getRoomSensorData();
+  //   const interval = setInterval(() => {
+  //     getRoomSensorData();
+  //   }, 30000);
+  //   return () => clearInterval(interval);
+  // }, []);
+
+  // console.log(temperature, humidity);
 
   return (
     <div className={classes.mainContainer}>

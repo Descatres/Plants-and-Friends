@@ -18,7 +18,7 @@ export function useFetchPlantDetails() {
       api
         .get(PLANT_URL.replace(":id", id))
         .then((response: any) => {
-          setPlantData(response.data);
+          setPlantData(response.data.plant);
         })
         .catch((error: any) => {
           toast.error("An error has occurred getting the plant data!");

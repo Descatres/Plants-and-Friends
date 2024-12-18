@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useFetchPlantDetails } from "../../hooks/useFetchPlantDetails";
-import classes from "./Plant.module.css";
+import classes from "./PlantDetails.module.css";
 import { useLocation } from "react-router-dom";
 import Spinner from "../../Components/Spinner/Spinner";
 
-function Plant() {
+function PlantDetails() {
   const { getPlantData, plantData, isLoadingPlantData } =
     useFetchPlantDetails();
   const location = useLocation();
@@ -17,10 +17,10 @@ function Plant() {
   return (
     <div className={classes.mainContainer}>
       <h1>Plant Details</h1>
-      <p>Plant Name: {plantData?.name}</p>
+      <p>Plant Name: {plantData && plantData?.name}</p>
       {isLoadingPlantData && <Spinner />}
     </div>
   );
 }
 
-export default Plant;
+export default PlantDetails;
