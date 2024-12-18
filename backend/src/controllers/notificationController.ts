@@ -24,4 +24,15 @@ async function getNotifications(req: CustomRequest, res: Response) {
 	}
 }
 
-export { getNotifications };
+async function deleteAllNotifications(req: CustomRequest, res: Response) {
+	const userId = req.user?.id;
+
+	try {
+		await Notification.deleteMany({ userId });
+		res.status(200).json({ message: "All notifications deleted successfully" });
+	} catch (err) {
+		res.status(500).json({ message: "Error deleting notifications" });
+	}
+}
+
+export { getNotifications, deleteAllNotifications };

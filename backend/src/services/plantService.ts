@@ -1,9 +1,9 @@
 import Plant from "../models/Plant";
-import { CustomError } from "../utils/CustomError"; 
+import { CustomError } from "../utils/CustomError";
 
-
-async function getAllPlants(userId: string) {
-	const plants = await Plant.find({ ownerId: userId });
+async function getAllPlants(userId: string, page: number, limit: number) {
+	const skip = (page - 1) * limit;
+	const plants = await Plant.find({ ownerId: userId }).skip(skip).limit(limit);
 
 	if (!plants || plants.length === 0) {
 		throw new CustomError("No plants found for the user", 404);
@@ -11,7 +11,6 @@ async function getAllPlants(userId: string) {
 
 	return plants;
 }
-
 
 async function getPlantById(id: string, userId: string) {
 	const plant = await Plant.findById(id);
@@ -27,7 +26,6 @@ async function getPlantById(id: string, userId: string) {
 	return plant;
 }
 
-
 async function createPlant(plantData: any, userId: string) {
 	const plant = new Plant({
 		...plantData,
@@ -41,4 +39,4 @@ async function createPlant(plantData: any, userId: string) {
 	}
 }
 
-export { getAllPlants, getPlantById, createPlant }
+export { getAllPlants, getPlantById, createPlant };

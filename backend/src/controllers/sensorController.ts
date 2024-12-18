@@ -5,6 +5,8 @@ import { mqttClient, MQTT_TOPIC_TEMPERATURE, MQTT_TOPIC_HUMIDITY } from "../conf
 import { CustomRequest } from "../types/CustomRequest";
 
 let latestSensorData: { temperature?: number; humidity?: number } = {};
+const NOTIFICATION_TIME_WINDOW = 60000;
+const SENSOR_TIME_WINDOW = 5000;
 
 mqttClient.on("message", (topic, message) => {
 	const payload = parseFloat(message.toString());
@@ -46,6 +48,19 @@ async function checkAndCreateNotifications() {
 		if (notificationMessage) {
 			console.log(`[Notification] ${notificationMessage}`);
 
+            const existingNotification = await Notification.findOne({
+				message: notificationMessage.trim(),
+				plantId: plant._id,
+				createdAt: {
+					$gte: new Date(Date.now() - NOTIFICATION_TIME_WINDOW),
+				},
+			});
+
+			if (existingNotification) {
+				console.log(`[Notification] Duplicate detected. Skipping notification for plant '${plant.name}'.`);
+				continue;
+			}
+
 			const notification = new Notification({
 				message: notificationMessage.trim(),
 				plantId: plant._id,
@@ -66,16 +81,28 @@ function sendSensorData(req: CustomRequest, res: Response) {
 	res.setHeader("Cache-Control", "no-cache");
 	res.setHeader("Connection", "keep-alive");
 
-	const interval = setInterval(async () => {
-		console.log("[Interval] Checking sensor data and generating notifications...");
-		await checkAndCreateNotifications();
+	console.log("[SSE] Client connected to receive sensor data.");
+
+	const sensorDataInterval = setInterval(() => {
+		console.log("[Interval] Sending sensor data to client.");
+
+		if (latestSensorData.temperature === undefined || latestSensorData.humidity === undefined) {
+			console.log("[Interval] No valid sensor data to send.");
+			return;
+		}
 
 		res.write(`data: ${JSON.stringify(latestSensorData)}\n\n`);
-	}, 30000);
+	}, SENSOR_TIME_WINDOW);
+
+	const notificationInterval = setInterval(async () => {
+		console.log("[Interval] Checking sensor data and generating notifications...");
+		await checkAndCreateNotifications();
+	}, NOTIFICATION_TIME_WINDOW);
 
 	req.on("close", () => {
-		clearInterval(interval);
-		console.log("Client disconnected from SSE.");
+		clearInterval(sensorDataInterval);
+		clearInterval(notificationInterval);
+		console.log("[SSE] Client disconnected.");
 	});
 }
 

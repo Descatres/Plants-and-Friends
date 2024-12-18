@@ -4,7 +4,8 @@ import { CustomRequest } from "../types/CustomRequest";
 
 async function getPlants(req: CustomRequest, res: Response) {
 	const userId = req.user?.id;
-	const plants = await getAllPlants(userId!);
+	const { page = 1, limit = 10 } = req.query;
+	const plants = await getAllPlants(userId!, Number(page), Number(limit));
 	res.json(plants);
 }
 
