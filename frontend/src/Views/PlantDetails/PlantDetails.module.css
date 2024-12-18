@@ -60,7 +60,7 @@
   border-radius: 0.5rem;
 }
 
-.footerContainer {
+/* .footerContainer {
   display: flex;
   bottom: 0;
   align-items: flex-end;
@@ -69,4 +69,17 @@
   padding: 1rem 0;
   background-color: white;
   z-index: 10;
+} */
+
+.footerContainer {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  padding: 1rem 0;
+  background-color: white;
+  z-index: 10;
+  box-shadow: 0px -1px 10px rgba(0, 0, 0, 0.1);
 }
