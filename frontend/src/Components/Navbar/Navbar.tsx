@@ -15,7 +15,9 @@ import {
   REGISTER_ROUTE,
   ROOM_ALERTS_ROUTE,
 } from "../../utils/routesAndEndpoints/routesAndEndpoints";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useClearNotifications } from "../../hooks/useClearNotifications";
+import { useFetchNotifications } from "../../hooks/useFetchNotifications";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -40,23 +42,33 @@ function Navbar() {
     navigate(LANDING_PAGE_ROUTE);
   };
 
-  const mockNotifications = [
-    { id: 1, name: "Notification 1", onClick: () => {} },
-    { id: 2, name: "Notification 2", onClick: () => {} },
-    { id: 3, name: "Notification 3", onClick: () => {} },
-  ];
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const { getNotifications, notifications, setNotifications } =
+    useFetchNotifications();
 
-  const removeNotification = (id: number) => {
-    setNotifications((notifications) =>
-      notifications.filter((notification) => notification.id !== id)
-    );
-    if (notifications.length === 1) {
-      setNotifications([
-        { id: 0, name: "No notifications", onClick: () => {} },
-      ]);
-    }
-  };
+  const { clearNotifications } = useClearNotifications();
+
+  // useEffect(() => {
+  //   if (token) {
+  //     getNotifications();
+  //     if (notifications.length === 0) {
+  //       setNotifications([
+  //         {
+  //           name: "No notifications",
+  //         },
+  //       ]);
+  //     }
+  //     if (notifications.length >= 2) {
+  //       setNotifications(
+  //         notifications.concat([
+  //           {
+  //             name: "Delete Notifications",
+  //             onClick: clearNotifications,
+  //           },
+  //         ])
+  //       );
+  //     }
+  //   }
+  // }, [notifications]);
 
   return (
     <div className={classes.navbar}>
@@ -86,7 +98,6 @@ function Navbar() {
             }
             options={notifications.map((notification) => ({
               ...notification,
-              onClick: () => removeNotification(notification.id),
             }))}
           />
           <DropdownMenu

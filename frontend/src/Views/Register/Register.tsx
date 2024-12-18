@@ -5,24 +5,23 @@ import { useAuthentication } from "../../hooks/useAuthentication";
 import Spinner from "../../Components/Spinner/Spinner";
 import { useNavigate } from "react-router-dom";
 import { LOGIN_ROUTE } from "../../utils/routesAndEndpoints/routesAndEndpoints";
+import { toast } from "react-toastify";
 
 function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [error, setError] = useState<string | null>(null);
-
   const navigate = useNavigate();
 
   const { register, isLoading } = useAuthentication();
 
   const handleRegister = async (e: FormEvent) => {
+    e.preventDefault();
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      toast.error("Passwords do not match!");
       return;
     }
-    e.preventDefault();
     const data = { email, password };
     register(data);
   };

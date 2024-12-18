@@ -20,21 +20,26 @@ function LandingPage() {
   return (
     <div className={classes.formContainer}>
       <div className={classes.form}>
-        <h1>Rooted in Care Growing with Precision</h1>
-        <p>
-          Plant pantry that tracks soil humidity, temperature, and plant
-          details, offering real-time insights for optimal growth.
-        </p>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <h1>Rooted in Care </h1>
+          <h1 style={{ textAlign: "right" }}>&emsp;Growing with Precision</h1>
+        </div>
+        <div style={{ maxWidth: "40rem", minWidth: "20rem" }}>
+          <p>
+            &ensp;Plant pantry that tracks soil humidity, temperature, and plant
+            details, offering real-time insights for optimal growth.
+          </p>
+        </div>
         <div className={classes.buttonsContainer}>
-          <>
-            <Button variant="secondary" onClick={handleNavigateLogin}>
-              Login
-            </Button>
-            <p>or</p>
-            <p style={{ cursor: "pointer" }} onClick={handleNavigateRegister}>
-              Register
-            </p>
-          </>
+          {/* <> */}
+          <Button variant="secondary" onClick={handleNavigateLogin}>
+            Login
+          </Button>
+          <p>or</p>
+          <p style={{ cursor: "pointer" }} onClick={handleNavigateRegister}>
+            Register
+          </p>
+          {/* </> */}
         </div>
       </div>
     </div>

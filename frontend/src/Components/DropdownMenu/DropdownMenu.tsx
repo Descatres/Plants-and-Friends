@@ -11,14 +11,16 @@ function DropdownMenu({ button, options }: DropdownMenuProps) {
     <Dropdown.Root>
       <Dropdown.Trigger asChild>{button}</Dropdown.Trigger>
       <Dropdown.Content className="dropdownContent">
-        {options?.map((option) => (
-          <Dropdown.Item
-            key={option.id}
-            onClick={option.onClick}
-            className="dropdownItem"
-          >
-            {option.name}
-          </Dropdown.Item>
+        {options?.map((option, index) => (
+          <div key={index}>
+            <Dropdown.Item
+              key={option.id}
+              onClick={option.onClick}
+              className="dropdownItem"
+            >
+              {option.name}
+            </Dropdown.Item>
+          </div>
         ))}
       </Dropdown.Content>
     </Dropdown.Root>

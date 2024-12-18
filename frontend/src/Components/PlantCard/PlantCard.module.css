@@ -8,6 +8,8 @@
   transition: box-shadow 0.3s;
   overflow: hidden;
   /* width: 45%; */
+  flex: 1;
+  cursor: pointer;
 }
 
 .plantCard:hover {
@@ -23,7 +25,7 @@
 .list {
   flex-direction: row;
   gap: 2rem;
-  min-width: 380px;
+  min-width: 400px;
 }
 
 .plantCardImage {
@@ -38,6 +40,9 @@
   max-width: 100%;
   max-height: 100%;
   border-radius: 6px;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .plantCardDetails {

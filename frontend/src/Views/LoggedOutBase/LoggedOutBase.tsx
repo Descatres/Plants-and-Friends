@@ -6,10 +6,12 @@ function LoggedOutBaseContent({ children }: { children: ReactNode }) {
   return (
     <div className={classes.background}>
       <div className={classes.contentContainer}>
-        <div className={classes.treeContainer}>
+        <div className={classes.formParentContainer}>
           <div className={classes.formContainer}>
             <div className={classes.form}>{children}</div>
           </div>
+        </div>
+        <div className={classes.treeContainer}>
           <div className={classes.tree}>
             <PineModel />
           </div>

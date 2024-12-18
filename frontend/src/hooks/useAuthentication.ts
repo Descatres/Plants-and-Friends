@@ -67,7 +67,6 @@ export function useAuthentication() {
         const errors = error.response?.data?.errors || [
           "Failed to create account",
         ];
-
         console.log("error", errors);
         toast.error("Failed to create account");
       })

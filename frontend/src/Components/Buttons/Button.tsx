@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 import classes from "./Button.module.css";
 
 interface ButtonProps {
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "tertiary";
   onClick?: () => void;
   children: ReactNode;
 }
@@ -10,7 +10,13 @@ interface ButtonProps {
 function Button({ variant = "primary", onClick, children }: ButtonProps) {
   return (
     <button
-      className={variant === "primary" ? classes.primary : classes.secondary}
+      className={
+        variant === "primary"
+          ? classes.primary
+          : variant === "secondary"
+          ? classes.secondary
+          : classes.tertiary
+      }
       onClick={onClick}
     >
       {children}

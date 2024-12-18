@@ -1,0 +1,31 @@
+.mainContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.mainContainer img {
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  padding: 0.3rem 0.6rem;
+}
+
+.mainContainer img:hover {
+  transform: scale(1.03);
+}
+
+.mainContainer img:active {
+  transform: scale(0.97);
+}
+
+.selected {
+  border: transparent;
+  border-radius: 0.5rem;
+  background-color: #6868685f;
+}
