@@ -8,7 +8,7 @@ function RoomStats() {
   const { getRoomSensorData, temperature, humidity } = useFetchRoomStats();
 
   useEffect(() => {
-    getRoomSensorData();
+    // getRoomSensorData();
   }, []);
 
   return (

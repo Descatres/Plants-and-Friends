@@ -23,6 +23,7 @@ import RoomAlerts from "./Views/RoomAlerts/RoomAlerts";
 
 function App() {
   const token = useSelector((state: RootState) => state.token.value);
+  console.log(token);
 
   useEffect(() => {
     if (
