@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import classes from "./Home.module.css";
 import PlantCard from "../../Components/PlantCard/PlantCard";
 import Spinner from "../../Components/Spinner/Spinner";
@@ -7,14 +7,24 @@ import RoomStats from "../../Components/RoomStats/RoomStats";
 import ListGridSwapper from "../../Components/ListGridSwapper/ListGridSwapper";
 import Search from "../../Components/Search/Search";
 import DropdownMenu from "../../Components/DropdownMenu/DropdownMenu";
-import ErrorPage from "../../errorPages/ErrorPage";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import Footer from "../../Components/Footer/Footer";
+import Button from "../../Components/Buttons/Button";
+import { NEW_PLANT_ROUTE } from "../../utils/routesAndEndpoints/routesAndEndpoints";
 
 function Home() {
-  const { getAllPlants, isLoadingPlants, plants, errorFindingData } =
-    useFetchPlants();
+  const {
+    getPlants,
+    isLoadingPlants,
+    plants,
+    totalPlants,
+    currentPage,
+    setCurrentPage,
+  } = useFetchPlants();
+  const observerRef = useRef<HTMLDivElement>(null);
+  const limit = 10;
+
   const [isList, setIsList] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<string | "">("");
@@ -22,8 +32,34 @@ function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getAllPlants();
+    // getPlants(currentPage, limit);
+    getPlants();
   }, []);
+  // }, [currentPage, getPlants]);
+
+  // const handleIntersect = useCallback(
+  //   (entries: IntersectionObserverEntry[]) => {
+  //     const [entry] = entries;
+  //     if (entry.isIntersecting && plants.length < totalPlants) {
+  //       setCurrentPage((prev) => prev + 1); // Load the next page
+  //     }
+  //   },
+  //   [plants.length, totalPlants, setCurrentPage]
+  // );
+
+  // useEffect(() => {
+  //   const observer = new IntersectionObserver(handleIntersect, {
+  //     root: null,
+  //     rootMargin: "200px",
+  //     threshold: 1.0,
+  //   });
+
+  //   if (observerRef.current) observer.observe(observerRef.current);
+
+  //   return () => {
+  //     if (observerRef.current) observer.unobserve(observerRef.current);
+  //   };
+  // }, [handleIntersect]);
 
   useEffect(() => {
     if (!sortBy) setIsDescending(false);
@@ -51,10 +87,14 @@ function Home() {
     setSortBy("");
   };
 
+  const handleNavigatePlant = () => {
+    navigate(NEW_PLANT_ROUTE);
+  };
+
   const filteredPlants = plants
     ?.filter(
       (plant) =>
-        plant.name.toLowerCase().includes(searchQuery) ||
+        plant.name?.toLowerCase().includes(searchQuery) ||
         plant.species?.toLowerCase().includes(searchQuery)
     )
     .sort((a: any, b: any) => {
@@ -125,7 +165,7 @@ function Home() {
                 filteredPlants.length > 0 &&
                 filteredPlants.map((plant, index) => (
                   <div key={index}>
-                    <div key={plant._id} className={classes.plant}>
+                    <div key={plant._id}>
                       <PlantCard
                         id={plant._id}
                         name={plant.name}
@@ -148,7 +188,11 @@ function Home() {
           </div>
         </div>
         <div className={classes.footerContainer}>
-          <Footer />
+          <Footer>
+            <Button variant="tertiary" onClick={handleNavigatePlant}>
+              New Plant
+            </Button>
+          </Footer>
         </div>
       </div>
     </div>

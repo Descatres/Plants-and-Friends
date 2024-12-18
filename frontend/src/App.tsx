@@ -72,7 +72,7 @@ function App() {
             </>
           )}
           {/* TODO - Detect the proper error (404, 500, etc) and send it to the component */}
-          <Route path="*" element={<ErrorPage />} />
+          {/* <Route path="*" element={<ErrorPage />} /> */}
         </Routes>
       </div>
     </Router>

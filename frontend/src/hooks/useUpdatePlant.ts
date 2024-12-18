@@ -1,22 +1,29 @@
 import { useCallback, useState } from "react";
 import { useApi } from "./useApi";
 import { Plant } from "../types/Plant";
-import { PLANTS_URL } from "../utils/routesAndEndpoints/routesAndEndpoints";
+import { PLANT_URL } from "../utils/routesAndEndpoints/routesAndEndpoints";
 import { toast } from "react-toastify";
 
-export function useCreatePlant() {
+export function useUpdatePlant() {
   const { api } = useApi();
 
-  const [isCreatingPlant, setIsCreatingPlant] = useState<boolean>(false);
+  const [isUpdatingPlant, setIsUpdatingPlant] = useState<boolean>(false);
   const [errorFindingData, setErrorFindingData] = useState(false);
 
-  const createPlant = useCallback(
+  const updatePlant = useCallback(
     (plant: Plant) => {
-      setIsCreatingPlant(true);
+      setIsUpdatingPlant(true);
       setErrorFindingData(false);
-      console.log(plant);
+      if (!plant._id) {
+        toast.error("An error has occurred getting the plant data!");
+        setErrorFindingData(true);
+        setIsUpdatingPlant(false);
+        return;
+      }
+      const updateUrl = PLANT_URL.replace(":id", plant._id);
+
       api
-        .post(PLANTS_URL, plant)
+        .patch(updateUrl, plant)
         .then(() => {
           toast.success("Plant created successfully!");
         })
@@ -27,15 +34,15 @@ export function useCreatePlant() {
           if (error.code) return;
         })
         .finally(() => {
-          setIsCreatingPlant(false);
+          setIsUpdatingPlant(false);
         });
     },
     [api]
   );
 
   return {
-    isCreatingPlant,
+    isUpdatingPlant,
     errorFindingData,
-    createPlant,
+    updatePlant,
   };
 }

@@ -87,9 +87,10 @@ export function useApi() {
         navigate(LANDING_PAGE_ROUTE);
       } else if (status === 403) {
         navigate(FORBIDDEN_ROUTE);
-      } else if ([500, 502, 503].includes(status)) {
-        navigate(INTERNAL_ERROR_ROUTE);
-      } else return Promise.reject(error);
+      }
+      // else if ([500, 502, 503].includes(status)) {
+      //   navigate(INTERNAL_ERROR_ROUTE);
+      else return Promise.reject(error);
     }
   );
 

@@ -47,28 +47,34 @@ function Navbar() {
 
   const { clearNotifications } = useClearNotifications();
 
-  // useEffect(() => {
-  //   if (token) {
-  //     getNotifications();
-  //     if (notifications.length === 0) {
-  //       setNotifications([
-  //         {
-  //           name: "No notifications",
-  //         },
-  //       ]);
-  //     }
-  //     if (notifications.length >= 2) {
-  //       setNotifications(
-  //         notifications.concat([
-  //           {
-  //             name: "Delete Notifications",
-  //             onClick: clearNotifications,
-  //           },
-  //         ])
-  //       );
-  //     }
-  //   }
-  // }, [notifications]);
+  useEffect(() => {
+    if (token) {
+      const interval = setInterval(() => {
+        getNotifications();
+      }, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [notifications]);
+
+  useEffect(() => {
+    if (notifications.length === 0) {
+      setNotifications([
+        {
+          name: "No notifications",
+        },
+      ]);
+    }
+    if (notifications.length >= 2) {
+      setNotifications((prevNotifications) =>
+        prevNotifications.concat([
+          {
+            name: "Delete Notifications",
+            onClick: clearNotifications,
+          },
+        ])
+      );
+    }
+  }, [notifications, clearNotifications]);
 
   return (
     <div className={classes.navbar}>

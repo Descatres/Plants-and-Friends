@@ -28,6 +28,7 @@ export function useAuthentication() {
         password: data.password,
       })
       .then((response: any) => {
+        console.log("response", response);
         const { token } = response.data;
 
         if (token) {

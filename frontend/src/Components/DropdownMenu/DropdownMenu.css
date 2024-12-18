@@ -16,7 +16,7 @@
   padding: 10px 0;
   cursor: pointer;
   transition: background-color 0.3s;
-  cursor: "pointer";
+  cursor: pointer;
   -moz-user-select: none;
   -webkit-user-select: none;
   user-select: none;

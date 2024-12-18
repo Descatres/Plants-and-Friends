@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { PLANT_ROUTE } from "../../utils/routesAndEndpoints/routesAndEndpoints";
 
 type PlantCardProps = {
-  id: string;
-  name: string;
+  id?: string;
+  name?: string;
   species?: string;
   minTemperature?: number;
   maxTemperature?: number;

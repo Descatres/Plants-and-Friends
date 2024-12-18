@@ -7,27 +7,29 @@ export function useFetchNotifications() {
   const { api } = useApi();
 
   const [notifications, setNotifications] = useState<any[]>([]);
-  const [errorFindingData, setErrorFindingData] = useState(false);
 
   const getNotifications = useCallback(() => {
-    setErrorFindingData(false);
     api
       .get(NOTIFICATIONS_URL)
       .then((response: any) => {
-        setNotifications(response.data);
+        if (Array.isArray(response.data.notifications)) {
+          setNotifications(response.data.notifications);
+        } else {
+          console.error(
+            "Expected an array but got:",
+            response.data.notifications
+          );
+          setNotifications([]);
+        }
       })
       .catch((error: any) => {
-        toast.error("An error has occurred getting the plants!");
-        setErrorFindingData(true);
-        console.log(error);
-        if (error.code) return;
+        return;
       });
   }, [api]);
 
   return {
     notifications,
     setNotifications,
-    errorFindingData,
     getNotifications,
   };
 }

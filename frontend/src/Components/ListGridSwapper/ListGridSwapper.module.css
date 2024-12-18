@@ -17,11 +17,11 @@
 }
 
 .mainContainer img:hover {
-  transform: scale(1.03);
+  transform: scale(0.97);
 }
 
 .mainContainer img:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
 }
 
 .selected {

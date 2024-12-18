@@ -25,7 +25,8 @@
     "react-router-dom": "^6.26.2",
     "react-toastify": "^11.0.0",
     "redux-persist": "^6.0.0",
-    "three": "^0.170.0"
+    "three": "^0.170.0",
+    "prop-types": "15.7.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

@@ -5,7 +5,7 @@
   justify-content: space-between;
   height: 100vh;
   overflow: auto;
-  padding: 2rem 2rem;
+  padding: 0 2rem 1.5rem;
   flex-wrap: wrap;
   box-sizing: border-box;
 }
@@ -114,12 +114,12 @@
 
 .filterCardSelect:hover,
 .orderCard:hover {
-  transform: scale(1.03);
+  transform: scale(0.97);
 }
 
 .filterCardSelect:active,
 .orderCard:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
 }
 
 .filterCard,
@@ -143,33 +143,43 @@
 }
 
 .filterCard:hover {
-  transform: scale(1.03);
+  transform: scale(0.97);
 }
 
 .filterCard:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
 }
 
 .plantsContainer {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  width: 100%;
+  box-sizing: border-box;
   flex-direction: row;
+  gap: 2rem;
 }
 
-.plantRowList {
+.plantRow {
   display: flex;
-  justify-content: flex-start;
-  width: 100%;
+  justify-content: center;
+  width: fit-content;
   gap: 2rem;
   flex-wrap: wrap;
 }
 
 .plantRowGrid {
   display: flex;
-  justify-content: flex-start;
-  width: 100%;
+  justify-content: center;
+  width: fit-content;
+  box-sizing: border-box;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.plantRowList {
+  display: flex;
+  justify-content: center;
+  width: fit-content;
   gap: 2rem;
   flex-wrap: wrap;
 }
@@ -184,7 +194,7 @@
 @media (max-width: 705px) {
   .plantRowGrid {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
   }
 }
 
