@@ -32,7 +32,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+  gap: rem;
   width: 100%;
   flex-wrap: wrap;
 }
@@ -50,14 +50,135 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: 1rem;
+  gap: rem;
+  width: 100%;
+}
+
+.plantInfoContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 3rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   width: 100%;
 }
 
 .plantImageContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 2px;
-  border: 2px solid #d9d9d9;
   border-radius: 0.5rem;
+  max-width: 30rem;
+  flex: 1;
+}
+
+.plantImageContainer img {
+  display: flex;
+  align-self: center;
+  border-radius: 0.5rem;
+  border: 2px solid #d9d9d9;
+}
+
+.plantMainInfoContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 30rem;
+  flex: 1;
+}
+
+.plantMainInfoContainer h1 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+.plantMainInfoContainer input {
+  padding: 0.5rem;
+  border: 0px solid #ddd;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #466060;
+  font-size: 1.5rem;
+  height: 2rem;
+}
+
+.plantDescriptionContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  min-width: 40%;
+  max-width: 30rem;
+  flex: 1;
+}
+
+.plantDescriptionContainer textarea {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 1.2rem;
+  color: #466060;
+}
+
+.plantStatsContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 12%;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.plantTemperatureContainer,
+.plantHumidityContainer {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.plantTemperature,
+.plantHumidity {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.plantTemperatureSlider,
+.plantHumiditySlider {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  height: 2rem;
+  gap: 1rem;
+}
+
+.plantTemperatureSlider input,
+.plantHumiditySlider input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #466060;
+  font-size: 1.2rem;
+  width: 5rem;
+  height: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* .footerContainer {

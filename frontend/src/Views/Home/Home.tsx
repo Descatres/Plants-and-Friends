@@ -190,7 +190,7 @@ function Home() {
               !isLoadingPlants && <p>No plants to show!</p>}
             {isLoadingPlants && <Spinner />}
           </div>
-          <div ref={observerRef} className={classes.lazyLoadTrigger}></div>
+          <div ref={observerRef}></div>
         </div>
         <div className={classes.footerContainer}>
           <Footer>

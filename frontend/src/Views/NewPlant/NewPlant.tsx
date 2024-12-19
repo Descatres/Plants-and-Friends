@@ -155,10 +155,16 @@ function Plant() {
 
               <div className={classes.plantDescriptionContainer}>
                 <h1>Description</h1>
-                <input
+                {/* <input
                   type="text"
                   placeholder="Plant Description"
                   onChange={handlePlantDescription}
+                /> */}
+                <textarea
+                  // type=""
+                  placeholder="Plant Description"
+                  value={plantDescription}
+                  // onChange={handlePlantDescription}
                 />
               </div>
             </div>

@@ -193,85 +193,84 @@ function PlantDetails() {
           <div className={classes.roomStatsContainer}>
             <RoomStats />
           </div>
-          {
-            <div className={classes.plantOptionsContainer}>
-              <div className={classes.plantInfoContainer}>
-                <div className={classes.plantImageContainer}>
-                  <img src={cameraIcon} alt="camera icon" />
-                </div>
-
-                <div className={classes.plantMainInfoContainer}>
-                  <h1>Name</h1>
-                  <input
-                    type="text"
-                    placeholder="Plant Name"
-                    value={plantName}
-                    onChange={handlePlantName}
-                  />
-                  <h1>Species</h1>
-                  <input
-                    type="text"
-                    placeholder="Plant Species"
-                    value={plantSpecies}
-                    onChange={handlePlantSpecies}
-                  />
-                </div>
-
-                <div className={classes.plantDescriptionContainer}>
-                  <h1>Description</h1>
-                  <input
-                    type="text"
-                    placeholder="Plant Description"
-                    value={plantDescription}
-                    onChange={handlePlantDescription}
-                  />
-                </div>
+          <div className={classes.plantOptionsContainer}>
+            <div className={classes.plantInfoContainer}>
+              <div className={classes.plantImageContainer}>
+                <img src={cameraIcon} alt="Add your plant image here!" />
               </div>
 
-              <div className={classes.plantStatsContainer}>
-                <div className={classes.plantTemperatureContainer}>
-                  <div className={classes.plantTemperature}>
-                    <h1>Ideal Temperature</h1>
-                  </div>
-                  <div className={classes.plantTemperatureSlider}>
-                    <input
-                      type="number"
-                      min="0"
-                      value={plantMinTemperature}
-                      onChange={handlePlantMinTemperature}
-                    />
-                    {errorMinTemp && <p>{errorMinTemp}</p>}
-                    <input
-                      type="number"
-                      max="100"
-                      value={plantMaxTemperature}
-                      onChange={handlePlantMaxTemperature}
-                    />
-                    {errorMaxTemp && <p>{errorMaxTemp}</p>}
-                  </div>
+              <div className={classes.plantMainInfoContainer}>
+                <h1>Name</h1>
+                <input
+                  type="text"
+                  placeholder="Plant Name"
+                  value={plantName}
+                  onChange={handlePlantName}
+                />
+                <h1>Species</h1>
+                <input
+                  type="text"
+                  placeholder="Plant Species"
+                  value={plantSpecies}
+                  onChange={handlePlantSpecies}
+                />
+              </div>
+
+              <div className={classes.plantDescriptionContainer}>
+                <h1>Description</h1>
+                <textarea
+                  // type=""
+                  placeholder="Plant Description"
+                  value={plantDescription}
+                  // onChange={handlePlantDescription}
+                />
+              </div>
+            </div>
+            <div className={classes.plantStatsContainer}>
+              <div className={classes.plantTemperatureContainer}>
+                <div className={classes.plantTemperature}>
+                  <h1>Ideal Temperature</h1>
                 </div>
-                <div className={classes.plantHumidityContainer}>
-                  <div className={classes.plantHumidity}>
-                    <h1>Ideal Humidity</h1>
-                  </div>
-                  <div className={classes.plantHumiditySlider}>
-                    <input
-                      type="number"
-                      value={plantMinHumidity}
-                      onChange={handlePlantMinHumidity}
-                    />
-                    {errorMinHum && <p>{errorMinHum}</p>}
-                    <input
-                      type="number"
-                      value={plantMaxHumidity}
-                      onChange={handlePlantMaxHumidity}
-                    />
-                    {errorMaxHum && <p>{errorMaxHum}</p>}
-                  </div>
+                <div className={classes.plantTemperatureSlider}>
+                  <input
+                    type="number"
+                    min="0"
+                    value={plantMinTemperature}
+                    onChange={handlePlantMinTemperature}
+                    className={classes.plantTemperatureSlider}
+                  />
+                  {errorMinTemp && <p>{errorMinTemp}</p>}
+                  <input
+                    type="number"
+                    max="100"
+                    value={plantMaxTemperature}
+                    onChange={handlePlantMaxTemperature}
+                    className={classes.plantTemperatureSlider}
+                  />
+                  {errorMaxTemp && <p>{errorMaxTemp}</p>}
+                </div>
+              </div>
+              <div className={classes.plantHumidityContainer}>
+                <div className={classes.plantHumidity}>
+                  <h1>Ideal Humidity</h1>
+                </div>
+                <div className={classes.plantHumiditySlider}>
+                  <input
+                    type="number"
+                    value={plantMinHumidity}
+                    onChange={handlePlantMinHumidity}
+                  />
+                  {errorMinHum && <p>{errorMinHum}</p>}
+                  <input
+                    type="number"
+                    value={plantMaxHumidity}
+                    onChange={handlePlantMaxHumidity}
+                  />
+                  {errorMaxHum && <p>{errorMaxHum}</p>}
                 </div>
               </div>
             </div>
-          }
+          </div>
         </div>
         <div className={classes.footerContainer}>
           <Footer>
