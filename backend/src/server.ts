@@ -31,7 +31,12 @@ function main() {
 }
 
 function startServer() {
-	app.use(cors());
+	app.use(
+		cors({
+			origin: "*", // Allow all origins
+			credentials: true,
+		})
+	);
 	app.use(bodyParser.json());
 
 	app.use(
@@ -53,9 +58,9 @@ function startServer() {
 	app.use(passport.initialize());
 	app.use(passport.session());
 
-	app.use("/", plantRoutes);
-	app.use("/", authRoutes);
-	app.use("/", notificationRoutes);
+	app.use("/api/", plantRoutes);
+	app.use("/api/", authRoutes);
+	app.use("/api/", notificationRoutes);
 
 	app.use(errorHandler);
 
