@@ -84,7 +84,8 @@ export function useApi() {
       const status = error.response ? error.response.status : null;
       if (status === 401) {
         dispatch(removeToken(null));
-        navigate(LANDING_PAGE_ROUTE);
+        // navigate(LANDING_PAGE_ROUTE);
+        window.location.href = LANDING_PAGE_ROUTE;
       } else if (status === 403) {
         navigate(FORBIDDEN_ROUTE);
       }

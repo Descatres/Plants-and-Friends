@@ -32,34 +32,38 @@ function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // getPlants(currentPage, limit);
-    getPlants();
-  }, []);
-  // }, [currentPage, getPlants]);
+    getPlants(currentPage, limit);
+  }, [currentPage]);
 
-  // const handleIntersect = useCallback(
-  //   (entries: IntersectionObserverEntry[]) => {
-  //     const [entry] = entries;
-  //     if (entry.isIntersecting && plants.length < totalPlants) {
-  //       setCurrentPage((prev) => prev + 1); // Load the next page
-  //     }
-  //   },
-  //   [plants.length, totalPlants, setCurrentPage]
-  // );
+  const handleIntersect = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
 
-  // useEffect(() => {
-  //   const observer = new IntersectionObserver(handleIntersect, {
-  //     root: null,
-  //     rootMargin: "200px",
-  //     threshold: 1.0,
-  //   });
+      if (
+        entry.isIntersecting &&
+        plants.length < totalPlants &&
+        !isLoadingPlants
+      ) {
+        console.log("Loading more plants...");
+        setCurrentPage((prev) => prev + 1);
+      }
+    },
+    [plants.length, totalPlants, isLoadingPlants, setCurrentPage]
+  );
 
-  //   if (observerRef.current) observer.observe(observerRef.current);
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleIntersect, {
+      root: null,
+      rootMargin: "0px",
+      threshold: 1.0,
+    });
 
-  //   return () => {
-  //     if (observerRef.current) observer.unobserve(observerRef.current);
-  //   };
-  // }, [handleIntersect]);
+    if (observerRef.current) observer.observe(observerRef.current);
+
+    return () => {
+      if (observerRef.current) observer.unobserve(observerRef.current);
+    };
+  }, [handleIntersect]);
 
   useEffect(() => {
     if (!sortBy) setIsDescending(false);
@@ -186,6 +190,7 @@ function Home() {
               !isLoadingPlants && <p>No plants to show!</p>}
             {isLoadingPlants && <Spinner />}
           </div>
+          <div ref={observerRef} className={classes.lazyLoadTrigger}></div>
         </div>
         <div className={classes.footerContainer}>
           <Footer>
