@@ -1,15 +1,37 @@
-# PlantsPantry
+# Frontend for Plants and Friends
 
-- A simple App to manage your plants.
+# How to run Locally
 
-# How to run
+- Create a .env file on the root folder of the fronted with the following:
 
-`npm i`
-`npm run dev`
+`VITE_API_URL=http://localhost:5001`
 
-- The history state is automatically handled by react-router and react-router-dom.
-- Lazy loading is being applied to fetch the plants (not working - it broke at the last minute :/).
+- Run
+  ```
+  npm i && npm run dev
+  ```
 
+## Features and notes
+
+- Logged out:
+  - Beautiful Landing page featuring Glassmorphism, a 3d model of a tree (which persists across pages while logged off)
+  - Login
+  - Register
+- Logged in
+
+  - Create Plant
+  - Edit Plant
+  - Delete Plant
+  - Check real time sensor data
+  - Notifications (broken atm)
+  - Search by plant name and species
+  - Sort by either name or species (alphabetically, or reverse)
+  - The history state is automatically handled by react-router and react-router-dom.
+  - Lazy loading is being applied to fetch the plants.
+
+  ***
+
+- A page to control specific sensors for rooms was thought of but it was not implemented.
 - Some UX improvements could've been made, such as making some buttons disabled (for example, to update the plant, the user must first update a field, only then the button should be enabled); modals to confirm destructive non reversible actions, such as delting a plant; and so on. We know this would be the best approach but, due to lack of time and not using a UI library, like Chakra UI (which is lovely in our opinion), we couldn't implement it in time. But we do know it is something we can improve the app on!
 
 - The images are not being set because, once again, we did not have time.
