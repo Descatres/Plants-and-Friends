@@ -44,7 +44,6 @@ function Home() {
         plants.length < totalPlants &&
         !isLoadingPlants
       ) {
-        console.log("Loading more plants...");
         setCurrentPage((prev) => prev + 1);
       }
     },

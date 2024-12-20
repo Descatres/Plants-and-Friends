@@ -17,8 +17,6 @@ export function useFetchPlants() {
     (page: number, limit: number) => {
       if (page < 1) return;
 
-      console.log(`Fetching plants: page=${page}, limit=${limit}`);
-
       setIsLoadingPlants(true);
       setErrorFindingData(false);
 
@@ -26,7 +24,6 @@ export function useFetchPlants() {
         .get(PLANTS_URL, { params: { page, limit } })
         .then((response: any) => {
           if (response.data.plants && response.data.plants.length > 0) {
-            console.log(`Received ${response.data.plants.length} plants.`);
             setPlants((prev) => [
               ...prev,
               ...response.data.plants.filter(

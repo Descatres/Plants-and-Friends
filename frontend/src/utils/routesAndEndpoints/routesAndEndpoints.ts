@@ -17,7 +17,7 @@ export const PLANTS_URL = "/api/";
 export const PLANT_URL = "/api/plant/:id";
 export const SENSOR_DATA_URL = "/api/sensor-data";
 export const NOTIFICATIONS_URL = "/api/notifications";
-export const DELETE_NOTIFICATION_URL = "/api/notifications/";
+export const DELETE_NOTIFICATION_URL = "/api/notifications";
 
 // Special endpoints
 export const REFRESH_TOKEN = "/refresh";

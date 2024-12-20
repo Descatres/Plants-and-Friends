@@ -14,7 +14,6 @@ export function useCreatePlant() {
     (plant: Plant) => {
       setIsCreatingPlant(true);
       setErrorFindingData(false);
-      console.log(plant);
       api
         .post(PLANTS_URL, plant)
         .then(() => {

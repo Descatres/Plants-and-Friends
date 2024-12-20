@@ -28,7 +28,6 @@ function PlantCard({
 }: PlantCardProps) {
   const navigate = useNavigate();
   const handleNavigatePlant = () => {
-    console.log("Navigating to plant with id: ", id);
     navigate(PLANT_ROUTE, { state: { id } });
   };
   return (

@@ -51,10 +51,10 @@ function Navbar() {
     if (token) {
       const interval = setInterval(() => {
         getNotifications();
-      }, 30000);
+      }, 10000);
       return () => clearInterval(interval);
     }
-  }, [notifications]);
+  }, []);
 
   useEffect(() => {
     if (notifications.length === 0) {
