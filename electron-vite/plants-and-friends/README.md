@@ -60,6 +60,7 @@ npm run start
   ***
 
 - A page to control specific sensors for rooms was thought of but it was not implemented.
+
 - Some UX improvements could've been made, such as making some buttons disabled (for example, to update the plant, the user must first update a field, only then the button should be enabled); modals to confirm destructive non reversible actions, such as delting a plant; and so on. We know this would be the best approach but, due to lack of time and not using a UI library, like Chakra UI (which is lovely in our opinion), we couldn't implement it in time. But we do know it is something we can improve the app on!
 
 - The images are not being set because, once again, we did not have time.

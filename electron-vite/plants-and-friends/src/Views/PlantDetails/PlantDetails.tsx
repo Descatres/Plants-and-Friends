@@ -88,7 +88,9 @@ function PlantDetails() {
     setPlantSpecies(e.target.value);
   };
 
-  const handlePlantDescription = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePlantDescription = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setPlantDescription(e.target.value);
   };
 
@@ -222,7 +224,7 @@ function PlantDetails() {
                   // type=""
                   placeholder="Plant Description"
                   value={plantDescription}
-                  // onChange={handlePlantDescription}
+                  onChange={handlePlantDescription}
                 />
               </div>
             </div>
