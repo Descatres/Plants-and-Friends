@@ -1,6 +1,6 @@
 {
   "name": "plants-and-friends",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "dist-electron/main/index.js",
   "description": "Plant pantry management system for plants and associated sensor",
   "author": "João Catré, Tiago Oliveira",

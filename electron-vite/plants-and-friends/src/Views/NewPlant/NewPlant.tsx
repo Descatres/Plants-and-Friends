@@ -217,9 +217,14 @@ function Plant() {
         </div>
         <div className={classes.footerContainer}>
           <Footer>
-            <Button variant="tertiary" onClick={handleCreatePlant}>
-              Create Plant
-            </Button>
+            <div style={{ display: "flex", gap: "1.2rem" }}>
+              <Button variant="secondary" onClick={() => navigate(HOME_ROUTE)}>
+                Back
+              </Button>
+              <Button variant="tertiary" onClick={handleCreatePlant}>
+                Create Plant
+              </Button>
+            </div>
           </Footer>
         </div>
       </div>

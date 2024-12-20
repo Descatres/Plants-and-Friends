@@ -275,7 +275,10 @@ function PlantDetails() {
         </div>
         <div className={classes.footerContainer}>
           <Footer>
-            <div style={{ display: "flex", gap: "1rem" }}>
+            <div style={{ display: "flex", gap: "1.2rem" }}>
+              <Button variant="secondary" onClick={() => navigate(HOME_ROUTE)}>
+                Back
+              </Button>
               <Button
                 variant="tertiary"
                 onClick={handleCreatePlant}
