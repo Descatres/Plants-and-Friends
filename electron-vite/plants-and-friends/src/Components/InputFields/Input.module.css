@@ -1,0 +1,27 @@
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.formGroup label {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  font-family: poppins;
+  color: #466060;
+}
+
+.formGroup input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #466060;
+  font-size: 1.2rem;
+  width: 23rem;
+  height: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}

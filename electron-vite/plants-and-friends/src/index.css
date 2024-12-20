@@ -1,0 +1,21 @@
+:root {
+  color-scheme: light dark;
+  background-color: white;
+  color: black;
+  font-family: "Poppins", sans-serif;
+  overflow: hidden;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}

@@ -1,0 +1,47 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+  width: calc(100% - 4rem);
+  padding: 1rem 2rem;
+  background-color: #78d43c;
+  z-index: 10;
+}
+
+.navbar h1 {
+  font-family: Poppins;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: white;
+}
+
+.logoTitle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  cursor: pointer;
+}
+
+.buttonWrapper {
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.buttonWrapper:hover {
+  transform: scale(0.97);
+}
+
+.buttonWrapper:active {
+  transform: scale(0.95);
+}
