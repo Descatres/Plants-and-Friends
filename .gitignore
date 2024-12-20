@@ -92,3 +92,5 @@ jest/
 *.pptx
 
 electron-vite-react
+
+README2-credentials.md
