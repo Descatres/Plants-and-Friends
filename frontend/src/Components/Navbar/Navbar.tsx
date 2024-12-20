@@ -52,30 +52,42 @@ function Navbar() {
       getNotifications();
       const interval = setInterval(() => {
         getNotifications();
-      }, 10000);
+      }, 30000);
       return () => clearInterval(interval);
     }
   }, []);
 
   useEffect(() => {
-    if (notifications.length === 0) {
-      setNotifications([
-        {
-          name: "No notifications",
-        },
-      ]);
-    }
-    if (notifications.length >= 2) {
-      setNotifications((prevNotifications) =>
-        prevNotifications.concat([
+    const interval = setInterval(() => {
+      if (notifications.length === 0) {
+        setNotifications([
           {
-            name: "Delete Notifications",
-            onClick: clearNotifications,
+            _id: "no-notifications",
+            message: "No notifications",
+            onClick: () => {},
           },
-        ])
-      );
-    }
-  }, [notifications, clearNotifications]);
+        ]);
+      } else {
+        setNotifications((prevNotifications) => {
+          const filteredPrev = prevNotifications.filter(
+            (notification) => notification._id !== "no-notifications"
+          );
+          const newNotifications = notifications.filter(
+            (newNotification) =>
+              !filteredPrev.some((prev) => prev._id === newNotification._id)
+          );
+          const mappedNewNotifications = newNotifications.map(
+            (notification) => ({
+              ...notification,
+              onClick: clearNotifications,
+            })
+          );
+          return [...filteredPrev, ...mappedNewNotifications];
+        });
+      }
+      return () => clearInterval(interval);
+    }, 60000);
+  }, []);
 
   return (
     <div className={classes.navbar}>
@@ -104,7 +116,9 @@ function Navbar() {
               />
             }
             options={notifications.map((notification) => ({
-              ...notification,
+              id: notification._id,
+              name: notification.message,
+              onClick: notification.onClick,
             }))}
           />
           <DropdownMenu

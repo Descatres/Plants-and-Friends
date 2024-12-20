@@ -8,56 +8,71 @@
 
 - [Arduino Script](https://wokwi.com/projects/385292642174231553) (can be found [here](./SensorScript/sensor.ino) as well)
 
-# Electron App for Plants and Friends
+- [Electron support](#electron-app-for-plants-and-friends)
 
-# How to run Locally
+- Features are described across the rest of the README, as they are subdivided into the Frontend and Backend sections.
 
-Go to
+---
+
+# Table of Contents
+
+### 1. Clone the Repository
+
+Clone the repository to your local machine:
 
 ```bash
-cd electron-vite/plants-and-friends
+git clone https://github.com/Descatres/Plants-and-Friends
+cd backend
 ```
-
-Run
-
-```bash
-npm install
-npm run start
-```
-
-- Make sure the backend is running on port 5001 (check [below](#backend-for-plants-and-friends) for more information)
 
 ---
 
 # Frontend for Plants and Friends
 
-# How to run Locally
+## How to run Locally
 
-- Create a .env file on the root folder of the fronted with the following:
-- VITE_API_URL=http://localhost:5001
+- ### 1. Create a .env file on the root folder of the fronted with the following:
 
-`npm i`
-`npm run dev`
+```env
+VITE_API_URL=http://localhost:5001
+```
 
-## Features and notes
+- ### 2. Then install the packages:
+
+```bash
+npm i
+```
+
+- ### 3. Run the development server:
+
+```bash
+npm run dev
+```
+
+---
+
+### Features
 
 - Logged out:
+
   - Beautiful Landing page featuring Glassmorphism, a 3d model of a tree (which persists across pages while logged off)
   - Login
   - Register
-- Logged in
 
+- Logged in:
   - Create Plant
   - Edit Plant
   - Delete Plant
   - Check real time sensor data
-  - Notifications (broken atm)
+  - Notifications
   - Search by plant name and species
   - Sort by either name or species (alphabetically, or reverse)
   - The history state is automatically handled by react-router and react-router-dom.
   - Lazy loading is being applied to fetch the plants.
 
-  ***
+---
+
+### Notes
 
 - A page to control specific sensors for rooms was thought of but it was not implemented.
 
@@ -65,15 +80,15 @@ npm run start
 
 - The images are not being set because, once again, we did not have time.
 
-- The notifications got broken at some point and we couldn't fix it in time. Nonetheless, only the 10 most recent notifications would be shown, as this is supposed to be a web app to control the plants and check some notifications. For more in depth usage, the Android App we have is a much better option. This PoC is just for basic plant management with some integrations to get sensor data.
+- Only the 10 most recent notifications are shown, as this is supposed to be a web app to control the plants and check some notifications. For more in depth usage, the Android App we have is a much better option. This PoC is just for basic plant management with some integrations to get sensor data.
 
 - The same species plants are not being shown on the plant details page but it can be filtered by the user in the homepage with the sort by and search features! This would have lazy loading as well if we were to implement it.
 
 - Lastly, the MQTT integration is working, which is a ver nice feature. It only works for one sensor (this is supposed to be a PoC), but it can be upscaled to multiple by giving ids to the sensor in the script and associate each id to the plant or room the user wants.
 
-# Backend for Plants and Friends
+---
 
-This is the backend of the Plants and Friends project, designed to manage plant-related data, authenticate users, and interact with MQTT devices. It features routes for managing plants, user authentication, notifications, and sensor data. The backend connects to a MongoDB database and integrates with MQTT to receive real-time sensor data.
+# Backend for Plants and Friends
 
 ## Features
 
@@ -96,16 +111,7 @@ This is the backend of the Plants and Friends project, designed to manage plant-
 
 ## Setup Instructions
 
-### 1. Clone the Repository
-
-Clone the repository to your local machine:
-
-```bash
-git clone https://github.com/Descatres/Plants-and-Friends
-cd backend
-```
-
-### 2. Install Dependencies
+### 1. Install Dependencies
 
 Install all required dependencies using npm or yarn:
 
@@ -113,7 +119,7 @@ Install all required dependencies using npm or yarn:
 npm install
 ```
 
-### 3. Set Up Environment Variables
+### 2. Set Up Environment Variables
 
 Create a `.env` file in the root of the project with the following environment variables:
 
@@ -128,7 +134,7 @@ MQTT_TOPIC_HUMIDITY=plants_and_friends_humidity_topic
 PORT=5001
 ```
 
-### 4. Start the Development Server
+### 3. Start the Development Server
 
 To run the server in development mode, use the following command:
 
@@ -138,7 +144,7 @@ npm run dev
 
 This command will seed the database (if configured) and start the server using `nodemon` for automatic restarts.
 
-### 5. Build the Project (Optional)
+### 4. Build the Project (Optional)
 
 To build the TypeScript code into JavaScript, run:
 
@@ -152,7 +158,7 @@ After building, you can start the server with:
 npm run start
 ```
 
-### 6. Seed Database (Optional)
+### 5. Seed Database (Optional)
 
 If you'd like to seed the database with initial data, run:
 
@@ -160,7 +166,7 @@ If you'd like to seed the database with initial data, run:
 npm run seed
 ```
 
-### 7. API Endpoints
+### 6. API Endpoints
 
 - **Authentication**
 
@@ -189,3 +195,27 @@ npm run seed
 ## Deployment
 
 For deployment, you can configure the server on a remote environment with MongoDB and MQTT connectivity. Make sure to update the `.env` variables with appropriate production values.
+
+# Electron App for Plants and Friends
+
+# How to run Locally
+
+Go to
+
+```bash
+cd electron-vite/plants-and-friends
+```
+
+Run
+
+```bash
+npm install
+npm run start
+```
+
+- Make sure the backend is running on port 5001 (check [above](#backend-for-plants-and-friends) for more information)
+- Just as in the frontend, please create a .env file, to test locally, with the following:
+
+```env
+VITE_API_URL=http://localhost:5001
+```

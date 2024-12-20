@@ -7,13 +7,20 @@
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
   margin-top: 0.3rem;
+  max-height: 20rem;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .dropdownItem {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 0;
+  padding: 10px 20px;
   cursor: pointer;
   transition: background-color 0.3s;
   cursor: pointer;
@@ -21,6 +28,8 @@
   -webkit-user-select: none;
   user-select: none;
   outline: none;
+  flex-wrap: wrap;
+  max-width: 20rem;
 }
 
 .dropdownItem:hover {

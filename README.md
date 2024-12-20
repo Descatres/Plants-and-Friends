@@ -64,7 +64,7 @@ npm run dev
   - Edit Plant
   - Delete Plant
   - Check real time sensor data
-  - Notifications (broken atm)
+  - Notifications
   - Search by plant name and species
   - Sort by either name or species (alphabetically, or reverse)
   - The history state is automatically handled by react-router and react-router-dom.
@@ -80,7 +80,7 @@ npm run dev
 
 - The images are not being set because, once again, we did not have time.
 
-- The notifications got broken at some point and we couldn't fix it in time. Nonetheless, only the 10 most recent notifications would be shown, as this is supposed to be a web app to control the plants and check some notifications. For more in depth usage, the Android App we have is a much better option. This PoC is just for basic plant management with some integrations to get sensor data.
+- Only the 10 most recent notifications are shown, as this is supposed to be a web app to control the plants and check some notifications. For more in depth usage, the Android App we have is a much better option. This PoC is just for basic plant management with some integrations to get sensor data.
 
 - The same species plants are not being shown on the plant details page but it can be filtered by the user in the homepage with the sort by and search features! This would have lazy loading as well if we were to implement it.
 
