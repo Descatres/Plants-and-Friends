@@ -28,12 +28,22 @@ async function getNotifications(req: CustomRequest, res: Response) {
 }
 
 async function createNotifications(_req: Request, res: Response) {
+	try {
+		const result = await processNotifications();
+		res.json(result);
+	} catch (error) {
+		console.error("Error creating notifications:", error);
+		res.status(500).json({ message: "Error creating notifications." });
+	}
+}
+
+export async function processNotifications() {
 	console.log("[Notification Poll] Checking sensor data...");
 	const { temperature, humidity } = latestSensorData;
 
 	if (!temperature || !humidity) {
 		console.log("[Notification Poll] No valid sensor data.");
-		return res.status(204).json({ message: "No valid sensor data available for notifications." });
+		return { message: "No valid sensor data available for notifications." };
 	}
 
 	const plants = await Plant.find({});
@@ -45,7 +55,7 @@ async function createNotifications(_req: Request, res: Response) {
 		let notificationMessage = "";
 
 		if ((plant.minTemperature && temperature < plant.minTemperature) || (plant.maxTemperature && temperature > plant.maxTemperature)) {
-			notificationMessage = `Temperature out of range for plant '${plant.name}' (Current: ${temperature}°C). `;
+			notificationMessage = `Temperature out of range for plant '${plant.name}' (Current: ${temperature}°C).`;
 			const notification = await generateNotifications(notificationMessage, plant);
 
 			if (notification) {
@@ -54,17 +64,19 @@ async function createNotifications(_req: Request, res: Response) {
 		}
 
 		if ((plant.minHumidity && humidity < plant.minHumidity) || (plant.maxHumidity && humidity > plant.maxHumidity)) {
-			notificationMessage = `Humidity out of range for plant '${plant.name}' (Current: ${humidity}%). `;
+			notificationMessage = `Humidity out of range for plant '${plant.name}' (Current: ${humidity}%).`;
 			const notification = await generateNotifications(notificationMessage, plant);
-			
-            if (notification) {
+
+			if (notification) {
 				notifications.push(notification);
 			}
 		}
 	}
 
-	res.json({ notifications });
+	console.log(`[Notification Poll] Generated ${notifications.length} notifications.`);
+	return { notifications };
 }
+
 
 async function deleteAllNotifications(req: CustomRequest, res: Response) {
 	const userId = req.user?.id;

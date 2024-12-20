@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import { mqttClient } from "./config/mqtt";
 import sensorRoutes from "./routes/sensorRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
+import { processNotifications } from "./controllers/notificationController";
 
 const express = require("express");
 const cors = require("cors");
@@ -61,6 +62,15 @@ function startServer() {
 	app.use("/api/", plantRoutes);
 	app.use("/api/", authRoutes);
 	app.use("/api/", notificationRoutes);
+
+	setInterval(async () => {
+		try {
+			const result = await processNotifications();
+			console.log("[Notification Poll] Notifications created:", result);
+		} catch (error) {
+			console.error("[Notification Poll] Error:", error);
+		}
+	}, 60000);
 
 	app.use(errorHandler);
 

@@ -16,14 +16,13 @@ mqttClient.on("message", (topic, message) => {
 	}
 });
 
-function sendSensorData(_req: CustomRequest, res: Response, next: NextFunction) {
+function sendSensorData(_req: CustomRequest, res: Response, _next: NextFunction) {
 	if (latestSensorData.temperature === undefined || latestSensorData.humidity === undefined) {
 		console.log("[Interval] No valid sensor data to send.");
-		next(res.status(500).json({ error: "No valid sensor data to send." }));
+		return res.status(500).json({ error: "No valid sensor data to send." });
 	}
 
 	res.json(latestSensorData);
-	next();
 }
 
 export { sendSensorData, latestSensorData };
