@@ -90,3 +90,5 @@ jest/
 # Static files
 *.pdf
 *.pptx
+
+electron-vite-react
